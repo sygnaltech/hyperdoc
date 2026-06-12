@@ -47,7 +47,7 @@ Typora uses `<docname>.assets/` siblings, Obsidian uses `_attachments/`. Relativ
 - Does dragging an image copy or reference?
 - What happens to assets when a doc is renamed?
 
-**Decision:** We'll use `.hd/` as the storage directory.  Within that, each doc will have a folder e.g. `my-doc`.  Renaming a doc through our editor renames the associated assets folder, if one exists. 
+**Decision:** We'll use `.hd/` as the storage directory.  Within that, each doc will have a folder e.g. `my-doc.assets`.  Subfolder hierarchy is also represented e.g. `.hd/assets/subfolder1/my-doc.assets`. For consistency.  Renaming a doc through our editor renames the associated assets folder, if one exists. 
 
 ---
 

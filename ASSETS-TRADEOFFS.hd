@@ -1,0 +1,73 @@
+---
+title: Asset Storage Tradeoffs
+format: hd-doc v1
+date: 2026-06-12
+---
+
+<h1>Asset Storage Tradeoffs</h1>
+
+<p>Discussion notes on how <code>.hd</code> files should reference assets, where assets live, and how that interacts with serving <code>.hd</code> documents over HTTP.</p>
+
+<h2>The centralized <code>.hd/</code> + mirrored path is sound</h2>
+
+<p>Centralizing all assets under a project-root <code>.hd/</code> directory, with subfolders mirroring each document's path, trades portability of an individual doc (you can't just send someone the <code>.hd</code> file by itself) for project-level tidiness — and for a repo-based docs tool that's the right trade. The mirror also avoids name collisions naturally: <code>.hd/docs/api/auth/</code> and <code>.hd/services/auth/</code> coexist fine. The <code>.hd/</code> directory being dot-prefixed is a minor cost — hidden on Unix, sometimes filtered in file pickers — but workable.</p>
+
+<h2>The real question isn't where assets live, it's how docs reference them</h2>
+
+<p>Three options, each with tradeoffs:</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Example in <code>.hd</code></th>
+      <th>Editor behavior</th>
+      <th>Browser-from-disk</th>
+      <th>Server-serve</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>A. Explicit relative path</strong></td>
+      <td><code>&lt;img src="../.hd/docs/overview/diagram.png"&gt;</code></td>
+      <td>Just works</td>
+      <td>Just works</td>
+      <td>Just works</td>
+    </tr>
+    <tr>
+      <td><strong>B. Just-the-filename</strong></td>
+      <td><code>&lt;img src="diagram.png"&gt;</code></td>
+      <td>Editor resolves to <code>.hd/&lt;docpath&gt;/diagram.png</code></td>
+      <td>Broken</td>
+      <td>Server rewrites or <code>&lt;base&gt;</code></td>
+    </tr>
+    <tr>
+      <td><strong>C. Special prefix</strong></td>
+      <td><code>&lt;img src="@asset/diagram.png"&gt;</code> or <code>hd-asset:diagram.png</code></td>
+      <td>Editor resolves prefix</td>
+      <td>Broken</td>
+      <td>Server rewrites prefix</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A is honest and transparent but ugly. B reads cleanest but requires editor + server cooperation. C is explicit about "this is an HD-managed asset" but invents new URL syntax.</p>
+
+<h2>On <code>&lt;base&gt;</code> specifically</h2>
+
+<p>It's tempting but has one big constraint: <code>&lt;base href&gt;</code> applies to <em>every</em> relative URL in the document — not just images. The moment a doc has an <code>&lt;a href="other-doc.hd"&gt;</code> link or any other relative reference, <code>&lt;base&gt;</code> shifts that too and breaks it. You'd have to make all non-asset links absolute or root-relative to coexist, which leaks deployment URLs into your source docs.</p>
+
+<p>It can work cleanly only if <strong>every</strong> relative URL in a doc follows the same resolution convention — e.g., if all relative refs are "look in my asset folder." That's plausible for pure-content docs but falls apart once cross-document links appear.</p>
+
+<h2>Recommendation</h2>
+
+<p>Pick <strong>B (just-the-filename) for assets</strong> + <strong>server-side per-element rewriting at serve time</strong>, not <code>&lt;base&gt;</code>. The server walks the DOM once on serve, rewrites <code>&lt;img src&gt;</code>, <code>&lt;source src&gt;</code>, <code>&lt;a href="*.hd"&gt;</code>, etc. against rules it knows. Pros: docs stay clean and portable within the project; rewrite logic is explicit and per-element; no <code>&lt;base&gt;</code> gotchas; works the same for the editor preview and the production server.</p>
+
+<p><code>&lt;base&gt;</code> becomes a useful escape hatch for cases where the server can't or doesn't rewrite — e.g., a static HTML export — but it shouldn't be the primary asset-resolution mechanism.</p>
+
+<h2>Open sub-decisions</h2>
+
+<ol>
+  <li><strong>Does the body-only <code>.hd</code> file ever encode "this is an asset" vs "this is a doc link"</strong>, or do we infer from extension (<code>*.png</code> = asset, <code>*.hd</code> = doc link)? The latter is simpler.</li>
+  <li><strong>What about cross-doc image refs?</strong> E.g., <code>README.hd</code> reusing an image from <code>docs/overview.hd</code>'s asset folder. Do we forbid it (each doc owns its assets), or allow a shared <code>.hd/_shared/</code> folder?</li>
+</ol>

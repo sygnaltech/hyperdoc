@@ -3,6 +3,7 @@ title: HD Format Handling
 format: hd-doc v1
 date: 2026-06-12
 ---
+
 <h1>HD Format Handling</h1>
 
 <p>How <code>.hd</code> files are expected to behave across editors, tools, and workflows. Companion document to <a href="CORE-DECISIONS.md">CORE-DECISIONS.md</a>.</p>

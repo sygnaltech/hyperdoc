@@ -16,7 +16,7 @@ Every modern WYSIWYG — TipTap, ProseMirror, Lexical, Slate — operates on doc
 
 VS Code can be told `.hd` is HTML, but ripgrep, GitHub's file viewer, git diff renderers, and downstream tools (Notion, Linear) won't. Every consumer needs explicit handling. The benefit is unambiguous semantics + no clash with existing `.html` handlers. Worth deciding deliberately whether that's worth more than `.html` + a CustomEditor activation rule.
 
-**Decision:** _TBD_
+**Decision:** Yes we're using .hd 
 
 ---
 
@@ -27,7 +27,7 @@ Markdown can't express colspan, merged cells, inline styles, multi-paragraph cel
 - **(a) `.hd` is authoritative**; markdown is a lossy convenience for paste/copy. More expressive, harder to predict round-trips.
 - **(b) Constrain `.hd` to a "markdown-safe subset"** that round-trips losslessly. More predictable for users coming from markdown/Notion, but defeats some of the point.
 
-**Decision:** _TBD_
+**Decision:** Identify the core set of HTML entities and attributes that are valuable for our purposes, and identify which are translatable to MD.  Document as FORMAT-SPEC.hd 
 
 ---
 
@@ -35,7 +35,7 @@ Markdown can't express colspan, merged cells, inline styles, multi-paragraph cel
 
 TypeScript-first, mature table extension (with colspan/merge/resize), strong paste-from-HTML handling, MIT, used by GitLab/Linear. The alternative is raw ProseMirror — more control, much more work. Quill and Lexical are weaker on tables.
 
-**Decision:** _TBD_
+**Decision:** Great 
 
 ---
 
@@ -47,7 +47,7 @@ Typora uses `<docname>.assets/` siblings, Obsidian uses `_attachments/`. Relativ
 - Does dragging an image copy or reference?
 - What happens to assets when a doc is renamed?
 
-**Decision:** _TBD_
+**Decision:** We'll use `.hd/` as the storage directory.  Within that, each doc will have a folder e.g. `my-doc`.  Renaming a doc through our editor renames the associated assets folder, if one exists. 
 
 ---
 

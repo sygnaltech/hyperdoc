@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { parseDocument } from '../format/parser';
 import { serializeDocument } from '../format/serializer';
+import { HD_FORMAT_VERSION } from '../format/version';
 import { generateId, IdIndex } from '../identity';
 import { assetFolderFor } from '../assets/paths';
 import { ensureAssetFolder, saveImageBytes, moveAssetFolder } from '../assets/manager';
@@ -66,19 +67,31 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       const currentId = typeof m.id === 'string' ? m.id : undefined;
       const reconciled = await this.idIndex.reconcile(document.uri, currentId);
 
+      let needsPersist = false;
       if (reconciled.kind === 'regenerate') {
         m.id = generateId();
+        needsPersist = true;
+      } else if (reconciled.kind === 'moved') {
+        const root = this.workspaceRootFor(document.uri);
+        if (root && typeof m.id === 'string') {
+          await moveAssetFolder(reconciled.from, document.uri, m.id, root);
+        }
+      }
+
+      if (m.version === undefined || m.version === null) {
+        m.version = HD_FORMAT_VERSION;
+        needsPersist = true;
+      }
+
+      if (needsPersist) {
         writeGuard = true;
         try {
           await this.persist(document, m, body);
         } finally {
           writeGuard = false;
         }
-        this.idIndex.register(document.uri, m.id as string);
-      } else if (reconciled.kind === 'moved') {
-        const root = this.workspaceRootFor(document.uri);
-        if (root && typeof m.id === 'string') {
-          await moveAssetFolder(reconciled.from, document.uri, m.id, root);
+        if (reconciled.kind === 'regenerate' && typeof m.id === 'string') {
+          this.idIndex.register(document.uri, m.id);
         }
       }
 

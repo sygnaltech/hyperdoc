@@ -140,7 +140,8 @@ html, body {
   z-index: 5;
 }
 
-.hd-table-col-insert {
+.hd-table-col-insert,
+.hd-table-row-insert {
   position: absolute;
   width: 18px;
   height: 18px;
@@ -161,14 +162,32 @@ html, body {
   justify-content: center;
 }
 
-#editor:hover .hd-table-col-insert {
-  opacity: 0.45;
+.hd-table-col-insert.visible,
+.hd-table-row-insert.visible {
+  opacity: 0.55;
 }
 
-.hd-table-col-insert:hover {
-  opacity: 1;
+.hd-table-col-insert:hover,
+.hd-table-row-insert:hover {
+  opacity: 1 !important;
   background: var(--vscode-button-background);
   color: var(--vscode-button-foreground);
+}
+
+/* ---------- Column resize handle + cursor ------------------------------ */
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--vscode-button-background, #7C3AED);
+  pointer-events: none;
 }
 
 /* ---------- Right-click context menu ----------------------------------- */

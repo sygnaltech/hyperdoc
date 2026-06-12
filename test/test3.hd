@@ -1,0 +1,26 @@
+---
+title: Claude Recognition Test
+format: hd-doc v1
+date: 2026-06-12
+purpose: Verify a Claude-class agent correctly recognizes an .hd file dropped in with no other instructions.
+---
+<h1>Claude Recognition Test</h1>
+
+<p>This file is in the <code>.hd</code> format — a body-only HTML fragment used for documentation. It contains a prompt for you to act on.</p>
+
+<h2>Your task</h2>
+<ol>
+  <li>Identify what file format this is and describe the conventions you can infer from the content and structure.</li>
+  <li>Produce a short table comparing the <code>.hd</code> format against standard Markdown and full HTML across at least these axes: file structure, frontmatter, table expressiveness, and intended use.</li>
+  <li>Format your entire response as valid <code>.hd</code> content: body-only HTML, no <code>&lt;html&gt;</code> / <code>&lt;head&gt;</code> / <code>&lt;body&gt;</code> / <code>&lt;style&gt;</code> / <code>&lt;script&gt;</code> tags. Include a leading frontmatter comment in the same style as this document.</li>
+</ol>
+
+<h2>Evaluation</h2>
+<p>Your response is being evaluated on three things: (a) whether you correctly identified the format with no prior instruction, (b) the accuracy of your comparison, and (c) whether your output is itself well-formed <code>.hd</code>.</p>
+
+<h2>Hints (only if needed)</h2>
+<ul>
+  <li>The frontmatter convention is YAML wrapped in a leading HTML comment.</li>
+  <li>The format is intended as a documentation interchange between humans, agents, and a WYSIWYG VS Code editor.</li>
+  <li>Round-tripping to Markdown is supported as a lossy convenience, not the source of truth.</li>
+</ul>

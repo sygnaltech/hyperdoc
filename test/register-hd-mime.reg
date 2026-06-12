@@ -1,0 +1,10 @@
+Windows Registry Editor Version 5.00
+
+; Registers .hd files as text/html so browsers (Chrome, Edge, Firefox)
+; render them as HTML when dragged in or opened via file:// URL.
+; Does NOT change the default app for .hd — that remains whatever
+; you have set (e.g. the VS Code .hd extension).
+
+[HKEY_CLASSES_ROOT\.hd]
+"Content Type"="text/html"
+"PerceivedType"="text"

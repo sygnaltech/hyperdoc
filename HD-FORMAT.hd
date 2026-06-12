@@ -1,0 +1,64 @@
+---
+title: HD Format Handling
+format: hd-doc v1
+date: 2026-06-12
+---
+<h1>HD Format Handling</h1>
+
+<p>How <code>.hd</code> files are expected to behave across editors, tools, and workflows. Companion document to <a href="CORE-DECISIONS.md">CORE-DECISIONS.md</a>.</p>
+
+<hr>
+
+<h2>Baseline handling (the expected behaviors)</h2>
+
+<p>These are the scenarios <code>.hd</code> must handle correctly for the format to feel native:</p>
+
+<ol>
+  <li><strong>Double-click in the file system</strong> — opens VS Code, which auto-launches our WYSIWYG viewer/editor for the file.</li>
+  <li><strong>Click in the VS Code sidebar</strong> — opens our viewer/editor inline (no source view by default).</li>
+  <li><strong>Passed to any modern agent (Claude, GPT, etc.)</strong> — recognized and processed as textual HTML content, regardless of whether it arrives via file upload, clipboard, or tool call.</li>
+  <li><strong>Copy from our editor to clipboard</strong> — converts to HTML or Markdown as needed, with the target chosen by user/context.</li>
+</ol>
+
+<hr>
+
+<h2>Gaps to address in the spec</h2>
+
+<p>The seven items below are real handling concerns that need explicit answers in the spec, not assumed.</p>
+
+<h3>1. Paste/drop INTO the editor</h3>
+<p>Inverse of copy-out and just as important.</p>
+<ul>
+  <li>Pasting Markdown from Notion/Slack/Linear → auto-convert to <code>.hd</code>.</li>
+  <li>Pasting HTML from a browser → clean (strip styles, scripts, classes we don't recognize) and accept.</li>
+  <li>Dropping or pasting an image → save to the asset folder and insert a reference.</li>
+</ul>
+
+<h3>2. Search</h3>
+<p>VS Code "Search in files" and ripgrep need to treat <code>.hd</code> as a text type so content search works. Ripgrep handles it automatically since it's plain text, but we should set a <code>files.associations</code> mapping in our extension so VS Code's search, outline, and breadcrumbs treat it as HTML.</p>
+
+<h3>3. Git diff noise</h3>
+<p>Underrated concern. HTML diffs are noisier than Markdown because reflowing a paragraph can change many lines. We probably want a canonicalization rule (consistent tag formatting, one block element per line, predictable indentation) applied on save so diffs stay reviewable. Without it, code review on <code>.hd</code> files will hurt.</p>
+
+<h3>4. Asset co-location on rename/move</h3>
+<p>Renaming <code>README.hd</code> → <code>getting-started.hd</code> must also rename the sibling assets folder and rewrite internal references. Same for move. This is referenced in CORE-DECISIONS #5 but worth restating as a handling requirement, not just a convention.</p>
+
+<h3>5. Agent format awareness</h3>
+<p>Agents will read <code>.hd</code> as text just fine — it's HTML. But they won't know our conventions (body-only, frontmatter location, asset paths, Markdown round-trip rules) unless we make them discoverable. A first-line marker like <code>&lt;!-- hd-doc v1 --&gt;</code> or a frontmatter <code>format: hd-doc v1</code> field gives an agent a signal to look up the spec. Cheap, high-leverage.</p>
+
+<h3>6. External publishing</h3>
+<p>GitHub, Notion, Slack won't render <code>.hd</code>. We need a stated answer for "I need to share this doc outside our tooling":</p>
+<ul>
+  <li>Manual "Export as HTML" / "Export as Markdown" command, OR</li>
+  <li>Auto-export sidecar files on save, OR</li>
+  <li>"Copy as Markdown" → paste into Notion as the standard workflow.</li>
+</ul>
+
+<h3>7. Print / PDF export</h3>
+<p>Not urgent but stakeholders will ask for it. Cheap to add once the WYSIWYG can render — <code>window.print()</code> with a print stylesheet covers most needs.</p>
+
+<hr>
+
+<h2>Priority</h2>
+
+<p>Of the seven, <strong>#3 (git diff noise)</strong> and <strong>#5 (agent format awareness)</strong> are the two that are painful to discover late. The others can be incremental.</p>

@@ -11,6 +11,8 @@ import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import { Bridge, getVsCodeApi } from './bridge';
 import { setupToolbar } from './toolbar';
+import { makePasteHandler } from './paste';
+import { setupTableUI } from './tables';
 
 const vscode = getVsCodeApi();
 const bridge = new Bridge(vscode);
@@ -23,13 +25,23 @@ let docMeta: Record<string, unknown> = {};
 let assetBaseUrl = '';
 let suppressChange = false;
 
+async function handleImageFile(file: File): Promise<void> {
+  if (!editor) return;
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const ext = file.type.split('/')[1] || 'png';
+  try {
+    const { filename, webviewUri } = await bridge.saveImage(bytes, ext);
+    editor.chain().focus().setImage({ src: webviewUri, alt: filename }).run();
+  } catch (err) {
+    console.error('hd: image save failed', err);
+  }
+}
+
 function createEditor(initialBody: string) {
   editor = new Editor({
     element: editorEl,
     extensions: [
       StarterKit.configure({
-        codeBlock: {},
-        code: {},
         heading: { levels: [1, 2, 3, 4, 5, 6] }
       }),
       Underline,
@@ -47,35 +59,14 @@ function createEditor(initialBody: string) {
       if (suppressChange) return;
       const html = rewriteImgSrcs(ed.getHTML(), assetBaseUrl, 'out');
       bridge.sendChange(docMeta, html);
+    },
+    editorProps: {
+      handlePaste: makePasteHandler(() => editor, handleImageFile)
     }
   });
 
   setupToolbar(toolbarEl, editor);
-  installImagePasteHandler(editor);
-}
-
-function installImagePasteHandler(ed: Editor) {
-  ed.view.dom.addEventListener('paste', async (e: Event) => {
-    const ev = e as ClipboardEvent;
-    const items = ev.clipboardData?.items;
-    if (!items) return;
-    for (const item of Array.from(items)) {
-      if (item.kind === 'file' && item.type.startsWith('image/')) {
-        ev.preventDefault();
-        const file = item.getAsFile();
-        if (!file) continue;
-        const bytes = new Uint8Array(await file.arrayBuffer());
-        const ext = (file.type.split('/')[1] || 'png');
-        try {
-          const { filename, webviewUri } = await bridge.saveImage(bytes, ext);
-          ed.chain().focus().setImage({ src: webviewUri, alt: filename }).run();
-        } catch (err) {
-          console.error('hd: image save failed', err);
-        }
-        return;
-      }
-    }
-  });
+  setupTableUI(editor, editorEl);
 }
 
 window.addEventListener('message', (event) => {

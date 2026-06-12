@@ -42,6 +42,7 @@ html, body {
 }
 
 #editor {
+  position: relative;
   padding: 16px 24px;
   max-width: 880px;
   margin: 0 auto;
@@ -128,4 +129,85 @@ html, body {
 
 .ProseMirror .selectedCell {
   background: var(--vscode-editor-selectionBackground);
+}
+
+/* ---------- Table hover column-insert buttons -------------------------- */
+
+.hd-table-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.hd-table-col-insert {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border, transparent);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.12s, background 0.12s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#editor:hover .hd-table-col-insert {
+  opacity: 0.45;
+}
+
+.hd-table-col-insert:hover {
+  opacity: 1;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+/* ---------- Right-click context menu ----------------------------------- */
+
+.hd-context-menu {
+  position: fixed;
+  background: var(--vscode-menu-background, var(--vscode-editor-background));
+  color: var(--vscode-menu-foreground, var(--vscode-foreground));
+  border: 1px solid var(--vscode-menu-border, var(--vscode-panel-border));
+  border-radius: 4px;
+  padding: 4px 0;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  font-size: 13px;
+  font-family: var(--vscode-font-family);
+}
+
+.hd-context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 14px;
+  text-align: left;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  white-space: nowrap;
+}
+
+.hd-context-menu button:hover {
+  background: var(--vscode-menu-selectionBackground, var(--vscode-list-hoverBackground));
+  color: var(--vscode-menu-selectionForeground, inherit);
+}
+
+.hd-context-separator {
+  height: 1px;
+  background: var(--vscode-menu-separatorBackground, var(--vscode-panel-border));
+  margin: 4px 0;
 }

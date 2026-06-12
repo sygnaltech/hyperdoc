@@ -1,0 +1,55 @@
+<!--
+---
+title: Hello from a .hd file
+tags: [docs, hd-format, example]
+date: 2026-06-12
+author: mike@sygnal.com
+description: Demo document showing body-only HTML with frontmatter in a leading HTML comment.
+---
+-->
+<h1>Hello from a .hd file</h1>
+<p>This is a body-only HTML fragment — no <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, or <code>&lt;body&gt;</code> wrappers. Just semantic content.</p>
+
+<h2>Why this matters</h2>
+<p>Markdown can't easily express things like the table below — merged cells, multi-line content, or inline formatting inside cells. HTML can. The <code>.hd</code> extension signals "documentation HTML fragment" rather than a full HTML page.</p>
+
+<h2>A table that markdown can't cleanly render</h2>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Markdown</th>
+      <th>.hd</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Basic tables</td>
+      <td>Yes</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Merged cells (colspan/rowspan)</td>
+      <td>No</td>
+      <td><strong>Yes</strong></td>
+    </tr>
+    <tr>
+      <td>Multi-paragraph cells</td>
+      <td>No</td>
+      <td><strong>Yes</strong> — like this<br><br>Second paragraph in the same cell.</td>
+    </tr>
+    <tr>
+      <td colspan="2" style="text-align:center"><em>Merged across two columns →</em></td>
+      <td>Works fine</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>A list</h2>
+<ul>
+  <li>Headings, paragraphs, lists, links — all standard HTML</li>
+  <li>No <code>&lt;style&gt;</code> or <code>&lt;script&gt;</code> tags allowed in the document</li>
+  <li>Assets stored alongside the file in a sibling folder (TBD convention)</li>
+</ul>
+
+<p><a href="https://claude.com/blog/using-claude-code-the-unreasonable-effectiveness-of-html">Reference: Claude blog post on HTML over Markdown</a></p>

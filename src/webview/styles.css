@@ -1,0 +1,131 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background: var(--vscode-editor-background);
+}
+
+#toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  background: var(--vscode-editor-background);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#toolbar button {
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border, transparent);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  min-width: 28px;
+}
+
+#toolbar button:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+#toolbar button.active {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+#editor {
+  padding: 16px 24px;
+  max-width: 880px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.ProseMirror {
+  outline: none;
+  min-height: 200px;
+}
+
+.ProseMirror h1 { font-size: 2em; margin: 0.8em 0 0.4em; }
+.ProseMirror h2 { font-size: 1.5em; margin: 0.8em 0 0.4em; }
+.ProseMirror h3 { font-size: 1.25em; margin: 0.8em 0 0.4em; }
+.ProseMirror h4, .ProseMirror h5, .ProseMirror h6 { margin: 0.8em 0 0.4em; }
+
+.ProseMirror p { margin: 0.5em 0; }
+
+.ProseMirror code {
+  background: var(--vscode-textCodeBlock-background, rgba(127,127,127,0.15));
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.95em;
+}
+
+.ProseMirror pre {
+  background: var(--vscode-textCodeBlock-background, rgba(127,127,127,0.15));
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: var(--vscode-editor-font-family, monospace);
+}
+
+.ProseMirror pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid var(--vscode-textBlockQuote-border, rgba(127,127,127,0.4));
+  background: var(--vscode-textBlockQuote-background, transparent);
+  margin: 1em 0;
+  padding: 0.25em 1em;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  margin: 1em 0;
+  width: auto;
+}
+
+.ProseMirror th, .ProseMirror td {
+  border: 1px solid var(--vscode-panel-border);
+  padding: 6px 10px;
+  min-width: 60px;
+  vertical-align: top;
+}
+
+.ProseMirror th {
+  background: var(--vscode-editor-inactiveSelectionBackground);
+  font-weight: 600;
+}
+
+.ProseMirror a {
+  color: var(--vscode-textLink-foreground);
+  text-decoration: underline;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--vscode-panel-border);
+  margin: 1.5em 0;
+}
+
+.ProseMirror ul, .ProseMirror ol {
+  padding-left: 1.5em;
+}
+
+.ProseMirror .selectedCell {
+  background: var(--vscode-editor-selectionBackground);
+}

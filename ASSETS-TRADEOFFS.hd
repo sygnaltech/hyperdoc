@@ -71,3 +71,40 @@ date: 2026-06-12
   <li><strong>Does the body-only <code>.hd</code> file ever encode "this is an asset" vs "this is a doc link"</strong>, or do we infer from extension (<code>*.png</code> = asset, <code>*.hd</code> = doc link)? The latter is simpler.</li>
   <li><strong>What about cross-doc image refs?</strong> E.g., <code>README.hd</code> reusing an image from <code>docs/overview.hd</code>'s asset folder. Do we forbid it (each doc owns its assets), or allow a shared <code>.hd/_shared/</code> folder?</li>
 </ol>
+
+<h2>UUID-based document identity</h2>
+
+<p>An additional mechanic to integrate with the asset folder approach: generate a unique ID per document, stored in the frontmatter. Asset folders are then keyed by ID rather than path or filename. This makes rename and move free at the file system level, makes templates work cleanly (empty <code>id</code> field → editor regenerates on open), and gives every document a stable identity that survives location changes.</p>
+
+<h3>Wins</h3>
+<ul>
+  <li>Rename and move become free at the file system level. Nothing else needs to change.</li>
+  <li>Templates work as imagined — empty <code>id:</code> field → editor regenerates on open.</li>
+  <li>Asset folders get stable, collision-proof identifiers that don't break when the doc's path or title changes.</li>
+  <li>Git diffs for moves stay clean — just the file moved, no path rewrites, no asset-folder rename.</li>
+  <li>Same model Notion uses internally for the same reasons.</li>
+</ul>
+
+<h3>Costs</h3>
+<ol>
+  <li><strong>Opaque file tree.</strong> <code>.hd/3f2b8c91…/diagram.png</code> is unreadable in a file manager. Finding a doc's assets without the editor requires opening the doc to read the ID. Mitigation: editor command "reveal asset folder," or a tiny <code>_meta.json</code> inside each asset folder noting the current doc path/title.</li>
+  <li><strong>Orphan detection is harder.</strong> Path-based: <code>.hd/docs/old-name/</code> is obviously stale because no <code>docs/old-name.hd</code> exists. ID-based: you must cross-reference every ID against every doc's frontmatter to find orphans. Need a "GC orphaned assets" command.</li>
+  <li><strong>Cross-doc asset references get ugly.</strong> Path version: <code>../.hd/docs/overview/diagram.png</code> — readable. ID version: <code>../.hd/3f2b…/diagram.png</code> — meaningless to a human reading the source.</li>
+  <li><strong>Hand-editing the file tree is annoying.</strong> People do this — move files in Explorer, drag PNGs into folders. ID folders make it awkward.</li>
+</ol>
+
+<h3>Duplication handling</h3>
+
+<p>VS Code's explorer copy-paste doesn't give a clean pre-copy hook, so the operation itself can't be intercepted. Three viable detection strategies, in order of robustness:</p>
+
+<ol>
+  <li><strong>On-open reconciliation.</strong> Editor maintains an in-memory map of ID → path. When opening a <code>.hd</code>, if its ID is already mapped to a <em>different existing</em> file, regenerate (it's a duplicate). If mapped to a file that no longer exists, update the map (it was a move). Edge case: copy made while editor wasn't running, both files opened later — second one wins the regenerate. Catches roughly 95% of cases.</li>
+  <li><strong>Filesystem watcher.</strong> Editor watches for new <code>.hd</code> files appearing. New file with an existing ID → regenerate immediately. Catches more cases but requires the workspace to be open at copy time.</li>
+  <li><strong>First-save check.</strong> Verify ID uniqueness on save. Slower-feeling but bulletproof. Won't catch a copy that's never edited.</li>
+</ol>
+
+<p>(1) + (2) together is what's actually workable.</p>
+
+<h3>Decision</h3>
+
+<p>Adopt UUID-based document identity. Encode the identifier as <strong>base62</strong> (digits + lowercase + uppercase) rather than a standard hyphenated UUID — base62 carries the same entropy in roughly 22 characters versus 36, keeping frontmatter and folder names more condensed without sacrificing collision resistance.</p>

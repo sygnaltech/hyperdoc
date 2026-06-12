@@ -55,4 +55,4 @@ Typora uses `<docname>.assets/` siblings, Obsidian uses `_attachments/`. Relativ
 
 Markdown has YAML frontmatter as a near-universal convention (title, tags, date). HTML body-only has no native equivalent. Either a leading HTML comment block or a `<header data-frontmatter>…</header>` first child. This affects how external tools — and you — parse `.hd` files.
 
-**Decision:** _TBD_
+**Decision:** Yep

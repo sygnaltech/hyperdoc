@@ -1,2 +1,6 @@
 .havoc/
 .mcp.json
+node_modules/
+dist/
+*.vsix
+.vscode-test/

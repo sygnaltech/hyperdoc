@@ -1,0 +1,68 @@
+{
+  "name": "hd-editor",
+  "displayName": "HD Editor",
+  "description": "WYSIWYG editor for .hd documentation files (body-only HTML with optional YAML frontmatter).",
+  "version": "0.1.0",
+  "publisher": "sygnal",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onCustomEditor:sygnal.hd-editor",
+    "onCommand:hd.copyAsMarkdown"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "hd",
+        "aliases": ["HD", "hd"],
+        "extensions": [".hd"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "sygnal.hd-editor",
+        "displayName": "HD Editor",
+        "selector": [{ "filenamePattern": "*.hd" }],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      { "command": "hd.copyAsMarkdown", "title": "HD: Copy as Markdown" },
+      { "command": "hd.regenerateId", "title": "HD: Regenerate Document ID" }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc -p . --noEmit"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "@types/turndown": "^5.0.4",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@tiptap/core": "^2.2.0",
+    "@tiptap/extension-image": "^2.2.0",
+    "@tiptap/extension-link": "^2.2.0",
+    "@tiptap/extension-subscript": "^2.2.0",
+    "@tiptap/extension-superscript": "^2.2.0",
+    "@tiptap/extension-table": "^2.2.0",
+    "@tiptap/extension-table-cell": "^2.2.0",
+    "@tiptap/extension-table-header": "^2.2.0",
+    "@tiptap/extension-table-row": "^2.2.0",
+    "@tiptap/extension-underline": "^2.2.0",
+    "@tiptap/starter-kit": "^2.2.0",
+    "js-yaml": "^4.1.0",
+    "marked": "^12.0.0",
+    "turndown": "^7.1.0"
+  }
+}

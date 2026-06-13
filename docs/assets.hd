@@ -1,18 +1,12 @@
 ---
 title: Assets
-date: 2026-06-13T00:00:00.000Z
+date: '2026-06-13T00:00:00.000Z'
 description: How images and binary assets are stored, referenced, and tracked through renames and moves.
 id: 2njQMsf8fvOHHwDFytmV73
 version: 1
 ---
 
-<h1>Assets</h1>
-
-<h2>Storage convention</h2>
-
-<p>Every HD document with binary assets has its own folder under a centralized <code>.hd/</code> directory at the workspace root. The folder hierarchy mirrors the document's path; the leaf folder is named with the document's base62 id:</p>
-
-<pre><code>workspace/
+<h1>Assets</h1><img src="image-1.png" alt="image-1.png"><h2>Storage convention</h2><p>Every HD document with binary assets has its own folder under a centralized <code>.hd/</code> directory at the workspace root. The folder hierarchy mirrors the document's path; the leaf folder is named with the document's base62 id:</p><pre><code>workspace/
 ├── docs/
 │   └── architecture/
 │       └── overview.hd     ← id: 7gXk2L9pM4nQ8vR1cT3bDe
@@ -21,50 +15,4 @@ version: 1
         └── architecture/
             └── 7gXk2L9pM4nQ8vR1cT3bDe/
                 ├── image-1.png
-                └── diagram.svg</code></pre>
-
-<h2>How assets are referenced inside a document</h2>
-
-<p>Inside the <code>.hd</code> file, assets are referenced by bare filename:</p>
-
-<pre><code>&lt;img src="image-1.png" alt="Architecture overview"&gt;</code></pre>
-
-<p>The editor and any future serve-time renderer resolve bare filenames against the document's asset folder. On save, image <code>src</code> attributes are normalized back to bare filenames so the file stays portable and the on-disk source stays clean.</p>
-
-<h2>What happens on common operations</h2>
-
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr><th>Operation</th><th>What the editor does</th></tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Paste an image (clipboard or drag-drop)</td>
-      <td>Saves the bytes to the document's asset folder as <code>image-N.&lt;ext&gt;</code>; inserts an <code>&lt;img&gt;</code> tag with the bare filename at the cursor.</td>
-    </tr>
-    <tr>
-      <td>Rename a <code>.hd</code> file</td>
-      <td>Moves the asset folder to match the new path. The document's <code>id</code> doesn't change, so internal references stay valid.</td>
-    </tr>
-    <tr>
-      <td>Move a <code>.hd</code> file to a different directory</td>
-      <td>Same as rename: asset folder follows the document.</td>
-    </tr>
-    <tr>
-      <td>Duplicate a <code>.hd</code> file via the file explorer</td>
-      <td>The copy gets a fresh <code>id</code> on first open in the editor; a new (empty) asset folder is created the first time you add an asset. The original's assets stay with the original.</td>
-    </tr>
-    <tr>
-      <td>Delete a <code>.hd</code> file outside the editor</td>
-      <td>The asset folder is orphaned. A "garbage-collect orphaned assets" command is planned.</td>
-    </tr>
-  </tbody>
-</table>
-
-<h2>Why folders use the id instead of the filename</h2>
-
-<p>If asset folders were named after the document file (e.g., <code>.hd/docs/overview/</code>), renaming the document would either break asset references or require coordinated folder renames. Keying the folder by the document's <code>id</code> decouples the asset location from the filename, so renames and moves are free at the file-system level and asset references inside the document stay valid without rewrites.</p>
-
-<h2>Cross-document asset references</h2>
-
-<p>The base implementation expects each document to own its assets. Cross-document references (Document A linking to an image in Document B's asset folder) are not part of the current spec; if shared assets become a recurring need, a <code>.hd/_shared/</code> convention is the likely answer.</p>
+                └── diagram.svg</code></pre><h2>How assets are referenced inside a document</h2><p>Inside the <code>.hd</code> file, assets are referenced by bare filename:</p><pre><code>&lt;img src="image-1.png" alt="Architecture overview"&gt;</code></pre><p>The editor and any future serve-time renderer resolve bare filenames against the document's asset folder. On save, image <code>src</code> attributes are normalized back to bare filenames so the file stays portable and the on-disk source stays clean.</p><h2>What happens on common operations</h2><table style="min-width: 50px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Operation</p></th><th colspan="1" rowspan="1"><p>What the editor does</p></th></tr><tr><td colspan="1" rowspan="1"><p>Paste an image (clipboard or drag-drop)</p></td><td colspan="1" rowspan="1"><p>Saves the bytes to the document's asset folder as <code>image-N.&lt;ext&gt;</code>; inserts an <code>&lt;img&gt;</code> tag with the bare filename at the cursor.</p></td></tr><tr><td colspan="1" rowspan="1"><p>Rename a <code>.hd</code> file</p></td><td colspan="1" rowspan="1"><p>Moves the asset folder to match the new path. The document's <code>id</code> doesn't change, so internal references stay valid.</p></td></tr><tr><td colspan="1" rowspan="1"><p>Move a <code>.hd</code> file to a different directory</p></td><td colspan="1" rowspan="1"><p>Same as rename: asset folder follows the document.</p></td></tr><tr><td colspan="1" rowspan="1"><p>Duplicate a <code>.hd</code> file via the file explorer</p></td><td colspan="1" rowspan="1"><p>The copy gets a fresh <code>id</code> on first open in the editor; a new (empty) asset folder is created the first time you add an asset. The original's assets stay with the original.</p></td></tr><tr><td colspan="1" rowspan="1"><p>Delete a <code>.hd</code> file outside the editor</p></td><td colspan="1" rowspan="1"><p>The asset folder is orphaned. A "garbage-collect orphaned assets" command is planned.</p></td></tr></tbody></table><h2>Why folders use the id instead of the filename</h2><p>If asset folders were named after the document file (e.g., <code>.hd/docs/overview/</code>), renaming the document would either break asset references or require coordinated folder renames. Keying the folder by the document's <code>id</code> decouples the asset location from the filename, so renames and moves are free at the file-system level and asset references inside the document stay valid without rewrites.</p><h2>Cross-document asset references</h2><p>The base implementation expects each document to own its assets. Cross-document references (Document A linking to an image in Document B's asset folder) are not part of the current spec; if shared assets become a recurring need, a <code>.hd/_shared/</code> convention is the likely answer.</p>

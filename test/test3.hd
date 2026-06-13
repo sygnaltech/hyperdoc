@@ -1,9 +1,12 @@
 ---
 title: Claude Recognition Test
 format: hd-doc v1
-date: 2026-06-12
+date: 2026-06-12T00:00:00.000Z
 purpose: Verify a Claude-class agent correctly recognizes an .hd file dropped in with no other instructions.
+id: 4TnPMArPPU1TdXNMG1Otbx
+version: 1
 ---
+
 <h1>Claude Recognition Test</h1>
 
 <p>This file is in the <code>.hd</code> format — a body-only HTML fragment used for documentation. It contains a prompt for you to act on.</p>

@@ -1,0 +1,143 @@
+---
+title: HD Format Specification
+date: 2026-06-13T00:00:00.000Z
+description: Human-readable specification of a valid .hd file — structure, frontmatter, allowed elements, and allowed attributes.
+id: 21P8M6RFRrBZuSDYnWbQW8
+version: 1
+---
+
+<h1>HD Format Specification</h1>
+
+<p>This document is the human-readable specification of a valid <code>.hd</code> file. The agent-facing version with the same rules lives at <code>.claude/skills/hd-format/SKILL.md</code>. The per-element Markdown round-trip authority lives at <a href="../FORMAT-SPEC.hd">FORMAT-SPEC.hd</a> at the project root.</p>
+
+<h2>File structure</h2>
+
+<ol>
+  <li><strong>Optional YAML frontmatter</strong> at the top of the file, fenced with <code>---</code> on its own line. No HTML comment wrapper.</li>
+  <li><strong>One blank line</strong> after the frontmatter is a convention for readability, not a requirement.</li>
+  <li><strong>Body-only HTML content</strong> follows. The file must not contain <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, or <code>&lt;body&gt;</code> tags.</li>
+</ol>
+
+<p>Minimal example:</p>
+
+<pre><code>---
+title: Getting Started
+id: 7gXk2L9pM4nQ8vR1cT3bDe
+version: 1
+---
+
+&lt;h1&gt;Getting Started&lt;/h1&gt;
+&lt;p&gt;Welcome.&lt;/p&gt;</code></pre>
+
+<h2>Frontmatter fields</h2>
+
+<p>All fields are optional. The editor will inject <code>id</code> and <code>version</code> automatically on first open if they are absent.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>base62 string (22 chars)</td><td>Per-document identifier. Stable across renames and moves; asset folders are keyed by it. Do not edit by hand — clear it to force regeneration.</td></tr>
+    <tr><td><code>version</code></td><td>integer</td><td>HD format version the document is written against. Current: <strong>1</strong>. A missing version means "the latest version."</td></tr>
+    <tr><td><code>title</code></td><td>string</td><td>Human-readable title.</td></tr>
+    <tr><td><code>date</code></td><td>ISO 8601 date or datetime</td><td>Document date.</td></tr>
+    <tr><td><code>author</code></td><td>string</td><td>Author identifier (email or handle).</td></tr>
+    <tr><td><code>description</code></td><td>string</td><td>One-line description.</td></tr>
+    <tr><td><code>tags</code></td><td>list of strings</td><td>Tags / categories.</td></tr>
+  </tbody>
+</table>
+
+<h2>Supported elements</h2>
+
+<h3>Block</h3>
+<ul>
+  <li><code>h1</code> through <code>h6</code></li>
+  <li><code>p</code>, <code>blockquote</code>, <code>pre</code>, <code>hr</code>, <code>div</code></li>
+</ul>
+
+<h3>Lists</h3>
+<ul>
+  <li><code>ul</code>, <code>ol</code>, <code>li</code></li>
+  <li><code>dl</code>, <code>dt</code>, <code>dd</code></li>
+</ul>
+
+<h3>Tables</h3>
+<ul>
+  <li><code>table</code>, <code>caption</code></li>
+  <li><code>thead</code>, <code>tbody</code>, <code>tfoot</code></li>
+  <li><code>tr</code>, <code>th</code>, <code>td</code></li>
+  <li><code>colgroup</code>, <code>col</code></li>
+</ul>
+
+<h3>Inline text</h3>
+<ul>
+  <li><code>a</code></li>
+  <li><code>strong</code>, <code>em</code>, <code>b</code>, <code>i</code>, <code>u</code>, <code>s</code></li>
+  <li><code>code</code>, <code>kbd</code>, <code>samp</code>, <code>var</code></li>
+  <li><code>mark</code>, <code>sub</code>, <code>sup</code></li>
+  <li><code>abbr</code>, <code>cite</code>, <code>q</code>, <code>small</code></li>
+  <li><code>span</code>, <code>br</code></li>
+</ul>
+
+<h3>Media</h3>
+<ul>
+  <li><code>img</code>, <code>figure</code>, <code>figcaption</code></li>
+  <li><code>svg</code> and its standard children for inline diagrams</li>
+</ul>
+
+<h3>Sectioning</h3>
+<ul>
+  <li><code>section</code>, <code>article</code>, <code>aside</code></li>
+  <li><code>header</code>, <code>footer</code>, <code>nav</code>, <code>main</code></li>
+</ul>
+
+<h3>Disclosure</h3>
+<ul>
+  <li><code>details</code>, <code>summary</code></li>
+</ul>
+
+<h2>Excluded elements</h2>
+
+<ul>
+  <li><code>html</code>, <code>head</code>, <code>body</code> — body-only rule.</li>
+  <li><code>script</code>, <code>style</code> — no executable code or stylesheets.</li>
+  <li><code>iframe</code>, <code>embed</code>, <code>object</code> — no embedded external content.</li>
+  <li><code>form</code>, <code>input</code>, <code>button</code>, <code>textarea</code>, <code>select</code>, <code>label</code>, <code>fieldset</code> — no interactive controls.</li>
+  <li><code>canvas</code>, <code>audio</code>, <code>video</code> — no programmatic graphics or media playback.</li>
+  <li><code>meta</code>, <code>link</code>, <code>base</code>, <code>title</code> — head-only elements.</li>
+</ul>
+
+<h2>Supported attributes</h2>
+
+<h3>Universal (allowed on any element)</h3>
+<ul>
+  <li><code>id</code>, <code>class</code></li>
+  <li><code>title</code></li>
+  <li><code>lang</code>, <code>dir</code></li>
+  <li><code>style</code> — inline only; the <code>&lt;style&gt;</code> tag itself is excluded</li>
+  <li><code>data-*</code></li>
+</ul>
+
+<h3>Element-specific</h3>
+<ul>
+  <li><code>a</code>: <code>href</code>, <code>target</code>, <code>rel</code>, <code>download</code></li>
+  <li><code>img</code>: <code>src</code>, <code>alt</code>, <code>width</code>, <code>height</code>, <code>loading</code></li>
+  <li><code>td</code>, <code>th</code>: <code>colspan</code>, <code>rowspan</code>, <code>scope</code>, <code>headers</code></li>
+  <li><code>ol</code>: <code>start</code>, <code>type</code>, <code>reversed</code></li>
+  <li><code>details</code>: <code>open</code></li>
+  <li><code>col</code>, <code>colgroup</code>: <code>span</code></li>
+  <li><code>code</code>, <code>pre</code>: <code>class</code> for syntax-language hints (e.g., <code>language-typescript</code>)</li>
+</ul>
+
+<h2>Excluded attributes</h2>
+
+<ul>
+  <li>Event handlers: <code>onclick</code>, <code>onload</code>, and any <code>on*</code> attribute.</li>
+  <li>Form-control attributes.</li>
+  <li>Interactivity attributes: <code>contenteditable</code>, <code>draggable</code>, <code>hidden</code>.</li>
+</ul>

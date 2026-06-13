@@ -1,8 +1,10 @@
 ---
 title: HD Format Element Specification
 format: hd-doc v1
-date: 2026-06-12
+date: 2026-06-12T00:00:00.000Z
 description: Authoritative reference for each supported element/attribute and its Markdown round-trip behavior.
+id: 3JtsnslgeZiWFjYXJuyueV
+version: 1
 ---
 
 <h1>HD Format Element Specification</h1>

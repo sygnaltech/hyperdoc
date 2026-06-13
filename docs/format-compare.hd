@@ -1,0 +1,97 @@
+---
+title: Format Comparison
+date: 2026-06-13T00:00:00.000Z
+description: Capability-by-capability comparison of HD against Markdown, HTML, and Nextra docs.
+id: 2YQ2Q6rfoVUYU6L2K9lPzv
+version: 1
+---
+
+<h1>Format Comparison</h1>
+
+<p>Capability-by-capability comparison of the <code>.hd</code> format against Markdown, raw HTML, and Nextra docs (MDX-based). The Nextra column is intentionally left blank for now and will be filled in as the comparison work progresses.</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Capability</th>
+      <th>.hd</th>
+      <th>Markdown</th>
+      <th>HTML</th>
+      <th>Nextra docs</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr><td colspan="5"><strong>Format basics</strong></td></tr>
+    <tr><td>File extension</td><td><code>.hd</code></td><td><code>.md</code> / <code>.markdown</code></td><td><code>.html</code> / <code>.htm</code></td><td></td></tr>
+    <tr><td>Plain-text source</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>YAML frontmatter</td><td>Yes (bare <code>---</code> fence)</td><td>Common but non-standard</td><td>No (head metadata instead)</td><td></td></tr>
+    <tr><td>Per-document UUID</td><td>Yes — base62, 22 chars</td><td>No</td><td>No</td><td></td></tr>
+    <tr><td>Format version field</td><td>Yes — <code>version</code></td><td>No</td><td>Implicit (HTML5 etc.)</td><td></td></tr>
+
+    <tr><td colspan="5"><strong>Inline content</strong></td></tr>
+    <tr><td>Headings (H1–H6)</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Bold / italic</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Strikethrough</td><td>Yes (<code>s</code>)</td><td>Yes (GFM)</td><td>Yes</td><td></td></tr>
+    <tr><td>Underline</td><td>Yes (<code>u</code>)</td><td>Raw HTML only</td><td>Yes</td><td></td></tr>
+    <tr><td>Inline code</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Sub / superscript / highlight</td><td>Yes</td><td>Raw HTML only</td><td>Yes</td><td></td></tr>
+    <tr><td>Keyboard / sample / variable spans</td><td>Yes (<code>kbd</code>, <code>samp</code>, <code>var</code>)</td><td>Raw HTML only</td><td>Yes</td><td></td></tr>
+
+    <tr><td colspan="5"><strong>Block content</strong></td></tr>
+    <tr><td>Paragraphs</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Blockquotes</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Code blocks (fenced)</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Code-block language hint</td><td>Yes — <code>class="language-…"</code></td><td>Yes — info string</td><td>Yes</td><td></td></tr>
+    <tr><td>Unordered / ordered lists</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Definition lists (<code>dl</code>)</td><td>Yes</td><td>Raw HTML only</td><td>Yes</td><td></td></tr>
+    <tr><td>Horizontal rule</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Collapsible sections (<code>details</code>)</td><td>Yes</td><td>Raw HTML only</td><td>Yes</td><td></td></tr>
+
+    <tr><td colspan="5"><strong>Media and diagrams</strong></td></tr>
+    <tr><td>Images</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Inline SVG</td><td>Yes</td><td>Raw HTML only</td><td>Yes</td><td></td></tr>
+    <tr><td>Figure + caption</td><td>Yes</td><td>Raw HTML only</td><td>Yes</td><td></td></tr>
+
+    <tr><td colspan="5"><strong>Tables</strong></td></tr>
+    <tr><td>Simple tables</td><td>Yes</td><td>Yes (GFM)</td><td>Yes</td><td></td></tr>
+    <tr><td>Header row / header column toggle</td><td>Yes</td><td>Header row only</td><td>Yes</td><td></td></tr>
+    <tr><td><code>colspan</code> / <code>rowspan</code></td><td>Yes</td><td>No</td><td>Yes</td><td></td></tr>
+    <tr><td>Multi-paragraph cells</td><td>Yes</td><td>No</td><td>Yes</td><td></td></tr>
+    <tr><td>Inline-styled cells</td><td>Yes</td><td>No</td><td>Yes</td><td></td></tr>
+    <tr><td>Resizable columns (in editor)</td><td>Yes</td><td>No</td><td>Editor-dependent</td><td></td></tr>
+
+    <tr><td colspan="5"><strong>Styling and attributes</strong></td></tr>
+    <tr><td>Inline <code>style</code> attribute</td><td>Yes (no <code>&lt;style&gt;</code> tag)</td><td>Raw HTML only</td><td>Yes</td><td></td></tr>
+    <tr><td><code>class</code> / <code>id</code> / <code>data-*</code></td><td>Yes</td><td>Some dialects (attribute syntax)</td><td>Yes</td><td></td></tr>
+    <tr><td>Custom components</td><td>No (semantic HTML only)</td><td>No (vanilla)</td><td>Web Components</td><td></td></tr>
+
+    <tr><td colspan="5"><strong>Editing experience</strong></td></tr>
+    <tr><td>WYSIWYG editor</td><td>Yes (this VS Code extension)</td><td>Third-party (Typora, Obsidian, etc.)</td><td>Yes (contenteditable / various editors)</td><td></td></tr>
+    <tr><td>Plain-text editable in any editor</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+    <tr><td>Paste from Markdown</td><td>Yes (auto-detect &amp; convert)</td><td>N/A</td><td>Editor-dependent</td><td></td></tr>
+    <tr><td>Paste from HTML</td><td>Yes (sanitized against allow-list)</td><td>Tool-dependent</td><td>N/A</td><td></td></tr>
+    <tr><td>Copy as Markdown</td><td>Yes</td><td>N/A</td><td>Tool-dependent</td><td></td></tr>
+
+    <tr><td colspan="5"><strong>Rendering and interop</strong></td></tr>
+    <tr><td>Renders in a browser as a single file</td><td>Wrapped by a server / editor</td><td>Needs a renderer</td><td>Yes</td><td></td></tr>
+    <tr><td>Renders natively in GitHub web UI</td><td>No (shows source)</td><td>Yes</td><td>No (shows source)</td><td></td></tr>
+    <tr><td>Paste into Notion / Slack / Linear</td><td>Via Copy as Markdown / HTML</td><td>Yes</td><td>Yes (varies)</td><td></td></tr>
+
+    <tr><td colspan="5"><strong>Identity and assets</strong></td></tr>
+    <tr><td>Stable doc ID independent of filename</td><td>Yes (base62)</td><td>No (filename-based)</td><td>No</td><td></td></tr>
+    <tr><td>Standardized asset folder convention</td><td>Yes — <code>.hd/&lt;mirrored-path&gt;/&lt;id&gt;/</code></td><td>Editor-dependent</td><td>None standard</td><td></td></tr>
+    <tr><td>Image paste auto-saves to folder</td><td>Yes</td><td>Editor-dependent</td><td>No native</td><td></td></tr>
+    <tr><td>Rename-resilient asset references</td><td>Yes (folder follows id, not name)</td><td>No</td><td>No</td><td></td></tr>
+
+  </tbody>
+</table>
+
+<h2>Reading the matrix</h2>
+
+<ul>
+  <li><strong>"Yes"</strong> means the format expresses the capability natively, without escape hatches.</li>
+  <li><strong>"Raw HTML only"</strong> means the capability is reachable in Markdown only by embedding literal HTML inside the document.</li>
+  <li><strong>"Editor-dependent"</strong> / <strong>"Tool-dependent"</strong> means the format itself doesn't define behavior; whether it works hinges on which editor or pipeline you use.</li>
+  <li>The Nextra column is intentionally blank pending a focused capability sweep of the Nextra / MDX feature surface.</li>
+</ul>

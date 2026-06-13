@@ -1,0 +1,57 @@
+---
+title: Getting Started
+date: 2026-06-13T00:00:00.000Z
+description: Install the HD VS Code extension and create your first document.
+id: 6Z8OLV4DdN6x8fJTZUrgW4
+version: 1
+---
+
+<h1>Getting Started</h1>
+
+<h2>Install the extension</h2>
+
+<p>From the project root, in order:</p>
+
+<ol>
+  <li>Install dependencies once: <code>npm install</code></li>
+  <li>Build the bundle: <code>npm run build</code></li>
+  <li>Package it: <code>npx @vscode/vsce package</code></li>
+  <li>Install into your main VS Code: <code>code --install-extension hd-editor-0.1.0.vsix --force</code></li>
+  <li>Reload VS Code: <strong>Ctrl+Shift+P</strong> → "Developer: Reload Window".</li>
+</ol>
+
+<p>For ongoing iteration the build / package / install steps can be chained:</p>
+
+<pre><code>npm run build; npx @vscode/vsce package; code --install-extension hd-editor-0.1.0.vsix --force</code></pre>
+
+<h2>Create your first .hd file</h2>
+
+<p>Create any file with a <code>.hd</code> extension in a workspace. VS Code launches the HD WYSIWYG editor as the default editor for that file. On first open, the editor injects an <code>id</code> and a <code>version</code> into the frontmatter — you don't need to set them by hand.</p>
+
+<p>If you want to seed your own frontmatter, start the file with a bare YAML fence:</p>
+
+<pre><code>---
+title: My Document
+description: A short description.
+---
+
+&lt;h1&gt;Hello, HD&lt;/h1&gt;
+&lt;p&gt;…&lt;/p&gt;</code></pre>
+
+<h2>Editor basics</h2>
+
+<ul>
+  <li><strong>Toolbar</strong> at the top: headings, bold/italic/underline, inline code, code block, links, lists, blockquote, horizontal rule, insert table.</li>
+  <li><strong>Tables</strong>: hover near the top to insert columns, near the left to insert rows. Right-click any cell for the full menu (delete column/row, toggle headers, delete table). Hover a column boundary to resize.</li>
+  <li><strong>Paste from Markdown</strong>: paste Markdown text — the editor detects it and converts automatically.</li>
+  <li><strong>Paste from HTML</strong>: paste HTML from Notion, Linear, or browsers — the editor sanitizes against the HD allow-list.</li>
+  <li><strong>Copy as Markdown</strong>: <strong>Ctrl+Shift+P</strong> → "HD: Copy as Markdown".</li>
+</ul>
+
+<h2>Where to go next</h2>
+
+<ul>
+  <li><a href="format-spec.hd">Format Specification</a> for the rules a valid <code>.hd</code> file follows.</li>
+  <li><a href="editor.hd">Editor Features</a> for the full set of editor behaviors.</li>
+  <li><a href="assets.hd">Assets</a> if you're working with images or other binaries.</li>
+</ul>

@@ -1,0 +1,6 @@
+---
+id: 1eEa9a06e54P9AdDUKoiX4
+version: 1
+---
+
+<p>On open, doesn't put the cursor in the doc. </p><p>Agent-created HD's don't necessarily have version, MUID, etc.  Ideally these can be created through skill scripts to ensure consistency before the viewer opens and edits them?  Currently we have a conflict where both are editing the doc and the user doesn't know what's changed.  Importance since both the agent and the user can be working on a doc.</p><p>Look at better multi-user caps-</p><p>Agent edits doc- viewer immediately highlights those changes for visibility. </p><p></p><p></p><p></p><p></p>

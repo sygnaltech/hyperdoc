@@ -1,143 +1,79 @@
 ---
 title: HD Format Specification
-date: 2026-06-13T00:00:00.000Z
+date: '2026-06-13T00:00:00.000Z'
 description: Human-readable specification of a valid .hd file — structure, frontmatter, allowed elements, and allowed attributes.
 id: 21P8M6RFRrBZuSDYnWbQW8
 version: 1
 ---
 
-<h1>HD Format Specification</h1>
-
-<p>This document is the human-readable specification of a valid <code>.hd</code> file. The agent-facing version with the same rules lives at <code>.claude/skills/hd-format/SKILL.md</code>. The per-element Markdown round-trip authority lives at <a href="../FORMAT-SPEC.hd">FORMAT-SPEC.hd</a> at the project root.</p>
-
-<h2>File structure</h2>
-
-<ol>
-  <li><strong>Optional YAML frontmatter</strong> at the top of the file, fenced with <code>---</code> on its own line. No HTML comment wrapper.</li>
-  <li><strong>One blank line</strong> after the frontmatter is a convention for readability, not a requirement.</li>
-  <li><strong>Body-only HTML content</strong> follows. The file must not contain <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, or <code>&lt;body&gt;</code> tags.</li>
-</ol>
-
-<p>Minimal example:</p>
-
-<pre><code>---
+<h1>HD Format Specification</h1><p>This document is the human-readable specification of a valid <code>.hd</code> file. The agent-facing version with the same rules lives at <code>.claude/skills/hd-format/SKILL.md</code>. </p><h2>File structure</h2><ol><li><p><strong>Optional YAML frontmatter</strong> at the top of the file, fenced with <code>---</code> on its own line. No HTML comment wrapper.</p></li><li><p><strong>One blank line</strong> after the frontmatter is a convention for readability, not a requirement.</p></li><li><p><strong>Body-only HTML content</strong> follows. The file must not contain <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, or <code>&lt;body&gt;</code> tags.</p></li></ol><p>Minimal example:</p><pre><code>---
 title: Getting Started
 id: 7gXk2L9pM4nQ8vR1cT3bDe
 version: 1
 ---
 
 &lt;h1&gt;Getting Started&lt;/h1&gt;
-&lt;p&gt;Welcome.&lt;/p&gt;</code></pre>
+&lt;p&gt;Welcome.&lt;/p&gt;</code></pre><h2>Frontmatter fields</h2><p>All fields are optional. The editor will inject <code>id</code> and <code>version</code> automatically on first open if they are absent.</p><table style="min-width: 75px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Field</p></th><th colspan="1" rowspan="1"><p>Type</p></th><th colspan="1" rowspan="1"><p>Notes</p></th></tr><tr><td colspan="1" rowspan="1"><p><code>id</code></p></td><td colspan="1" rowspan="1"><p>base62 string (22 chars)</p></td><td colspan="1" rowspan="1"><p>Per-document identifier. Stable across renames and moves; asset folders are keyed by it. Do not edit by hand — clear it to force regeneration.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>version</code></p></td><td colspan="1" rowspan="1"><p>integer</p></td><td colspan="1" rowspan="1"><p>HD format version the document is written against. Current: <strong>1</strong>. A missing version means "the latest version."</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>title</code></p></td><td colspan="1" rowspan="1"><p>string</p></td><td colspan="1" rowspan="1"><p>Human-readable title.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>date</code></p></td><td colspan="1" rowspan="1"><p>ISO 8601 date or datetime</p></td><td colspan="1" rowspan="1"><p>Document date.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>author</code></p></td><td colspan="1" rowspan="1"><p>string</p></td><td colspan="1" rowspan="1"><p>Author identifier (email or handle).</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>description</code></p></td><td colspan="1" rowspan="1"><p>string</p></td><td colspan="1" rowspan="1"><p>One-line description.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>tags</code></p></td><td colspan="1" rowspan="1"><p>list of strings</p></td><td colspan="1" rowspan="1"><p>Tags / categories.</p></td></tr></tbody></table><h2>Supported elements</h2><h3>Block</h3><ul><li><p><code>h1</code> through <code>h6</code></p></li><li><p><code>p</code>, <code>blockquote</code>, <code>pre</code>, <code>hr</code>, <code>div</code></p></li></ul><h3>Lists</h3><ul><li><p><code>ul</code>, <code>ol</code>, <code>li</code></p></li><li><p><code>dl</code>, <code>dt</code>, <code>dd</code></p></li></ul><h3>Tables</h3><ul><li><p><code>table</code>, <code>caption</code></p></li><li><p><code>thead</code>, <code>tbody</code>, <code>tfoot</code></p></li><li><p><code>tr</code>, <code>th</code>, <code>td</code></p></li><li><p><code>colgroup</code>, <code>col</code></p></li></ul><h3>Inline text</h3><ul><li><p><code>a</code></p></li><li><p><code>strong</code>, <code>em</code>, <code>b</code>, <code>i</code>, <code>u</code>, <code>s</code></p></li><li><p><code>code</code>, <code>kbd</code>, <code>samp</code>, <code>var</code></p></li><li><p><code>mark</code>, <code>sub</code>, <code>sup</code></p></li><li><p><code>abbr</code>, <code>cite</code>, <code>q</code>, <code>small</code></p></li><li><p><code>span</code>, <code>br</code></p></li></ul><h3>Media</h3><ul><li><p><code>img</code>, <code>figure</code>, <code>figcaption</code></p></li><li><p><code>svg</code> and its standard children for inline diagrams</p></li></ul><h3>Sectioning</h3><ul><li><p><code>section</code>, <code>article</code>, <code>aside</code></p></li><li><p><code>header</code>, <code>footer</code>, <code>nav</code>, <code>main</code></p></li></ul><h3>Disclosure</h3><ul><li><p><code>details</code>, <code>summary</code></p></li></ul><h2>Excluded elements</h2><ul><li><p><code>html</code>, <code>head</code>, <code>body</code> — body-only rule.</p></li><li><p><code>script</code>, <code>style</code> — no executable code or stylesheets.</p></li><li><p><code>iframe</code>, <code>embed</code>, <code>object</code> — no embedded external content.</p></li><li><p><code>form</code>, <code>input</code>, <code>button</code>, <code>textarea</code>, <code>select</code>, <code>label</code>, <code>fieldset</code> — no interactive controls.</p></li><li><p><code>canvas</code>, <code>audio</code>, <code>video</code> — no programmatic graphics or media playback.</p></li><li><p><code>meta</code>, <code>link</code>, <code>base</code>, <code>title</code> — head-only elements.</p></li></ul><h2>Supported attributes</h2><h3>Universal (allowed on any element)</h3><ul><li><p><code>id</code>, <code>class</code></p></li><li><p><code>title</code></p></li><li><p><code>lang</code>, <code>dir</code></p></li><li><p><code>style</code> — inline only; the <code>&lt;style&gt;</code> tag itself is excluded</p></li><li><p><code>data-*</code></p></li></ul><h3>Element-specific</h3><ul><li><p><code>a</code>: <code>href</code>, <code>target</code>, <code>rel</code>, <code>download</code></p></li><li><p><code>img</code>: <code>src</code>, <code>alt</code>, <code>width</code>, <code>height</code>, <code>loading</code></p></li><li><p><code>td</code>, <code>th</code>: <code>colspan</code>, <code>rowspan</code>, <code>scope</code>, <code>headers</code></p></li><li><p><code>ol</code>: <code>start</code>, <code>type</code>, <code>reversed</code></p></li><li><p><code>details</code>: <code>open</code></p></li><li><p><code>col</code>, <code>colgroup</code>: <code>span</code></p></li><li><p><code>code</code>, <code>pre</code>: <code>class</code> for syntax-language hints (e.g., <code>language-typescript</code>)</p></li></ul><h2>Excluded attributes</h2><ul><li><p>Event handlers: <code>onclick</code>, <code>onload</code>, and any <code>on*</code> attribute.</p></li><li><p>Form-control attributes.</p></li><li><p>Interactivity attributes: <code>contenteditable</code>, <code>draggable</code>, <code>hidden</code>.</p></li></ul>
 
-<h2>Frontmatter fields</h2>
+<h2>Markdown round-trip behavior</h2>
 
-<p>All fields are optional. The editor will inject <code>id</code> and <code>version</code> automatically on first open if they are absent.</p>
+<p>HD's <strong>Copy as Markdown</strong> command converts the document to Markdown. For each allowed element, the table below records whether the conversion is lossless, lossy, or falls back to raw HTML embedded in the Markdown output.</p>
+
+<h3>Status legend</h3>
+
+<ul>
+  <li><strong>Lossless</strong> — Markdown has a native syntax that preserves all relevant attributes.</li>
+  <li><strong>Lossy</strong> — Markdown can represent the element but loses some attributes (e.g., colspan, inline styles, classes).</li>
+  <li><strong>Raw HTML</strong> — Markdown has no equivalent; the element is emitted as raw HTML inside the Markdown output.</li>
+</ul>
+
+<h3>Element matrix</h3>
 
 <table>
   <thead>
     <tr>
-      <th>Field</th>
-      <th>Type</th>
+      <th>Element</th>
+      <th>MD Status</th>
       <th>Notes</th>
     </tr>
   </thead>
   <tbody>
-    <tr><td><code>id</code></td><td>base62 string (22 chars)</td><td>Per-document identifier. Stable across renames and moves; asset folders are keyed by it. Do not edit by hand — clear it to force regeneration.</td></tr>
-    <tr><td><code>version</code></td><td>integer</td><td>HD format version the document is written against. Current: <strong>1</strong>. A missing version means "the latest version."</td></tr>
-    <tr><td><code>title</code></td><td>string</td><td>Human-readable title.</td></tr>
-    <tr><td><code>date</code></td><td>ISO 8601 date or datetime</td><td>Document date.</td></tr>
-    <tr><td><code>author</code></td><td>string</td><td>Author identifier (email or handle).</td></tr>
-    <tr><td><code>description</code></td><td>string</td><td>One-line description.</td></tr>
-    <tr><td><code>tags</code></td><td>list of strings</td><td>Tags / categories.</td></tr>
+    <tr><td><code>h1</code>–<code>h6</code></td><td>Lossless</td><td>ATX headings (<code>#</code>...<code>######</code>).</td></tr>
+    <tr><td><code>p</code></td><td>Lossless</td><td>Plain paragraph.</td></tr>
+    <tr><td><code>strong</code>, <code>b</code></td><td>Lossless</td><td>Both map to <code>**…**</code>; the strong/b distinction is lost.</td></tr>
+    <tr><td><code>em</code>, <code>i</code></td><td>Lossless</td><td>Both map to <code>*…*</code>; the em/i distinction is lost.</td></tr>
+    <tr><td><code>u</code></td><td>Raw HTML</td><td>Markdown has no underline syntax.</td></tr>
+    <tr><td><code>s</code></td><td>Raw HTML</td><td>GFM has <code>~~…~~</code> for strikethrough; turndown emits raw HTML by default.</td></tr>
+    <tr><td><code>code</code> (inline)</td><td>Lossless</td><td>Backticks.</td></tr>
+    <tr><td><code>pre</code> + <code>code</code></td><td>Lossless</td><td>Fenced code block. <code>class="language-…"</code> is preserved as the info string.</td></tr>
+    <tr><td><code>blockquote</code></td><td>Lossless</td><td>Lines prefixed with <code>&gt;</code>.</td></tr>
+    <tr><td><code>ul</code>, <code>ol</code>, <code>li</code></td><td>Lossless</td><td>Bulleted/numbered lists. <code>ol</code>'s <code>start</code> attribute is supported in GFM.</td></tr>
+    <tr><td><code>dl</code>, <code>dt</code>, <code>dd</code></td><td>Raw HTML</td><td>No standard Markdown for definition lists.</td></tr>
+    <tr><td><code>a</code></td><td>Lossless</td><td><code>[text](href)</code>. <code>target</code> and <code>rel</code> are dropped.</td></tr>
+    <tr><td><code>img</code></td><td>Lossy</td><td><code>![alt](src)</code>. <code>width</code>, <code>height</code>, <code>loading</code> are dropped.</td></tr>
+    <tr><td><code>hr</code></td><td>Lossless</td><td><code>---</code>.</td></tr>
+    <tr><td><code>br</code></td><td>Lossless</td><td>Backslash line break or trailing spaces.</td></tr>
+    <tr><td><code>table</code> (simple)</td><td>Lossy</td><td>GFM table syntax. No colspan/rowspan, no multi-paragraph cells, no inline styles.</td></tr>
+    <tr><td><code>table</code> (complex)</td><td>Raw HTML</td><td>Tables with colspan/rowspan, merged cells, or block content in cells are emitted as HTML.</td></tr>
+    <tr><td><code>thead</code>, <code>tbody</code>, <code>tfoot</code>, <code>tr</code>, <code>th</code>, <code>td</code>, <code>caption</code>, <code>colgroup</code>, <code>col</code></td><td>Lossy / Raw</td><td>Follow the <code>table</code> ruling: lossy when the table is GFM-representable, raw otherwise.</td></tr>
+    <tr><td><code>div</code>, <code>span</code></td><td>Raw HTML</td><td>No Markdown equivalent.</td></tr>
+    <tr><td><code>section</code>, <code>article</code>, <code>aside</code>, <code>header</code>, <code>footer</code>, <code>nav</code>, <code>main</code></td><td>Raw HTML</td><td>Sectioning elements have no Markdown equivalent.</td></tr>
+    <tr><td><code>figure</code>, <code>figcaption</code></td><td>Raw HTML</td><td>Markdown has no figure/caption construct.</td></tr>
+    <tr><td><code>mark</code></td><td>Raw HTML</td><td>No standard Markdown for highlight.</td></tr>
+    <tr><td><code>sub</code>, <code>sup</code></td><td>Raw HTML</td><td>No standard Markdown.</td></tr>
+    <tr><td><code>kbd</code>, <code>samp</code>, <code>var</code>, <code>abbr</code>, <code>cite</code>, <code>q</code>, <code>small</code></td><td>Raw HTML</td><td>No Markdown equivalents.</td></tr>
+    <tr><td><code>details</code>, <code>summary</code></td><td>Raw HTML</td><td>Renders inline in some Markdown flavors; turndown emits as HTML.</td></tr>
+    <tr><td><code>svg</code></td><td>Raw HTML</td><td>Inline SVG passes through unchanged.</td></tr>
   </tbody>
 </table>
 
-<h2>Supported elements</h2>
-
-<h3>Block</h3>
-<ul>
-  <li><code>h1</code> through <code>h6</code></li>
-  <li><code>p</code>, <code>blockquote</code>, <code>pre</code>, <code>hr</code>, <code>div</code></li>
-</ul>
-
-<h3>Lists</h3>
-<ul>
-  <li><code>ul</code>, <code>ol</code>, <code>li</code></li>
-  <li><code>dl</code>, <code>dt</code>, <code>dd</code></li>
-</ul>
-
-<h3>Tables</h3>
-<ul>
-  <li><code>table</code>, <code>caption</code></li>
-  <li><code>thead</code>, <code>tbody</code>, <code>tfoot</code></li>
-  <li><code>tr</code>, <code>th</code>, <code>td</code></li>
-  <li><code>colgroup</code>, <code>col</code></li>
-</ul>
-
-<h3>Inline text</h3>
-<ul>
-  <li><code>a</code></li>
-  <li><code>strong</code>, <code>em</code>, <code>b</code>, <code>i</code>, <code>u</code>, <code>s</code></li>
-  <li><code>code</code>, <code>kbd</code>, <code>samp</code>, <code>var</code></li>
-  <li><code>mark</code>, <code>sub</code>, <code>sup</code></li>
-  <li><code>abbr</code>, <code>cite</code>, <code>q</code>, <code>small</code></li>
-  <li><code>span</code>, <code>br</code></li>
-</ul>
-
-<h3>Media</h3>
-<ul>
-  <li><code>img</code>, <code>figure</code>, <code>figcaption</code></li>
-  <li><code>svg</code> and its standard children for inline diagrams</li>
-</ul>
-
-<h3>Sectioning</h3>
-<ul>
-  <li><code>section</code>, <code>article</code>, <code>aside</code></li>
-  <li><code>header</code>, <code>footer</code>, <code>nav</code>, <code>main</code></li>
-</ul>
-
-<h3>Disclosure</h3>
-<ul>
-  <li><code>details</code>, <code>summary</code></li>
-</ul>
-
-<h2>Excluded elements</h2>
+<h3>Attributes always dropped when converting to Markdown</h3>
 
 <ul>
-  <li><code>html</code>, <code>head</code>, <code>body</code> — body-only rule.</li>
-  <li><code>script</code>, <code>style</code> — no executable code or stylesheets.</li>
-  <li><code>iframe</code>, <code>embed</code>, <code>object</code> — no embedded external content.</li>
-  <li><code>form</code>, <code>input</code>, <code>button</code>, <code>textarea</code>, <code>select</code>, <code>label</code>, <code>fieldset</code> — no interactive controls.</li>
-  <li><code>canvas</code>, <code>audio</code>, <code>video</code> — no programmatic graphics or media playback.</li>
-  <li><code>meta</code>, <code>link</code>, <code>base</code>, <code>title</code> — head-only elements.</li>
-</ul>
-
-<h2>Supported attributes</h2>
-
-<h3>Universal (allowed on any element)</h3>
-<ul>
-  <li><code>id</code>, <code>class</code></li>
-  <li><code>title</code></li>
-  <li><code>lang</code>, <code>dir</code></li>
-  <li><code>style</code> — inline only; the <code>&lt;style&gt;</code> tag itself is excluded</li>
-  <li><code>data-*</code></li>
-</ul>
-
-<h3>Element-specific</h3>
-<ul>
-  <li><code>a</code>: <code>href</code>, <code>target</code>, <code>rel</code>, <code>download</code></li>
-  <li><code>img</code>: <code>src</code>, <code>alt</code>, <code>width</code>, <code>height</code>, <code>loading</code></li>
-  <li><code>td</code>, <code>th</code>: <code>colspan</code>, <code>rowspan</code>, <code>scope</code>, <code>headers</code></li>
-  <li><code>ol</code>: <code>start</code>, <code>type</code>, <code>reversed</code></li>
+  <li>Universal: <code>id</code>, <code>class</code>, <code>title</code>, <code>lang</code>, <code>dir</code>, <code>style</code>, <code>data-*</code></li>
+  <li>Anchor: <code>target</code>, <code>rel</code>, <code>download</code></li>
+  <li>Image: <code>width</code>, <code>height</code>, <code>loading</code></li>
+  <li>Table cell: <code>scope</code>, <code>headers</code></li>
+  <li>Ordered list: <code>type</code>, <code>reversed</code> (only <code>start</code> survives in GFM)</li>
   <li><code>details</code>: <code>open</code></li>
-  <li><code>col</code>, <code>colgroup</code>: <code>span</code></li>
-  <li><code>code</code>, <code>pre</code>: <code>class</code> for syntax-language hints (e.g., <code>language-typescript</code>)</li>
-</ul>
-
-<h2>Excluded attributes</h2>
-
-<ul>
-  <li>Event handlers: <code>onclick</code>, <code>onload</code>, and any <code>on*</code> attribute.</li>
-  <li>Form-control attributes.</li>
-  <li>Interactivity attributes: <code>contenteditable</code>, <code>draggable</code>, <code>hidden</code>.</li>
 </ul>

@@ -7,6 +7,7 @@
       "path": "../../../Docs/hd-docs",
       "contentDir": "src/content",
       "publicDir": "public",
+      "deleteOrphans": true,
       "assetMap": [],
       "meta": {
         "index": {

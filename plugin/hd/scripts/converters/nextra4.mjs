@@ -1,4 +1,4 @@
-import { writeFile, mkdir, readdir, stat, copyFile } from 'node:fs/promises'
+import { writeFile, mkdir, readdir, stat, copyFile, rm } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join, resolve, extname, basename, dirname, relative } from 'node:path'
 import TurndownService from 'turndown'
@@ -52,8 +52,14 @@ function yamlValue(v) {
   return JSON.stringify(v)
 }
 
-function rewriteBody(body, { assetMap, warnings, sourceFile, docAssets = [], slug }) {
+function normalizeRoutePrefix(routePrefix) {
+  if (!routePrefix) return ''
+  return '/' + String(routePrefix).replace(/^\/+|\/+$/g, '')
+}
+
+function rewriteBody(body, { assetMap, warnings, sourceFile, docAssets = [], slug, routePrefix }) {
   let html = body
+  const prefix = normalizeRoutePrefix(routePrefix)
 
   html = html.replace(
     /href="([^"#]+)\.hd(#[^"]*)?"/g,
@@ -64,12 +70,15 @@ function rewriteBody(body, { assetMap, warnings, sourceFile, docAssets = [], slu
         return m
       }
       const cleaned = path.replace(/^\.\//, '')
-      return `href="/${cleaned}${hash || ''}"`
+      return `href="${prefix}/${cleaned}${hash || ''}"`
     }
   )
 
   if (docAssets.length > 0 && slug) {
     const assetSet = new Set(docAssets)
+    const assetUrlBase = prefix
+      ? `/assets${prefix}/${slug}`
+      : `/assets/${slug}`
     html = html.replace(/<img\s[^>]*>/gi, (tag) => {
       const m = tag.match(/\bsrc="([^"]+)"/)
       if (!m) return tag
@@ -80,7 +89,7 @@ function rewriteBody(body, { assetMap, warnings, sourceFile, docAssets = [], slu
         warnings.push(`${sourceFile}: image src "${src}" not found in HD asset folder`)
         return tag
       }
-      return tag.replace(m[0], `src="/assets/${slug}/${src}"`)
+      return tag.replace(m[0], `src="${assetUrlBase}/${src}"`)
     })
   }
 
@@ -172,9 +181,16 @@ export async function convert({ sources, sourceDir, destination, log }) {
   const targetRoot = resolve(sourceDir, destination.path)
   const contentDir = join(targetRoot, destination.contentDir || 'src/content')
   const publicDir = join(targetRoot, destination.publicDir || 'public')
+  const routePrefix = destination.routePrefix
+    ? String(destination.routePrefix).replace(/^\/+|\/+$/g, '')
+    : ''
+  const deleteOrphans = destination.deleteOrphans === undefined
+    ? 'warn'
+    : destination.deleteOrphans
 
   log(`target root : ${targetRoot}`)
   log(`content dir : ${contentDir}`)
+  if (routePrefix) log(`route prefix: /${routePrefix}`)
   log('')
 
   if (!existsSync(targetRoot)) {
@@ -198,7 +214,9 @@ export async function convert({ sources, sourceDir, destination, log }) {
       const assetFolder = join(workspace, '.hd', docDirRel, src.id)
       if (existsSync(assetFolder)) {
         const files = await readdir(assetFolder)
-        const publicAssetDir = join(publicDir, 'assets', src.slug)
+        const publicAssetDir = routePrefix
+          ? join(publicDir, 'assets', routePrefix, src.slug)
+          : join(publicDir, 'assets', src.slug)
         await mkdir(publicAssetDir, { recursive: true })
         for (const f of files) {
           const fromPath = join(assetFolder, f)
@@ -219,7 +237,8 @@ export async function convert({ sources, sourceDir, destination, log }) {
       warnings,
       sourceFile: src.file,
       docAssets,
-      slug: src.slug
+      slug: src.slug,
+      routePrefix
     })
     const mdxBody = td.turndown(html)
     const mdx = buildMdx(src.frontmatter, mdxBody)
@@ -263,9 +282,48 @@ export async function convert({ sources, sourceDir, destination, log }) {
   const existingMdx = (await readdir(contentDir))
     .filter(f => extname(f) === '.mdx')
     .map(f => basename(f, '.mdx'))
-  for (const o of existingMdx) {
-    if (!writtenSlugs.has(o)) {
+  const orphanMdx = existingMdx.filter(o => !writtenSlugs.has(o))
+  for (const o of orphanMdx) {
+    const orphanPath = join(contentDir, o + '.mdx')
+    if (deleteOrphans === true) {
+      await rm(orphanPath, { force: true })
+      log(`deleted    orphan ${o}.mdx`)
+    } else if (deleteOrphans !== false) {
       warnings.push(`orphan in target (no HD source): ${o}.mdx`)
+    }
+  }
+
+  if (deleteOrphans === true) {
+    if (!routePrefix) {
+      warnings.push(
+        'asset orphan cleanup skipped: no routePrefix set ' +
+        '(would risk deleting another project\'s assets under shared publicDir/assets/)'
+      )
+    } else {
+      const assetsParent = join(publicDir, 'assets', routePrefix)
+      if (existsSync(assetsParent)) {
+        const subfolders = await readdir(assetsParent)
+        for (const sub of subfolders) {
+          const subPath = join(assetsParent, sub)
+          const s = await stat(subPath)
+          if (s.isDirectory() && !writtenSlugs.has(sub)) {
+            await rm(subPath, { recursive: true, force: true })
+            log(`deleted    orphan assets ${routePrefix}/${sub}`)
+          }
+        }
+      }
+    }
+  } else if (deleteOrphans !== false && routePrefix) {
+    const assetsParent = join(publicDir, 'assets', routePrefix)
+    if (existsSync(assetsParent)) {
+      const subfolders = await readdir(assetsParent)
+      for (const sub of subfolders) {
+        const subPath = join(assetsParent, sub)
+        const s = await stat(subPath)
+        if (s.isDirectory() && !writtenSlugs.has(sub)) {
+          warnings.push(`orphan asset folder (no HD source): ${routePrefix}/${sub}/`)
+        }
+      }
     }
   }
 

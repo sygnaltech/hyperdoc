@@ -56,6 +56,8 @@ description: How to publish .hd documentation to external platforms like Nextra,
     <tr><td><code>type</code></td><td>yes</td><td>Converter key. Currently supported: <code>nextra4</code>.</td></tr>
     <tr><td><code>path</code></td><td>yes</td><td>Path to the target project root. Resolved relative to the config file.</td></tr>
     <tr><td><code>description</code></td><td>no</td><td>One-line description shown in the destination picker.</td></tr>
+    <tr><td><code>routePrefix</code></td><td>no</td><td>String prepended to internal link URLs and to the asset folder path. Required when multiple HD projects publish into the same target repo. See <a href="#multi-project">Sharing a target repo</a>.</td></tr>
+    <tr><td><code>deleteOrphans</code></td><td>no</td><td><code>true</code> | <code>false</code> | <code>"warn"</code> (default <code>"warn"</code>). Controls whether stale files in the target are removed, warned about, or ignored. See <a href="#orphans">Orphan handling</a>.</td></tr>
   </tbody>
 </table>
 
@@ -107,15 +109,63 @@ node plugin/hd/scripts/convert.mjs --config &lt;path&gt; --dest "&lt;name&gt;"  
 
 <p>When using <code>--config</code> without <code>--dest</code>, the script will run the sync automatically only if the config has exactly one destination; otherwise it lists what's available and exits.</p>
 
+<h2 id="orphans">Orphan handling</h2>
+
+<p>An <em>orphan</em> is a file in the target with no corresponding source on this sync — usually because the HD file was renamed or deleted but the previous output is still sitting in the target.</p>
+
+<p>The <code>deleteOrphans</code> field controls what the sync does with them:</p>
+
+<table>
+  <thead>
+    <tr><th>Value</th><th>Behavior</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>"warn"</code> (default)</td><td>Lists orphans in the sync output as warnings. Leaves them in place.</td></tr>
+    <tr><td><code>true</code></td><td>Deletes orphan <code>.mdx</code> files from <code>contentDir</code>. If <code>routePrefix</code> is set, also deletes orphan asset folders from <code>publicDir/assets/&lt;routePrefix&gt;/</code>.</td></tr>
+    <tr><td><code>false</code></td><td>Silent — no warning, no deletion.</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Safety property:</strong> deletion is always scoped to this project's own folders. The <code>.mdx</code> sweep only reads <code>contentDir</code>, which each project owns. The asset sweep only reads <code>publicDir/assets/&lt;routePrefix&gt;/</code>, which is unique per project. A sync cannot see, let alone delete, files belonging to another project — even when they share the same target repo.</p>
+
+<p>If <code>deleteOrphans: true</code> is set without <code>routePrefix</code>, asset cleanup is skipped (with a warning explaining why), because <code>publicDir/assets/</code> would be a shared namespace. <code>.mdx</code> deletion still runs because <code>contentDir</code> is project-scoped either way.</p>
+
+<h2 id="multi-project">Sharing a target repo across projects</h2>
+
+<p>Multiple HD source directories can publish into the same Nextra target repo — for example, a product documentation site that aggregates docs from several internal codebases. To stay isolated, each project must:</p>
+
+<ol>
+  <li>Use its own <code>contentDir</code> sub-folder (e.g., <code>src/content/projA</code>, <code>src/content/projB</code>).</li>
+  <li>Set <code>routePrefix</code> to match the sub-folder (e.g., <code>"projA"</code>).</li>
+</ol>
+
+<p>With both set, link and asset URLs are rewritten with the prefix, asset files are written to a per-project sub-folder under <code>publicDir/assets/&lt;routePrefix&gt;/</code>, and orphan deletion is bounded to that sub-folder. Two configs with different prefixes are physically incapable of touching each other's output.</p>
+
+<pre><code class="language-json">{
+  "destinations": [
+    {
+      "name": "nextra 4",
+      "type": "nextra4",
+      "path": "../../Docs/hd-docs",
+      "contentDir": "src/content/projA",
+      "routePrefix": "projA",
+      "deleteOrphans": true
+    }
+  ]
+}</code></pre>
+
+<p>Without <code>routePrefix</code>, internal <code>.hd</code> links rewrite to <code>/foo</code> (the repo root), which is correct only when the project's <code>contentDir</code> is <code>src/content</code> itself. If <code>contentDir</code> is a sub-folder and <code>routePrefix</code> is missing, internal links between docs in the same project will 404.</p>
+
 <h2>What the sync does and doesn't do</h2>
 
 <h3>Does</h3>
 
 <ul>
   <li>Converts every <code>.hd</code> file in the source directory to the destination format.</li>
-  <li>Rewrites internal <code>.hd</code> links to the platform's route style.</li>
-  <li>Copies assets per <code>assetMap</code>.</li>
+  <li>Rewrites internal <code>.hd</code> links to the platform's route style (with <code>routePrefix</code> applied if set).</li>
+  <li>Copies assets per <code>assetMap</code> and per-doc asset folders.</li>
   <li>Generates the platform's sidebar or manifest file from the config (e.g., <code>_meta.js</code> for Nextra).</li>
+  <li>Optionally deletes orphan output when <code>deleteOrphans: true</code> is set (see <a href="#orphans">Orphan handling</a>).</li>
   <li>Reports counts and warnings.</li>
 </ul>
 
@@ -123,7 +173,7 @@ node plugin/hd/scripts/convert.mjs --config &lt;path&gt; --dest "&lt;name&gt;"  
 
 <ul>
   <li><strong>Doesn't sync in reverse.</strong> Hand-edits in the target will not survive the next sync. If you need platform-specific customization, do it in the source HD file or upstream into the converter.</li>
-  <li><strong>Doesn't delete files in the target.</strong> Files in the target's content directory that have no matching HD source are flagged as orphan warnings but left in place. You decide whether to remove them.</li>
+  <li><strong>Doesn't delete files in the target unless asked.</strong> The default <code>deleteOrphans: "warn"</code> only flags orphans. Set <code>true</code> to actually remove them.</li>
   <li><strong>Doesn't look outside the source directory.</strong> Links in <code>.hd</code> files to files outside the source dir (for example, <code>../README.md</code> or another HD file at the project root) are flagged as warnings and left unchanged. They will resolve as broken links in the published site.</li>
 </ul>
 
@@ -151,8 +201,18 @@ node plugin/hd/scripts/convert.mjs --config &lt;path&gt; --dest "&lt;name&gt;"  
     </tr>
     <tr>
       <td><code>orphan in target (no HD source)</code></td>
-      <td>A file in the target's content directory has no corresponding <code>.hd</code> source.</td>
-      <td>Delete the file manually after confirming it's not still needed.</td>
+      <td>A <code>.mdx</code> in the target's content directory has no corresponding <code>.hd</code> source.</td>
+      <td>Delete manually, or set <code>deleteOrphans: true</code> on the destination to automate it.</td>
+    </tr>
+    <tr>
+      <td><code>orphan asset folder (no HD source)</code></td>
+      <td>An asset folder under <code>publicDir/assets/&lt;routePrefix&gt;/</code> has no corresponding <code>.hd</code> source. Only emitted when <code>routePrefix</code> is set.</td>
+      <td>Delete manually, or set <code>deleteOrphans: true</code>.</td>
+    </tr>
+    <tr>
+      <td><code>asset orphan cleanup skipped: no routePrefix set</code></td>
+      <td>You set <code>deleteOrphans: true</code> but no <code>routePrefix</code>. Asset deletion was skipped to avoid accidentally deleting another project's files under a shared <code>publicDir/assets/</code>.</td>
+      <td>Add <code>routePrefix</code>, or accept that assets won't be auto-cleaned.</td>
     </tr>
   </tbody>
 </table>

@@ -68,6 +68,8 @@ Common fields (every destination):
 | `type` | yes | Converter key. Currently: `nextra4`. |
 | `path` | yes | Path to target project root. Resolved relative to the config file. |
 | `description` | no | One-line description shown in the picker. |
+| `routePrefix` | no | String prepended to internal link URLs and asset folder paths. Required when multiple HD projects publish into the same target repo. Leading/trailing slashes are stripped. |
+| `deleteOrphans` | no | `true` \| `false` \| `"warn"` (default `"warn"`). When `true`, deletes stale `.mdx` from `contentDir` and (if `routePrefix` is set) stale asset folders from `publicDir/assets/<routePrefix>/`. |
 
 Type-specific fields are owned by each converter and documented in its
 section below.
@@ -80,29 +82,41 @@ section below.
    HD-only fields (`id`, `version`); keep `title`, `description`, `date`,
    `author`, `tags`.
 2. Rewrite the body HTML:
-   - `href="foo.hd"` → `href="/foo"` (Nextra route).
-   - `href="foo.hd#anchor"` → `href="/foo#anchor"`.
+   - `href="foo.hd"` → `href="/foo"` (or `/<routePrefix>/foo` when set).
+   - `href="foo.hd#anchor"` → `href="/foo#anchor"` (prefix applied if set).
    - `href="../foo.hd"` and `href="../foo.md"` → left unchanged, flagged as
      external-repo warnings.
+   - Per-doc asset references (`<img src="image-1.png">` with a matching
+     `.hd/<docDir>/<id>/` folder) → `/assets/<slug>/image-1.png`, or
+     `/assets/<routePrefix>/<slug>/image-1.png` when prefix is set.
    - `src="<assetMap.from>/..."` rewritten per `assetMap` to `/`-rooted paths
      under `public/`.
 3. Run `turndown` with the `gfm` plugin on the rewritten HTML. Simple tables
    become GFM tables; `<pre><code class="language-X">` becomes a fenced code
    block with the language hint.
 4. Write each result to `<target>/<contentDir>/<slug>.mdx`.
-5. Copy assets per `assetMap` entries.
-6. Write `_meta.js` from the `meta` block.
-7. List `.mdx` files in the target with no HD source as orphan warnings.
-   Does not delete them.
+5. Copy per-doc assets to `publicDir/assets/[<routePrefix>/]<slug>/`.
+6. Copy bulk assets per `assetMap` entries.
+7. Write `_meta.js` from the `meta` block.
+8. Reconcile orphans according to `deleteOrphans`:
+   - `"warn"` (default): list orphan `.mdx` (and orphan asset folders when
+     `routePrefix` is set) as warnings.
+   - `true`: delete orphan `.mdx` from `contentDir`; if `routePrefix` is set,
+     also delete orphan asset folders under `publicDir/assets/<routePrefix>/`.
+     Without `routePrefix`, asset cleanup is skipped with a warning because
+     `publicDir/assets/` is a shared namespace.
+   - `false`: silent.
 
 **Type-specific fields:**
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| `contentDir` | no | Defaults to `src/content`. |
+| `contentDir` | no | Defaults to `src/content`. When sharing a target repo across projects, set this to a per-project sub-folder (e.g. `src/content/projA`). |
 | `publicDir` | no | Defaults to `public`. Used to validate asset paths. |
 | `assetMap` | no | Array of `{ from, to }`. `from` is relative to the source dir; `to` is relative to the target root. |
-| `meta` | no | Written verbatim as `_meta.js`. Sidebar order = key order. |
+| `meta` | no | Written verbatim as `_meta.js` inside `contentDir`. Sidebar order = key order. |
+
+When `contentDir` is a sub-folder of `src/content`, **always set `routePrefix`** to the sub-folder name. Internal `.hd` links rewrite to `/<routePrefix>/<slug>`; without the prefix they would 404 because Nextra routes the page at `/<sub-folder>/<slug>`, not `/<slug>`.
 
 **What it does NOT do:**
 
@@ -112,9 +126,12 @@ section below.
   accept that the next sync will overwrite.
 - Convert `<blockquote>` to `<Callout>`. No HD construct maps cleanly to
   Callout's variant system. If you specifically want a Callout, hand-edit.
-- Delete orphan files in the target. It only warns. User decides what to
-  remove.
-- Touch files outside `contentDir` or `publicDir`.
+- Delete orphan files in the target unless `deleteOrphans: true` is set.
+  Default behavior is warn-only.
+- Touch files outside `contentDir` or (when `routePrefix` is set)
+  `publicDir/assets/<routePrefix>/`. Orphan cleanup is always scoped to
+  these per-project folders — a sync cannot delete another project's files
+  even when sharing a target repo.
 
 ## Authoring .hd for clean Nextra output
 
@@ -138,8 +155,13 @@ section below.
      or rewrite to a GitHub URL.
    - *external repo link not rewritten*: a `../FOO.md` link. Same call.
    - *asset source missing*: an `assetMap` entry pointed at a missing dir.
-   - *orphan in target*: leftover `.mdx` from before. Delete manually if
-     confirmed.
+   - *orphan in target*: leftover `.mdx` from before. Delete manually, or
+     flip `deleteOrphans: true` once you've confirmed the warning list is
+     correct.
+   - *orphan asset folder*: leftover per-doc asset directory. Same call.
+   - *asset orphan cleanup skipped: no routePrefix set*: you asked for
+     `deleteOrphans: true` but didn't set `routePrefix`. Either add a
+     prefix or accept that assets need manual cleanup.
 2. **`npm run build`** in the target. Prerender is the only catch-all for
    MDX/JSX compilation errors.
 3. **Browse one page.** Confirm layout. If a page needs `<Callout>` or

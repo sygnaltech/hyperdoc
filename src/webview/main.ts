@@ -39,8 +39,10 @@ async function handleImageFile(file: File): Promise<void> {
 }
 
 function createEditor(initialBody: string) {
+  const isBlank = isBlankBody(initialBody);
   editor = new Editor({
     element: editorEl,
+    autofocus: isBlank ? 'end' : false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4, 5, 6] }
@@ -69,6 +71,52 @@ function createEditor(initialBody: string) {
   setupToolbar(toolbarEl, editor, { bridge });
   setupTableUI(editor, editorEl);
   setupCodeCopy(editorEl);
+  setupClickBelowToFocus(editor, editorEl, toolbarEl);
+}
+
+function isBlankBody(body: string): boolean {
+  const stripped = body
+    .replace(/<p[^>]*>\s*<\/p>/gi, '')
+    .replace(/\s+/g, '')
+    .trim();
+  return stripped === '';
+}
+
+function setupClickBelowToFocus(ed: Editor, editorRoot: HTMLElement, toolbar: HTMLElement): void {
+  const editable = ed.view.dom;
+
+  document.addEventListener('mousedown', (e) => {
+    const target = e.target as Element | null;
+    if (!target) return;
+
+    if (editable.contains(target)) return;
+    if (toolbar.contains(target)) return;
+    if (target.closest(
+      'button, input, textarea, select, [contenteditable="true"], ' +
+      '.hd-context-menu, .hd-link-backdrop, .hd-link-dialog, .hd-code-copy'
+    )) return;
+
+    e.preventDefault();
+    focusNewLineAtEnd(ed);
+  });
+}
+
+function focusNewLineAtEnd(ed: Editor): void {
+  const { state } = ed;
+  const lastNode = state.doc.lastChild;
+  const lastIsEmptyParagraph =
+    lastNode != null &&
+    lastNode.type.name === 'paragraph' &&
+    lastNode.content.size === 0;
+
+  if (!lastIsEmptyParagraph) {
+    const paragraphType = state.schema.nodes.paragraph;
+    if (paragraphType) {
+      const tr = state.tr.insert(state.doc.content.size, paragraphType.create());
+      ed.view.dispatch(tr);
+    }
+  }
+  ed.commands.focus('end');
 }
 
 window.addEventListener('message', (event) => {

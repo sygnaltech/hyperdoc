@@ -1,9 +1,15 @@
 import type { Editor } from '@tiptap/core';
+import type { Bridge } from './bridge';
+import { showLinkDialog } from './link-dialog';
+
+interface ToolbarContext {
+  bridge: Bridge;
+}
 
 interface ButtonSpec {
   label: string;
   title: string;
-  command: (editor: Editor) => void;
+  command: (editor: Editor, ctx: ToolbarContext) => void;
   isActive?: (editor: Editor) => boolean;
 }
 
@@ -50,10 +56,12 @@ const BUTTONS: ButtonSpec[] = [
   },
   {
     label: 'Link', title: 'Insert/edit link',
-    command: (e) => {
-      const url = window.prompt('URL', '');
-      if (!url) return;
-      e.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    command: (e, ctx) => {
+      const existing = e.getAttributes('link') as { href?: string } | undefined;
+      void showLinkDialog(ctx.bridge, { initialHref: existing?.href }).then((result) => {
+        if (!result) return;
+        e.chain().focus().extendMarkRange('link').setLink({ href: result.href }).run();
+      });
     },
     isActive: (e) => e.isActive('link')
   },
@@ -82,7 +90,7 @@ const BUTTONS: ButtonSpec[] = [
   }
 ];
 
-export function setupToolbar(root: HTMLElement, editor: Editor): void {
+export function setupToolbar(root: HTMLElement, editor: Editor, ctx: ToolbarContext): void {
   root.innerHTML = '';
   const buttons: HTMLButtonElement[] = [];
   for (const spec of BUTTONS) {
@@ -91,7 +99,7 @@ export function setupToolbar(root: HTMLElement, editor: Editor): void {
     btn.title = spec.title;
     btn.textContent = spec.label;
     btn.addEventListener('mousedown', (e) => e.preventDefault()); // keep selection
-    btn.addEventListener('click', () => spec.command(editor));
+    btn.addEventListener('click', () => spec.command(editor, ctx));
     root.appendChild(btn);
     buttons.push(btn);
   }

@@ -65,7 +65,7 @@ function createEditor(initialBody: string) {
     }
   });
 
-  setupToolbar(toolbarEl, editor);
+  setupToolbar(toolbarEl, editor, { bridge });
   setupTableUI(editor, editorEl);
 }
 
@@ -90,6 +90,9 @@ window.addEventListener('message', (event) => {
     }
     case 'imageSaveResult':
       bridge.resolveImageSave(msg);
+      break;
+    case 'linkOptionsResult':
+      bridge.resolveLinkOptions(msg);
       break;
   }
 });

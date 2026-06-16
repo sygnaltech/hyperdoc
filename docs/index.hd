@@ -1,41 +1,9 @@
 ---
 title: HD Documentation
-date: 2026-06-13T00:00:00.000Z
+date: '2026-06-13T00:00:00.000Z'
 description: Index of the HD format and tooling documentation.
 id: 0MHyzBEGtzqoly7MJpguFf
 version: 1
 ---
 
-<h1>HD Documentation</h1>
-
-<p>HD is a body-only HTML documentation format and a VS Code WYSIWYG editor for authoring it. It targets the documentation use cases Markdown can't cleanly express — multi-paragraph table cells, <code>colspan</code>/<code>rowspan</code>, inline styles, inline SVG — without dragging in full-page HTML concerns like <code>&lt;head&gt;</code>, scripts, and stylesheets.</p>
-
-<h2>What's in this folder</h2>
-
-<ul>
-  <li><a href="getting-started.hd">Getting Started</a> — install the extension and create your first document.</li>
-  <li><a href="format-spec.hd">Format Specification</a> — file structure, frontmatter, allowed elements and attributes.</li>
-  <li><a href="format-compare.hd">Format Comparison</a> — how HD stacks up against Markdown, HTML, and Nextra docs.</li>
-  <li><a href="editor.hd">Editor Features</a> — toolbar, table manipulation, paste behavior, clipboard interop.</li>
-  <li><a href="assets.hd">Assets</a> — how images and binary assets are stored and managed.</li>
-  <li><a href="sync.hd">Sync to External Platforms</a> — publishing <code>.hd</code> source to Nextra, Docusaurus, GitBook, and friends via the <code>/hd:sync</code> slash command.</li>
-</ul>
-
-<h2>Quick characterization</h2>
-
-<ul>
-  <li><strong>Body-only HTML.</strong> Files contain only the content that would sit inside <code>&lt;body&gt;</code>. No <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;script&gt;</code>, or <code>&lt;style&gt;</code> tags.</li>
-  <li><strong>Optional YAML frontmatter.</strong> Bare <code>---</code> fence at the top, Markdown-style. No HTML comment wrapper.</li>
-  <li><strong>Per-document base62 identity.</strong> The editor injects a stable <code>id:</code> on first open. Asset folders are keyed by that id, so renames and moves don't break references.</li>
-  <li><strong>Format version field.</strong> The current version is <code>1</code>. Documents without a <code>version:</code> field are interpreted as the latest version.</li>
-  <li><strong>Markdown round-trip via clipboard.</strong> Paste Markdown into the editor and it converts; "Copy as Markdown" emits Markdown for round-trippable elements and raw HTML for everything else.</li>
-</ul>
-
-<h2>Related root-level documents</h2>
-
-<ul>
-  <li><a href="../CORE-DECISIONS.md">CORE-DECISIONS.md</a> — the six locked design decisions behind the format.</li>
-  <li><a href="../HD-FORMAT.hd">HD-FORMAT.hd</a> — handling expectations across tooling (editor, agents, search, diffs).</li>
-  <li><a href="../ASSETS-TRADEOFFS.hd">ASSETS-TRADEOFFS.hd</a> — analysis of asset storage and identity tradeoffs.</li>
-  <li><a href="../FORMAT-SPEC.hd">FORMAT-SPEC.hd</a> — per-element Markdown round-trip authority used by <code>src/conversion/hdToMd.ts</code>.</li>
-</ul>
+<h1>HD Documentation</h1><p>HD is a body-only HTML documentation format and a VS Code WYSIWYG editor for authoring it. It targets the documentation use cases Markdown can't cleanly express — multi-paragraph table cells, <code>colspan</code>/<code>rowspan</code>, inline styles, inline SVG — without dragging in full-page HTML concerns like <code>&lt;head&gt;</code>, scripts, and stylesheets.</p><h2>What's in this folder</h2><ul><li><p><a target="_blank" rel="noopener" href="getting-started.hd">Getting Started</a> — install the extension and create your first document.</p></li><li><p><a target="_blank" rel="noopener" href="format-spec.hd">Format Specification</a> — file structure, frontmatter, allowed elements and attributes.</p></li><li><p><a target="_blank" rel="noopener" href="format-compare.hd">Format Comparison</a> — how HD stacks up against Markdown, HTML, and Nextra docs.</p></li><li><p><a target="_blank" rel="noopener" href="editor.hd">Editor Features</a> — toolbar, table manipulation, paste behavior, clipboard interop.</p></li><li><p><a target="_blank" rel="noopener" href="assets.hd">Assets</a> — how images and binary assets are stored and managed.</p></li><li><p><a target="_blank" rel="noopener" href="sync.hd">Sync to External Platforms</a> — publishing <code>.hd</code> source to Nextra, Docusaurus, GitBook, and friends via the <code>/hd:sync</code> slash command.</p></li></ul><h2>Quick characterization</h2><ul><li><p><strong>Body-only HTML.</strong> Files contain only the content that would sit inside <code>&lt;body&gt;</code>. No <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;script&gt;</code>, or <code>&lt;style&gt;</code> tags.</p></li><li><p><strong>Optional YAML frontmatter.</strong> Bare <code>---</code> fence at the top, Markdown-style. No HTML comment wrapper.</p></li><li><p><strong>Per-document base62 identity.</strong> The editor injects a stable <code>id:</code> on first open. Asset folders are keyed by that id, so renames and moves don't break references.</p></li><li><p><strong>Format version field.</strong> The current version is <code>1</code>. Documents without a <code>version:</code> field are interpreted as the latest version.</p></li><li><p><strong>Markdown round-trip via clipboard.</strong> Paste Markdown into the editor and it converts; "Copy as Markdown" emits Markdown for round-trippable elements and raw HTML for everything else.</p></li></ul>

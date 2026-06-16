@@ -19,9 +19,29 @@ interface ImageSaveResult {
   error?: string;
 }
 
+export interface LinkOption {
+  relativePath: string;
+  title?: string;
+  fileName: string;
+}
+
+interface LinkOptionsResult {
+  type: 'linkOptionsResult';
+  requestId: number;
+  options: LinkOption[];
+  publishRoot: string | null;
+  error?: string;
+}
+
+interface PendingLinkOptions {
+  resolve: (result: { options: LinkOption[]; publishRoot: string | null }) => void;
+  reject: (err: unknown) => void;
+}
+
 export class Bridge {
   private nextRequestId = 1;
   private pendingImages = new Map<number, PendingImage>();
+  private pendingLinkOptions = new Map<number, PendingLinkOptions>();
   private changeTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingChange: { meta: Record<string, unknown>; body: string } | null = null;
 
@@ -60,6 +80,21 @@ export class Bridge {
     } else {
       pending.resolve({ filename: msg.filename, webviewUri: msg.webviewUri });
     }
+  }
+
+  requestLinkOptions(): Promise<{ options: LinkOption[]; publishRoot: string | null }> {
+    const requestId = this.nextRequestId++;
+    return new Promise((resolve, reject) => {
+      this.pendingLinkOptions.set(requestId, { resolve, reject });
+      this.vscode.postMessage({ type: 'requestLinkOptions', requestId });
+    });
+  }
+
+  resolveLinkOptions(msg: LinkOptionsResult): void {
+    const pending = this.pendingLinkOptions.get(msg.requestId);
+    if (!pending) return;
+    this.pendingLinkOptions.delete(msg.requestId);
+    pending.resolve({ options: msg.options ?? [], publishRoot: msg.publishRoot ?? null });
   }
 }
 

@@ -1,67 +1,9 @@
 ---
 title: Editor Features
-date: 2026-06-13T00:00:00.000Z
+date: '2026-06-13T00:00:00.000Z'
 description: The HD WYSIWYG editor's toolbar, table manipulation, paste behavior, and clipboard interop.
 id: 1LnQlEBfma2D4bx1wJidgK
 version: 1
 ---
 
-<h1>Editor Features</h1>
-
-<h2>Toolbar</h2>
-
-<p>Headings (H1–H3 buttons; H4–H6 via Markdown shortcuts), bold, italic, underline, inline code, code block, link, bullet list, ordered list, blockquote, horizontal rule, insert table.</p>
-
-<h2>Tables</h2>
-
-<p>HD tables support the full HTML capability set — <code>colspan</code>, <code>rowspan</code>, multi-paragraph cells, inline styles, header rows and columns. The editor provides three ways to manipulate them.</p>
-
-<h3>Hover insert</h3>
-
-<ul>
-  <li><strong>Columns</strong>: hover near the top of a table — within ~28 px above the top edge or anywhere in the header row — to see <strong>+</strong> buttons at every column boundary, including far left and far right. Click any one to insert a column at that boundary.</li>
-  <li><strong>Rows</strong>: hover near the left of a table to see <strong>+</strong> buttons at every row boundary, including above the first row and below the last. Click to insert a row.</li>
-</ul>
-
-<h3>Right-click menu</h3>
-
-<p>Right-click any table cell for the full menu:</p>
-
-<ul>
-  <li>Insert column before / after / delete column</li>
-  <li>Insert row above / below / delete row</li>
-  <li>Toggle header row / header column</li>
-  <li>Delete table</li>
-</ul>
-
-<h3>Resize columns</h3>
-
-<p>Hover within a couple of pixels of a vertical column boundary — the cursor changes to a horizontal resize indicator. Drag to resize. The chosen widths are stored as inline <code>style</code>/<code>colwidth</code> attributes and round-trip with the document.</p>
-
-<h2>Paste behavior</h2>
-
-<p>The paste handler dispatches based on clipboard content type, in this order:</p>
-
-<ol>
-  <li><strong>Image file</strong> — saved to the document's asset folder as <code>image-N.&lt;ext&gt;</code>; an <code>&lt;img&gt;</code> reference with the bare filename is inserted at the cursor.</li>
-  <li><strong>HTML</strong> — sanitized against the HD allow-list (disallowed elements are unwrapped, disallowed attributes stripped) and inserted. Office-style <code>StartFragment</code> / <code>EndFragment</code> wrappers are stripped first.</li>
-  <li><strong>Markdown-flavored plain text</strong> — detected by a conservative heuristic (needs at least two distinct Markdown markers across headings, lists, code fences, links, bold, tables); converted via <code>marked</code>, sanitized, inserted.</li>
-  <li><strong>Plain text</strong> — falls through to the editor's default plain-text handling. No code-block wrapping.</li>
-</ol>
-
-<h2>Clipboard out</h2>
-
-<p><strong>Ctrl+Shift+P</strong> → "<strong>HD: Copy as Markdown</strong>" copies the document's body as Markdown. Elements that round-trip cleanly are emitted as Markdown; everything else is emitted as raw HTML inside the Markdown so no content is lost. The per-element round-trip status is documented in <a href="../FORMAT-SPEC.hd">FORMAT-SPEC.hd</a>.</p>
-
-<h2>Document identity</h2>
-
-<p>Every <code>.hd</code> file gets a 22-character base62 <code>id</code> in its frontmatter on first open. The id is stable across renames and moves and is what asset folders are keyed by.</p>
-
-<ul>
-  <li>To force regeneration (e.g., when using a template), clear the <code>id:</code> value and reopen the file.</li>
-  <li>If you duplicate an <code>.hd</code> file in the explorer, the editor detects the duplicate id on next open and regenerates the new file's id automatically.</li>
-</ul>
-
-<h2>Format version</h2>
-
-<p>Documents carry a <code>version</code> field in their frontmatter. The current version is <code>1</code>. The editor injects <code>version: 1</code> on first open if the field is missing. A missing or absent version is interpreted as the latest version.</p>
+<h1>Editor Features</h1><h2>Toolbar</h2><p>Headings (H1–H3 buttons; H4–H6 via Markdown shortcuts), bold, italic, underline, inline code, code block, link, bullet list, ordered list, blockquote, horizontal rule, insert table.</p><h2>Tables</h2><p>HD tables support the full HTML capability set — <code>colspan</code>, <code>rowspan</code>, multi-paragraph cells, inline styles, header rows and columns. The editor provides three ways to manipulate them.</p><h3>Hover insert</h3><ul><li><p><strong>Columns</strong>: hover near the top of a table — within ~28 px above the top edge or anywhere in the header row — to see <strong>+</strong> buttons at every column boundary, including far left and far right. Click any one to insert a column at that boundary.</p></li><li><p><strong>Rows</strong>: hover near the left of a table to see <strong>+</strong> buttons at every row boundary, including above the first row and below the last. Click to insert a row.</p></li></ul><h3>Right-click menu</h3><p>Right-click any table cell for the full menu:</p><ul><li><p>Insert column before / after / delete column</p></li><li><p>Insert row above / below / delete row</p></li><li><p>Toggle header row / header column</p></li><li><p>Delete table</p></li></ul><h3>Resize columns</h3><p>Hover within a couple of pixels of a vertical column boundary — the cursor changes to a horizontal resize indicator. Drag to resize. The chosen widths are stored as inline <code>style</code>/<code>colwidth</code> attributes and round-trip with the document.</p><h2>Paste behavior</h2><p>The paste handler dispatches based on clipboard content type, in this order:</p><ol><li><p><strong>Image file</strong> — saved to the document's asset folder as <code>image-N.&lt;ext&gt;</code>; an <code>&lt;img&gt;</code> reference with the bare filename is inserted at the cursor.</p></li><li><p><strong>HTML</strong> — sanitized against the HD allow-list (disallowed elements are unwrapped, disallowed attributes stripped) and inserted. Office-style <code>StartFragment</code> / <code>EndFragment</code> wrappers are stripped first.</p></li><li><p><strong>Markdown-flavored plain text</strong> — detected by a conservative heuristic (needs at least two distinct Markdown markers across headings, lists, code fences, links, bold, tables); converted via <code>marked</code>, sanitized, inserted.</p></li><li><p><strong>Plain text</strong> — falls through to the editor's default plain-text handling. No code-block wrapping.</p></li></ol><h2>Clipboard out</h2><p><strong>Ctrl+Shift+P</strong> → "<strong>HD: Copy as Markdown</strong>" copies the document's body as Markdown. Elements that round-trip cleanly are emitted as Markdown; everything else is emitted as raw HTML inside the Markdown so no content is lost. The per-element round-trip status is documented in <a target="_blank" rel="noopener" href="./format-spec.hd">format-spec.hd</a>.</p><h2>Document identity</h2><p>Every <code>.hd</code> file gets a 22-character base62 <code>id</code> in its frontmatter on first open. The id is stable across renames and moves and is what asset folders are keyed by.</p><ul><li><p>To force regeneration (e.g., when using a template), clear the <code>id:</code> value and reopen the file.</p></li><li><p>If you duplicate an <code>.hd</code> file in the explorer, the editor detects the duplicate id on next open and regenerates the new file's id automatically.</p></li></ul><h2>Format version</h2><p>Documents carry a <code>version</code> field in their frontmatter. The current version is <code>1</code>. The editor injects <code>version: 1</code> on first open if the field is missing. A missing or absent version is interpreted as the latest version.</p>

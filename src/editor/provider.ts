@@ -20,7 +20,12 @@ interface InboundImageRequest {
   extension: string;
 }
 
-type Inbound = InboundChange | InboundImageRequest;
+interface InboundLinkOptionsRequest {
+  type: 'requestLinkOptions';
+  requestId: number;
+}
+
+type Inbound = InboundChange | InboundImageRequest | InboundLinkOptionsRequest;
 
 export class HdEditorProvider implements vscode.CustomTextEditorProvider {
   public static readonly viewType = 'sygnal.hd-editor';
@@ -133,8 +138,64 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
           await this.handleImageSave(webview, document, msg);
           break;
         }
+        case 'requestLinkOptions': {
+          await this.handleLinkOptions(webview, document, msg);
+          break;
+        }
       }
     });
+  }
+
+  private async handleLinkOptions(
+    webview: vscode.Webview,
+    document: vscode.TextDocument,
+    msg: InboundLinkOptionsRequest
+  ): Promise<void> {
+    try {
+      const publishRoot = await findPublishRoot(document.uri);
+      if (!publishRoot) {
+        webview.postMessage({
+          type: 'linkOptionsResult',
+          requestId: msg.requestId,
+          options: [],
+          publishRoot: null
+        });
+        return;
+      }
+
+      const files = await listHdFiles(publishRoot);
+      const docDir = vscode.Uri.joinPath(document.uri, '..');
+      const docDirFs = docDir.fsPath;
+      const docFs = document.uri.fsPath;
+
+      const options = await Promise.all(
+        files
+          .filter((f) => f.fsPath !== docFs)
+          .map(async (f) => {
+            let rel = path.relative(docDirFs, f.fsPath).replace(/\\/g, '/');
+            if (!rel.startsWith('.') && !rel.startsWith('/')) rel = './' + rel;
+            const title = await readDocTitle(f);
+            return { relativePath: rel, title, fileName: path.basename(f.fsPath) };
+          })
+      );
+
+      options.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+
+      webview.postMessage({
+        type: 'linkOptionsResult',
+        requestId: msg.requestId,
+        options,
+        publishRoot: publishRoot.fsPath
+      });
+    } catch (err) {
+      webview.postMessage({
+        type: 'linkOptionsResult',
+        requestId: msg.requestId,
+        options: [],
+        publishRoot: null,
+        error: String(err)
+      });
+    }
   }
 
   private async handleImageSave(
@@ -262,4 +323,66 @@ function nonceStr(): string {
   let s = '';
   for (let i = 0; i < 32; i++) s += chars[Math.floor(Math.random() * chars.length)];
   return s;
+}
+
+async function findPublishRoot(docUri: vscode.Uri): Promise<vscode.Uri | null> {
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(docUri);
+  const stopAt = workspaceFolder?.uri.fsPath ?? path.parse(docUri.fsPath).root;
+
+  let dir = path.dirname(docUri.fsPath);
+  while (true) {
+    const marker = vscode.Uri.file(path.join(dir, 'hd-sync.json'));
+    try {
+      await vscode.workspace.fs.stat(marker);
+      return vscode.Uri.file(dir);
+    } catch {
+      // not found at this level
+    }
+    if (dir === stopAt) return null;
+    const parent = path.dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+}
+
+async function listHdFiles(root: vscode.Uri): Promise<vscode.Uri[]> {
+  const out: vscode.Uri[] = [];
+  const SKIP = new Set(['node_modules', '.git', '.hd', 'dist', 'build', '.next', 'out']);
+  async function walk(dir: vscode.Uri): Promise<void> {
+    let entries: [string, vscode.FileType][];
+    try {
+      entries = await vscode.workspace.fs.readDirectory(dir);
+    } catch {
+      return;
+    }
+    for (const [name, type] of entries) {
+      if (type & vscode.FileType.Directory) {
+        if (SKIP.has(name) || name.startsWith('.')) continue;
+        await walk(vscode.Uri.joinPath(dir, name));
+      } else if (type & vscode.FileType.File) {
+        if (name.toLowerCase().endsWith('.hd')) {
+          out.push(vscode.Uri.joinPath(dir, name));
+        }
+      }
+    }
+  }
+  await walk(root);
+  return out;
+}
+
+async function readDocTitle(uri: vscode.Uri): Promise<string | undefined> {
+  try {
+    const bytes = await vscode.workspace.fs.readFile(uri);
+    const text = new TextDecoder().decode(bytes);
+    const { meta, body } = parseDocument(text);
+    const metaTitle = meta && typeof (meta as Record<string, unknown>).title === 'string'
+      ? ((meta as Record<string, unknown>).title as string)
+      : undefined;
+    if (metaTitle) return metaTitle;
+    const h1 = body.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    if (h1) return h1[1].replace(/<[^>]+>/g, '').trim() || undefined;
+    return undefined;
+  } catch {
+    return undefined;
+  }
 }

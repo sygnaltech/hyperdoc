@@ -108,6 +108,31 @@ function rewriteBody(body, { assetMap, warnings, sourceFile, docAssets = [], slu
 
 const VOID_ELEMENTS_RE = /<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b([^>]*)>/gi
 const INLINE_STYLE_RE = /\s+style="[^"]*"/gi
+const HTML_TAG_RE = /<([a-z][a-z0-9]*)(\s[^>]*?)?(\/?)>/gi
+
+const JSX_ATTR_MAP = [
+  [/\bcolspan=/gi, 'colSpan='],
+  [/\browspan=/gi, 'rowSpan='],
+  [/\btabindex=/gi, 'tabIndex='],
+  [/\bmaxlength=/gi, 'maxLength='],
+  [/\bminlength=/gi, 'minLength='],
+  [/\breadonly=/gi, 'readOnly='],
+  [/\bfor=/gi, 'htmlFor='],
+  [/\bclass=/gi, 'className='],
+  [/\bcellspacing=/gi, 'cellSpacing='],
+  [/\bcellpadding=/gi, 'cellPadding=']
+]
+
+function normalizeJsxAttrs(html) {
+  return html.replace(HTML_TAG_RE, (match, tag, attrs, slash) => {
+    if (!attrs) return match
+    let out = attrs
+    for (const [re, replacement] of JSX_ATTR_MAP) {
+      out = out.replace(re, replacement)
+    }
+    return `<${tag}${out}${slash}>`
+  })
+}
 
 function mdxSafeRawHtml(html) {
   let out = html.replace(INLINE_STYLE_RE, '')
@@ -115,6 +140,7 @@ function mdxSafeRawHtml(html) {
     if (attrs.trimEnd().endsWith('/')) return match
     return `<${tag}${attrs.trimEnd()} />`
   })
+  out = normalizeJsxAttrs(out)
   return out
 }
 

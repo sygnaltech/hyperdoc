@@ -1,0 +1,82 @@
+---
+title: VS Code Extension
+date: 2026-06-16T00:00:00.000Z
+description: The HD VS Code extension — what it is, why HD authoring lives inside VS Code, and how the WYSIWYG editor integrates with the surrounding workspace.
+id: 5Y835fJoRCTFs6J0hNh4Ls
+version: 1
+---
+
+<h1>VS Code Extension</h1>
+
+<p>The HD format is paired with a first-party Visual Studio Code extension that opens any <code>.hd</code> file in a WYSIWYG editor. The extension is the primary way HD content is authored: there's no separate desktop app to install, no web editor to log into, and no second window to keep open. You author HD documents alongside everything else in your repository — source code, configuration, scripts, other documentation — using the same editor you already have running.</p>
+
+<img src="image-1.png" alt="The HD WYSIWYG editor open on a .hd file inside VS Code, with the workspace file explorer on the left.">
+
+<p>The screenshot above shows a typical setup: the VS Code file explorer on the left listing the project's <code>.hd</code> files, and the HD WYSIWYG editor on the right rendering one of them as formatted prose. The toolbar across the top of the editor pane provides the headings, formatting, list, table, link, and code-block controls. Source code, configuration, and HD documentation all live in the same workspace and switch between tabs the same way.</p>
+
+<h2>Why VS Code</h2>
+
+<p>HD intentionally avoids being its own standalone editor application. Documentation work is rarely separable from the codebase it describes — the people writing it are usually the same people writing code, reviewing PRs, and editing config. Living inside VS Code means:</p>
+
+<ul>
+  <li><strong>One editor, one workspace.</strong> No tab-switching between a docs app and your code editor. The same file explorer, the same source control panel, the same terminal, the same extensions you already trust.</li>
+  <li><strong>Source-control native.</strong> <code>.hd</code> files are plain text, diff cleanly in <code>git</code>, and review the same way any other text file does. The extension is just the editor — the file on disk is what matters.</li>
+  <li><strong>Workspace context is free.</strong> The link picker, asset folders, and sync configuration all use the surrounding workspace as their natural search scope. Linking to another doc, attaching an image, or running a sync doesn't require pointing the tool at the right project — it already knows.</li>
+  <li><strong>No second install.</strong> If you already have VS Code, you have everything except the extension itself. Installing the extension is the only setup step.</li>
+</ul>
+
+<h2>What the extension registers</h2>
+
+<p>The extension contributes a few things to VS Code:</p>
+
+<ul>
+  <li><strong>A custom editor</strong> for the <code>.hd</code> file extension. When you open any <code>.hd</code> file, VS Code launches the HD WYSIWYG editor in the document pane instead of the plain-text editor. The custom editor is implemented as a webview backed by TipTap (a ProseMirror-based rich editor).</li>
+  <li><strong>A language registration</strong> for <code>.hd</code>, so the file appears with the HD icon in the explorer and so VS Code knows the file type.</li>
+  <li><strong>Slash commands</strong> available via the command palette (<strong>Ctrl+Shift+P</strong>):
+    <ul>
+      <li><code>HD: Copy as Markdown</code> — emits the current document's body as Markdown, with raw-HTML fallback for elements that don't round-trip.</li>
+      <li><code>HD: Regenerate Document ID</code> — reminds you how to force a fresh <code>id</code> in the frontmatter (clear the value and reopen).</li>
+    </ul>
+  </li>
+  <li><strong>A rename hook</strong> on workspace file events: when a <code>.hd</code> file is renamed or moved in the explorer, the extension moves its asset folder to match so internal asset references stay valid.</li>
+</ul>
+
+<h2>Installing the extension</h2>
+
+<p>From the project root, in order:</p>
+
+<ol>
+  <li>Install dependencies once: <code>npm install</code></li>
+  <li>Build the bundle: <code>npm run build</code></li>
+  <li>Package it: <code>npx @vscode/vsce package</code></li>
+  <li>Install into your main VS Code: <code>code --install-extension hd-editor-0.1.0.vsix --force</code></li>
+  <li>Reload VS Code: <strong>Ctrl+Shift+P</strong> → "Developer: Reload Window".</li>
+</ol>
+
+<p>For ongoing iteration the build / package / install steps can be chained:</p>
+
+<pre><code>npm run build; npx @vscode/vsce package; code --install-extension hd-editor-0.1.0.vsix --force</code></pre>
+
+<h2>Workspace conventions the extension follows</h2>
+
+<ul>
+  <li><strong>Asset folders</strong> live under <code>&lt;workspace&gt;/.hd/&lt;mirrored-path&gt;/&lt;id&gt;/</code>. The workspace is identified by the presence of a top-level <code>.hd</code> directory; if none exists, the extension creates it the first time you add an asset. See <a href="assets.hd">Assets</a> for full detail.</li>
+  <li><strong>Document IDs</strong> are written into the frontmatter on first open. Two documents must not share an id — the extension auto-detects duplicates (e.g., after duplicating a file in the explorer) and regenerates the new file's id on next open.</li>
+  <li><strong>Sync configuration</strong> lives in <code>hd-sync.json</code> inside the source directory it controls. The <code>/hd:sync</code> command (part of the <code>hd</code> Claude plugin, not the extension itself) discovers these files and runs the conversion. See <a href="sync.hd">Sync to External Platforms</a>.</li>
+</ul>
+
+<h2>What the extension does not do</h2>
+
+<ul>
+  <li><strong>Render HTML at runtime.</strong> The editor displays the document as a WYSIWYG surface — it is not a browser. To publish content for readers, sync to an external platform like Nextra.</li>
+  <li><strong>Execute scripts or stylesheets.</strong> HD is body-only HTML, and the editor enforces the allow-list. Pasted content from external apps is sanitized on the way in.</li>
+  <li><strong>Manage the publish pipeline.</strong> The <code>/hd:sync</code> command and its converters live in the separate <code>hd</code> Claude plugin. The extension authors the source; the plugin publishes it.</li>
+</ul>
+
+<h2>Where to go next</h2>
+
+<ul>
+  <li><a href="editor.hd">Editor Features</a> — toolbar, table manipulation, paste behavior, clipboard interop.</li>
+  <li><a href="use-cases.hd">Use Cases</a> — common ways teams use HD: user-facing documentation, internal tracking, AI-assisted notes.</li>
+  <li><a href="getting-started.hd">Getting Started</a> — install steps and first-document walkthrough.</li>
+</ul>

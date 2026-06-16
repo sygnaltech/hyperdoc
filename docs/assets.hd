@@ -6,7 +6,7 @@ id: 2njQMsf8fvOHHwDFytmV73
 version: 1
 ---
 
-<h1>Assets</h1><img src="image-1.png" alt="image-1.png"><h2>Storage convention</h2><p>Every HD document with binary assets has its own folder under a centralized <code>.hd/</code> directory at the workspace root. The folder hierarchy mirrors the document's path; the leaf folder is named with the document's base62 id:</p><pre><code>workspace/
+<h1>Assets</h1><h2>Storage convention</h2><p>Every HD document with binary assets has its own folder under a centralized <code>.hd/</code> directory at the workspace root. The folder hierarchy mirrors the document's path; the leaf folder is named with the document's base62 id:</p><pre><code>workspace/
 ├── docs/
 │   └── architecture/
 │       └── overview.hd     ← id: 7gXk2L9pM4nQ8vR1cT3bDe

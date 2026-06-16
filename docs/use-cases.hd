@@ -1,0 +1,109 @@
+---
+title: Use Cases
+date: 2026-06-16T00:00:00.000Z
+description: Common ways teams use HD — user-facing documentation published to external platforms, internal documentation that lives inside the codebase, and AI-collaborated working notes for project management.
+id: 3rumrW6HDQInTaZrCYbbGt
+version: 1
+---
+
+<h1>Use Cases</h1>
+
+<p>HD is general-purpose — anything that benefits from richer-than-Markdown structure but doesn't need full HTML's surface area is a candidate. In practice three patterns recur often enough to call out individually. They're not mutually exclusive; a single repository commonly runs all three at once, each in its own directory with its own <code>hd-sync.json</code> (or with no sync at all).</p>
+
+<h2>1. User-facing documentation published to an external platform</h2>
+
+<p>The canonical use case: a docs site that end users read. Authors write <code>.hd</code> files in the codebase, the WYSIWYG editor handles the formatting work, and the <code>/hd:sync</code> command publishes the result to a hosted documentation platform — currently Nextra 4, with other converters possible.</p>
+
+<p><strong>Why HD for this:</strong></p>
+
+<ul>
+  <li>Docs live next to the code they describe. The same PR that changes an API can update its docs in the same diff.</li>
+  <li>Tables with merged cells, multi-paragraph cells, and inline styles render cleanly — capabilities Markdown can't reach without raw HTML.</li>
+  <li>The source format is portable. If you decide to swap publishing platforms, the <code>.hd</code> files don't change; only the converter does.</li>
+  <li>Reviewers see real diffs in pull requests, not opaque binary documents.</li>
+</ul>
+
+<p><strong>Typical layout:</strong></p>
+
+<pre><code>my-repo/
+├── docs/
+│   ├── hd-sync.json          ← target = Nextra 4 repo
+│   ├── getting-started.hd
+│   ├── api-reference.hd
+│   └── troubleshooting.hd
+├── src/
+└── ...</code></pre>
+
+<p>See <a href="sync.hd">Sync to External Platforms</a> for the full configuration model, including how to share a single target repo across multiple HD source projects with <code>routePrefix</code>.</p>
+
+<h2>2. Internal documentation kept inside the codebase</h2>
+
+<p>Not every document is meant for public consumption. Architecture notes, runbooks, design rationales, decision records, onboarding guides, post-mortems — these stay inside the repository, are read by the team in VS Code (or on the GitHub web UI as source), and never get published anywhere.</p>
+
+<p><strong>Why HD for this instead of Markdown:</strong></p>
+
+<ul>
+  <li><strong>Tables.</strong> Decision records and architecture comparisons routinely need multi-paragraph cells, merged headers, and inline styling that GFM can't express. HD handles them natively.</li>
+  <li><strong>Asset folders.</strong> Diagrams, screenshots, and SVGs attach to a document automatically, with the folder following the document through renames and moves. No more <code>images/</code> directory full of files of uncertain provenance.</li>
+  <li><strong>Document identity.</strong> A doc keeps its <code>id</code> even when its filename changes. Links to it via id-aware tooling stay valid.</li>
+  <li><strong>WYSIWYG editing.</strong> The cognitive overhead of "is this raw HTML or Markdown" disappears. People who would otherwise avoid contributing because Markdown formatting feels finicky open the file and just write.</li>
+</ul>
+
+<p>No <code>hd-sync.json</code> is needed for this case — the documents are the deliverable. The VS Code extension is the entire toolchain.</p>
+
+<p><strong>Typical layout:</strong></p>
+
+<pre><code>my-repo/
+├── docs/
+│   ├── public/              ← user-facing, has hd-sync.json
+│   └── internal/            ← team-only, no sync
+│       ├── architecture.hd
+│       ├── runbook-deploy.hd
+│       └── adr-001-storage.hd
+└── ...</code></pre>
+
+<h2>3. AI-collaborated working notes for project management</h2>
+
+<p>HD makes a good substrate for the kind of working document that's authored jointly between a human and an AI coding agent: feature plans, bug investigations, research notes, agent task logs, PR-ready writeups. The format's properties happen to match what that workflow needs:</p>
+
+<ul>
+  <li><strong>Plain text on disk.</strong> The AI agent can read, write, and edit <code>.hd</code> files with normal file tools. No special protocol.</li>
+  <li><strong>Body-only HTML.</strong> Far more structurally rich than Markdown, but with no <code>&lt;head&gt;</code>, <code>&lt;script&gt;</code>, or styling concerns to trip an agent up. The allow-list keeps generated content within bounds.</li>
+  <li><strong>Tables-first.</strong> Agent investigation output is naturally tabular: hypothesis / evidence / verdict; file / line / observation; option / pros / cons. HD lets that structure survive intact, with multi-paragraph cells when an entry needs them.</li>
+  <li><strong>The WYSIWYG editor is where the human edits.</strong> The agent writes; the human refines in VS Code with the same toolbar, the same paste handling, the same asset folder. The medium is identical regardless of who's authoring.</li>
+  <li><strong>Stable identity.</strong> A document started as "feature-X-plan.hd" and later renamed to "feature-X-implementation.hd" keeps its <code>id</code>. Links to it from a tracking system or another HD doc still resolve.</li>
+  <li><strong>Round-tripping to Markdown.</strong> When a section needs to land in Linear, Jira, GitHub, or Slack, <strong>HD: Copy as Markdown</strong> emits exactly what those platforms accept — with raw-HTML fallback for tables and other constructs they can't render.</li>
+</ul>
+
+<p><strong>Typical artifacts:</strong></p>
+
+<ul>
+  <li><strong>Feature plans</strong> — a working doc the agent updates as it explores, the human edits when direction changes, and both reference during implementation.</li>
+  <li><strong>Bug investigation notes</strong> — hypotheses with evidence columns, repro steps, candidate root causes. Tables-heavy by nature.</li>
+  <li><strong>Research scratchpads</strong> — code reading notes, library evaluations, design alternative comparisons.</li>
+  <li><strong>Agent task logs</strong> — long-running automation output captured as a document the human can review and edit, not a chat transcript that scrolls away.</li>
+</ul>
+
+<h2>Choosing per directory, not per repo</h2>
+
+<p>The three patterns above are directory-level concerns. A single repository can host all three by giving each its own folder and (where applicable) its own <code>hd-sync.json</code>:</p>
+
+<pre><code>my-repo/
+├── docs/
+│   ├── public/                 ← use case 1: hd-sync.json → Nextra
+│   │   └── hd-sync.json
+│   ├── internal/               ← use case 2: no sync
+│   │   └── architecture.hd
+│   └── features/               ← use case 3: AI-collaborated notes
+│       └── F-042-plan.hd
+└── src/</code></pre>
+
+<p>The VS Code extension treats all three the same — it's a WYSIWYG editor for <code>.hd</code> files regardless of where they live. The <code>/hd:sync</code> command only operates on directories that opt in by adding an <code>hd-sync.json</code>; the others are simply edited in place.</p>
+
+<h2>What HD is not</h2>
+
+<ul>
+  <li><strong>Not a knowledge base.</strong> HD is a document format; tools like Notion, Confluence, or a self-hosted wiki provide search, permissions, and cross-document features that HD doesn't aspire to.</li>
+  <li><strong>Not a presentation format.</strong> No slide model, no transitions. If you need slides, generate them from HD source via a custom converter.</li>
+  <li><strong>Not a rendering target.</strong> Browsers don't render <code>.hd</code> directly; the extension renders it inside VS Code, and the publish pipeline emits another format for end-user reading.</li>
+</ul>

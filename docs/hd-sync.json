@@ -15,9 +15,11 @@
           "theme": { "breadcrumb": false }
         },
         "getting-started": "Getting Started",
+        "use-cases": "Use Cases",
+        "vscode-extension": "VS Code Extension",
+        "editor": "Editor Features",
         "format-spec": "Format Specification",
         "format-compare": "Format Comparison",
-        "editor": "Editor Features",
         "assets": "Assets",
         "sync": "Sync to External Platforms"
       }

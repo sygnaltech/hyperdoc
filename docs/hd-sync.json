@@ -1,0 +1,25 @@
+{
+  "destinations": [
+    {
+      "name": "nextra 4",
+      "type": "nextra4",
+      "description": "Public HD-format documentation site.",
+      "path": "../../../Docs/hd-docs",
+      "contentDir": "src/content",
+      "publicDir": "public",
+      "assetMap": [],
+      "meta": {
+        "index": {
+          "title": "Overview",
+          "theme": { "breadcrumb": false }
+        },
+        "getting-started": "Getting Started",
+        "format-spec": "Format Specification",
+        "format-compare": "Format Comparison",
+        "editor": "Editor Features",
+        "assets": "Assets",
+        "sync": "Sync to External Platforms"
+      }
+    }
+  ]
+}

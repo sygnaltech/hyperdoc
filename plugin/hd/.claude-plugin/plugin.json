@@ -1,0 +1,8 @@
+{
+  "name": "hd",
+  "version": "0.1.0",
+  "description": "Sync .hd documentation to a Nextra 4 docs site.",
+  "author": {
+    "name": "Sygnal"
+  }
+}

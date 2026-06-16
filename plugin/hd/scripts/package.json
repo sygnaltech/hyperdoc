@@ -1,0 +1,11 @@
+{
+  "name": "hd-sync-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
+  }
+}

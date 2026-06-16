@@ -1,0 +1,18 @@
+{
+  "$schema": "https://claude.com/schemas/marketplace.json",
+  "name": "sygnal-hd",
+  "description": "Plugins for the HD documentation format.",
+  "url": "https://github.com/sygnaltech/hd",
+  "owner": {
+    "name": "Sygnal",
+    "url": "https://github.com/sygnaltech"
+  },
+  "plugins": [
+    {
+      "name": "hd",
+      "source": "./plugin/hd",
+      "description": "Sync .hd documentation to external publishing platforms (Nextra, Docusaurus, GitBook, ...).",
+      "version": "0.1.0"
+    }
+  ]
+}

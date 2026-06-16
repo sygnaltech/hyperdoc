@@ -1,0 +1,169 @@
+---
+title: Sync to External Platforms
+date: 2026-06-16
+description: How to publish .hd documentation to external platforms like Nextra, Docusaurus, and GitBook using the hd Claude plugin and the /hd:sync slash command.
+---
+
+<h1>Sync to External Platforms</h1>
+
+<p>HD is the source format. To deliver documentation to readers you publish it to an external platform — Nextra, Docusaurus, GitBook, and so on. The <code>hd</code> Claude plugin handles this with a single slash command, <code>/hd:sync</code>, driven by a small per-directory config file.</p>
+
+<h2>The model</h2>
+
+<ul>
+  <li><strong>One source directory</strong> — the folder of <code>.hd</code> files you want to publish.</li>
+  <li><strong>One config file</strong> — <code>hd-sync.json</code>, placed inside that directory. It defines what counts as part of the export and where it goes.</li>
+  <li><strong>One or more destinations</strong> — each destination is a publishing target with its own platform type (e.g., Nextra 4) and its own output location. A single source can publish to many destinations at once.</li>
+  <li><strong>The slash command</strong> — <code>/hd:sync</code> discovers configs in the codebase, lets you pick a destination, and runs the conversion.</li>
+</ul>
+
+<p>Sync is one-way: HD → target. Files in the target are generated artifacts and will be overwritten on the next run.</p>
+
+<h2>Setting up a directory to sync</h2>
+
+<h3>1. Create <code>hd-sync.json</code> in the source directory</h3>
+
+<p>Place the file alongside the <code>.hd</code> files it controls. The config holds an array of destinations:</p>
+
+<pre><code class="language-json">{
+  "destinations": [
+    {
+      "name": "nextra 4",
+      "type": "nextra4",
+      "description": "Public docs site.",
+      "path": "../../Docs/hd-docs",
+      "contentDir": "src/content",
+      "publicDir": "public",
+      "assetMap": [
+        { "from": "images", "to": "public/images" }
+      ],
+      "meta": {
+        "index": { "title": "Overview", "theme": { "breadcrumb": false } },
+        "getting-started": "Getting Started"
+      }
+    }
+  ]
+}</code></pre>
+
+<h3>2. Common destination fields</h3>
+
+<table>
+  <thead>
+    <tr><th>Field</th><th>Required</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>yes</td><td>Unique label within this config. Shown in the destination picker.</td></tr>
+    <tr><td><code>type</code></td><td>yes</td><td>Converter key. Currently supported: <code>nextra4</code>.</td></tr>
+    <tr><td><code>path</code></td><td>yes</td><td>Path to the target project root. Resolved relative to the config file.</td></tr>
+    <tr><td><code>description</code></td><td>no</td><td>One-line description shown in the destination picker.</td></tr>
+  </tbody>
+</table>
+
+<p>Additional fields are owned by each destination type. The <code>nextra4</code> type accepts <code>contentDir</code>, <code>publicDir</code>, <code>assetMap</code>, and <code>meta</code> — see the <code>hd-to-mdx</code> skill for the full reference.</p>
+
+<h3>3. Multiple destinations</h3>
+
+<p>To publish the same source to several platforms, add more entries to the <code>destinations</code> array:</p>
+
+<pre><code class="language-json">{
+  "destinations": [
+    { "name": "nextra 4", "type": "nextra4", "path": "../../Docs/hd-nextra", "...": "..." },
+    { "name": "docusaurus", "type": "docusaurus", "path": "../../Docs/hd-docusaurus", "...": "..." },
+    { "name": "gitbook", "type": "gitbook", "path": "../../Docs/hd-gitbook", "...": "..." }
+  ]
+}</code></pre>
+
+<p>Each destination is independent. Running the sync against one does not affect the others.</p>
+
+<h2>Running a sync</h2>
+
+<h3>The slash command</h3>
+
+<p>From any working directory at or above the source directory, run:</p>
+
+<pre><code>/hd:sync</code></pre>
+
+<p>The command walks the working directory looking for <code>hd-sync.json</code> files (up to four levels deep, skipping <code>node_modules</code>, <code>dist</code>, <code>.git</code>, and similar). What happens next depends on what it finds:</p>
+
+<table>
+  <thead>
+    <tr><th>Discovery result</th><th>Behavior</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>No configs</td><td>Reports that none were found and exits.</td></tr>
+    <tr><td>One config, one destination</td><td>Runs without prompting.</td></tr>
+    <tr><td>One config, multiple destinations</td><td>Asks which destination.</td></tr>
+    <tr><td>Multiple configs</td><td>Asks which config, then which destination.</td></tr>
+  </tbody>
+</table>
+
+<h3>Direct CLI</h3>
+
+<p>The plugin's underlying script is also runnable directly, which is useful for scripting or for CI:</p>
+
+<pre><code>node plugin/hd/scripts/convert.mjs                                  # list discovered configs
+node plugin/hd/scripts/convert.mjs --list                           # same, JSON
+node plugin/hd/scripts/convert.mjs --config &lt;path&gt; --dest "&lt;name&gt;"  # run a sync</code></pre>
+
+<p>When using <code>--config</code> without <code>--dest</code>, the script will run the sync automatically only if the config has exactly one destination; otherwise it lists what's available and exits.</p>
+
+<h2>What the sync does and doesn't do</h2>
+
+<h3>Does</h3>
+
+<ul>
+  <li>Converts every <code>.hd</code> file in the source directory to the destination format.</li>
+  <li>Rewrites internal <code>.hd</code> links to the platform's route style.</li>
+  <li>Copies assets per <code>assetMap</code>.</li>
+  <li>Generates the platform's sidebar or manifest file from the config (e.g., <code>_meta.js</code> for Nextra).</li>
+  <li>Reports counts and warnings.</li>
+</ul>
+
+<h3>Doesn't</h3>
+
+<ul>
+  <li><strong>Doesn't sync in reverse.</strong> Hand-edits in the target will not survive the next sync. If you need platform-specific customization, do it in the source HD file or upstream into the converter.</li>
+  <li><strong>Doesn't delete files in the target.</strong> Files in the target's content directory that have no matching HD source are flagged as orphan warnings but left in place. You decide whether to remove them.</li>
+  <li><strong>Doesn't look outside the source directory.</strong> Links in <code>.hd</code> files to files outside the source dir (for example, <code>../README.md</code> or another HD file at the project root) are flagged as warnings and left unchanged. They will resolve as broken links in the published site.</li>
+</ul>
+
+<h2>Warnings you may see</h2>
+
+<table>
+  <thead>
+    <tr><th>Warning</th><th>What it means</th><th>Fix</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>external .hd reference (outside source dir)</code></td>
+      <td>A link to a <code>.hd</code> file above the source directory.</td>
+      <td>Move the file into the source dir, drop the link, or rewrite to an absolute URL.</td>
+    </tr>
+    <tr>
+      <td><code>external repo link not rewritten</code></td>
+      <td>A link to a non-<code>.hd</code> file above the source directory (e.g., a <code>.md</code> at the project root).</td>
+      <td>Same options as above.</td>
+    </tr>
+    <tr>
+      <td><code>asset source missing</code></td>
+      <td>An <code>assetMap</code> entry pointed at a directory that doesn't exist.</td>
+      <td>Fix the path in <code>hd-sync.json</code> or remove the entry.</td>
+    </tr>
+    <tr>
+      <td><code>orphan in target (no HD source)</code></td>
+      <td>A file in the target's content directory has no corresponding <code>.hd</code> source.</td>
+      <td>Delete the file manually after confirming it's not still needed.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>After a sync</h2>
+
+<p>The sync produces source files for the external platform; it does not build the site itself. Run the platform's build to verify the output compiles and the pages render. For Nextra 4 that's <code>npm run build</code> in the target project — prerender is the only catch-all for MDX/JSX errors the converter can't predict.</p>
+
+<h2>Reference</h2>
+
+<ul>
+  <li><a href="../plugin/hd/README.md">Plugin README</a> — file layout and direct CLI reference.</li>
+  <li><a href="../plugin/hd/skills/hd-to-mdx/SKILL.md">hd-to-mdx skill</a> — full schema reference, per-type fields, conversion rules, and instructions for adding a new destination type.</li>
+</ul>

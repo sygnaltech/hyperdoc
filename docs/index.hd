@@ -18,6 +18,7 @@ version: 1
   <li><a href="format-compare.hd">Format Comparison</a> — how HD stacks up against Markdown, HTML, and Nextra docs.</li>
   <li><a href="editor.hd">Editor Features</a> — toolbar, table manipulation, paste behavior, clipboard interop.</li>
   <li><a href="assets.hd">Assets</a> — how images and binary assets are stored and managed.</li>
+  <li><a href="sync.hd">Sync to External Platforms</a> — publishing <code>.hd</code> source to Nextra, Docusaurus, GitBook, and friends via the <code>/hd:sync</code> slash command.</li>
 </ul>
 
 <h2>Quick characterization</h2>

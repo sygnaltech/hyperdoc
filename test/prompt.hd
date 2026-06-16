@@ -1,10 +1,10 @@
 ---
 title: Simple Claude Prompt Test
 format: hd-doc v1
-date: 2026-06-12T00:00:00.000Z
+date: '2026-06-12T00:00:00.000Z'
 purpose: Drop into Claude with no instructions and verify the prompt is read and responded to normally.
 id: 1iXssLnSk2pQSoZU3NxblO
 version: 1
 ---
 
-<p>Write a haiku about debugging code.</p>
+<p>Write a haiku about debugging code.</p><pre><code>Some text here</code></pre><p>Abcd</p><p></p>

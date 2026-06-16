@@ -231,6 +231,42 @@ html, body {
   margin: 4px 0;
 }
 
+/* ---------- Code block copy button ------------------------------------- */
+
+.hd-code-copy {
+  position: absolute;
+  z-index: 6;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--vscode-foreground);
+  border: 0;
+  border-radius: 4px;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.12s, color 0.12s;
+}
+
+.hd-code-copy:hover {
+  opacity: 1;
+  color: #ffffff;
+}
+
+.hd-code-copy.copied {
+  opacity: 1;
+  color: var(--vscode-charts-green, var(--vscode-terminal-ansiGreen, #4ec9b0));
+}
+
+.hd-code-copy svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
 /* ---------- Link dialog ------------------------------------------------ */
 
 .hd-link-backdrop {

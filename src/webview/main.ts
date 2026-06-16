@@ -13,6 +13,7 @@ import { Bridge, getVsCodeApi } from './bridge';
 import { setupToolbar } from './toolbar';
 import { makePasteHandler } from './paste';
 import { setupTableUI } from './tables';
+import { setupCodeCopy } from './code-copy';
 
 const vscode = getVsCodeApi();
 const bridge = new Bridge(vscode);
@@ -67,6 +68,7 @@ function createEditor(initialBody: string) {
 
   setupToolbar(toolbarEl, editor, { bridge });
   setupTableUI(editor, editorEl);
+  setupCodeCopy(editorEl);
 }
 
 window.addEventListener('message', (event) => {

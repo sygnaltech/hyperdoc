@@ -38,7 +38,7 @@ version: 1
       <li><code>HD: Regenerate Document ID</code> — reminds you how to force a fresh <code>id</code> in the frontmatter (clear the value and reopen).</li>
     </ul>
   </li>
-  <li><strong>A rename hook</strong> on workspace file events: when a <code>.hd</code> file is renamed or moved in the explorer, the extension moves its asset folder to match so internal asset references stay valid.</li>
+  <li><strong>A migration command</strong>: <code>HD: Migrate Workspace Assets to Flat Layout</code> — moves any legacy mirrored asset folders to the flat layout used by current versions. Safe to run repeatedly; no-op when nothing needs migrating.</li>
 </ul>
 
 <h2>Installing the extension</h2>
@@ -60,7 +60,7 @@ version: 1
 <h2>Workspace conventions the extension follows</h2>
 
 <ul>
-  <li><strong>Asset folders</strong> live under <code>&lt;workspace&gt;/.hd/&lt;mirrored-path&gt;/&lt;id&gt;/</code>. The workspace is identified by the presence of a top-level <code>.hd</code> directory; if none exists, the extension creates it the first time you add an asset. See <a href="assets.hd">Assets</a> for full detail.</li>
+  <li><strong>Asset folders</strong> live under <code>&lt;workspace&gt;/.hd/&lt;id&gt;/</code> — keyed only by the document's id, not by its path. The workspace is identified by the presence of a top-level <code>.hd</code> directory; if none exists, the extension creates it the first time you add an asset. See <a href="assets.hd">Assets</a> for full detail.</li>
   <li><strong>Document IDs</strong> are written into the frontmatter on first open. Two documents must not share an id — the extension auto-detects duplicates (e.g., after duplicating a file in the explorer) and regenerates the new file's id on next open.</li>
   <li><strong>Sync configuration</strong> lives in <code>hd-sync.json</code> inside the source directory it controls. The <code>/hd:sync</code> command (part of the <code>hd</code> Claude plugin, not the extension itself) discovers these files and runs the conversion. See <a href="sync.hd">Sync to External Platforms</a>.</li>
 </ul>

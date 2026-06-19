@@ -41,7 +41,8 @@ description: A short description.
 <h2>Editor basics</h2>
 
 <ul>
-  <li><strong>Toolbar</strong> at the top: headings, bold/italic/underline, inline code, code block, links, lists, blockquote, horizontal rule, insert table.</li>
+  <li><strong>Toolbar</strong> at the top: headings, bold/italic/underline, inline code, code block, links, lists, blockquote, horizontal rule, insert table. The toolbar stays fixed in place as you scroll, so it's always reachable.</li>
+  <li><strong>Keyboard shortcuts</strong>: <strong>Ctrl+B</strong>/<strong>I</strong>/<strong>U</strong> for bold/italic/underline, <strong>Ctrl+K</strong> for link (insert if text is selected, edit if cursor is inside an existing link), <strong>Ctrl+Alt+1</strong>…<strong>6</strong> for headings, <strong>Ctrl+E</strong> for inline code. Full table in <a href="editor.hd">Editor Features</a>.</li>
   <li><strong>Tables</strong>: hover near the top to insert columns, near the left to insert rows. Right-click any cell for the full menu (delete column/row, toggle headers, delete table). Hover a column boundary to resize.</li>
   <li><strong>Paste from Markdown</strong>: paste Markdown text — the editor detects it and converts automatically.</li>
   <li><strong>Paste from HTML</strong>: paste HTML from Notion, Linear, or browsers — the editor sanitizes against the HD allow-list.</li>

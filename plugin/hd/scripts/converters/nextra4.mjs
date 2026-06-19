@@ -210,8 +210,10 @@ export async function convert({ sources, sourceDir, destination, log }) {
   for (const src of sources) {
     let docAssets = []
     if (workspace && src.id) {
+      const flatAssetFolder = join(workspace, '.hd', src.id)
       const docDirRel = relative(workspace, dirname(src.sourcePath)).replace(/\\/g, '/')
-      const assetFolder = join(workspace, '.hd', docDirRel, src.id)
+      const legacyAssetFolder = join(workspace, '.hd', docDirRel, src.id)
+      const assetFolder = existsSync(flatAssetFolder) ? flatAssetFolder : legacyAssetFolder
       if (existsSync(assetFolder)) {
         const files = await readdir(assetFolder)
         const publicAssetDir = routePrefix

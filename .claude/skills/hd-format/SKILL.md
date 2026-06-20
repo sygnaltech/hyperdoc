@@ -179,3 +179,25 @@ An earlier version of HD nested asset folders under the document's path, produci
 - Frontmatter is bare YAML — never wrap it in `<!-- ... -->`.
 - Prefer semantic block elements (`section`, `article`, `figure`) over generic `div` where it fits.
 - Tables are a primary motivator for the format — use them freely, including `colspan`/`rowspan` and multi-paragraph cell content.
+
+## Publishing to an external platform
+
+`.hd` is the source format; readers don't consume it directly. To publish a directory of `.hd` files to a documentation platform (currently Nextra 4 is supported; others extensible), drop a file named **`hd-sync.json`** into the source directory. It declares one or more destinations, each with a converter `type`, a target `path`, and per-converter fields. The `/hd:sync` slash command (provided by the `hd` Claude plugin) discovers these configs and runs the conversion.
+
+The full `hd-sync.json` schema — common fields (`name`, `type`, `path`, `routePrefix`, `deleteOrphans`, etc.) and type-specific fields for each converter — is documented in the **hd-to-mdx skill** at `plugin/hd/skills/hd-to-mdx/SKILL.md`. Load it whenever you are creating an `hd-sync.json`, adding a destination to an existing one, or troubleshooting sync output.
+
+Minimal example for a Nextra 4 destination:
+
+```json
+{
+  "destinations": [
+    {
+      "name": "public docs",
+      "type": "nextra4",
+      "path": "../../nextra-site",
+      "contentDir": "src/content",
+      "deleteOrphans": "warn"
+    }
+  ]
+}
+```

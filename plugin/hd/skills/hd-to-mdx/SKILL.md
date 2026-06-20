@@ -1,6 +1,6 @@
 ---
 name: hd-to-mdx
-description: Conversion rules for the `nextra4` destination type used by the `/hd:sync` slash command. Load when authoring .hd files in a repo that has hd-sync.json with a nextra4 destination, when reviewing sync output, when the converter emits warnings that need human judgment, or when adding a new destination type to the plugin.
+description: Schema for `hd-sync.json` and conversion rules for the `nextra4` destination type used by the `/hd:sync` slash command. Load when creating or editing an `hd-sync.json` file, when authoring .hd files in a repo that has hd-sync.json with a nextra4 destination, when reviewing sync output, when the converter emits warnings that need human judgment, or when adding a new destination type to the plugin.
 ---
 
 # HD → external platform sync
@@ -87,8 +87,10 @@ section below.
    - `href="../foo.hd"` and `href="../foo.md"` → left unchanged, flagged as
      external-repo warnings.
    - Per-doc asset references (`<img src="image-1.png">` with a matching
-     `.hd/<docDir>/<id>/` folder) → `/assets/<slug>/image-1.png`, or
-     `/assets/<routePrefix>/<slug>/image-1.png` when prefix is set.
+     `.hd/<id>/` folder at the workspace root) → `/assets/<slug>/image-1.png`,
+     or `/assets/<routePrefix>/<slug>/image-1.png` when prefix is set. The
+     converter falls back to the legacy mirrored path `.hd/<docDir>/<id>/` if
+     the flat folder is absent, for un-migrated workspaces.
    - `src="<assetMap.from>/..."` rewritten per `assetMap` to `/`-rooted paths
      under `public/`.
 3. Run `turndown` with the `gfm` plugin on the rewritten HTML. Simple tables

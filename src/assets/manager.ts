@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { assetFolderFor, parentOf } from './paths';
+import { assetFolderFor, resolveExistingAssetFolder } from './paths';
 
 export async function ensureAssetFolder(
   docUri: vscode.Uri,
@@ -9,6 +9,19 @@ export async function ensureAssetFolder(
   const folder = assetFolderFor(docUri, id, workspaceRoot);
   await vscode.workspace.fs.createDirectory(folder);
   return folder;
+}
+
+/**
+ * Resolve the URI the editor should point at when rendering existing assets.
+ * Prefers the flat location; falls back to the legacy mirrored location during
+ * the transition window so docs in un-migrated workspaces still render.
+ */
+export async function resolveAssetFolderForRead(
+  docUri: vscode.Uri,
+  id: string,
+  workspaceRoot: vscode.Uri
+): Promise<vscode.Uri> {
+  return resolveExistingAssetFolder(docUri, id, workspaceRoot);
 }
 
 export async function saveImageBytes(
@@ -35,28 +48,4 @@ function sanitizeExt(ext: string): string {
   if (!cleaned) return 'png';
   if (cleaned === 'jpeg') return 'jpg';
   return cleaned;
-}
-
-export async function moveAssetFolder(
-  oldDocUri: vscode.Uri,
-  newDocUri: vscode.Uri,
-  id: string,
-  workspaceRoot: vscode.Uri
-): Promise<void> {
-  const oldFolder = assetFolderFor(oldDocUri, id, workspaceRoot);
-  const newFolder = assetFolderFor(newDocUri, id, workspaceRoot);
-  if (oldFolder.toString() === newFolder.toString()) return;
-
-  try {
-    await vscode.workspace.fs.stat(oldFolder);
-  } catch {
-    return;
-  }
-
-  await vscode.workspace.fs.createDirectory(parentOf(newFolder));
-  try {
-    await vscode.workspace.fs.rename(oldFolder, newFolder, { overwrite: false });
-  } catch (e) {
-    console.error('hd: failed to move asset folder', e);
-  }
 }

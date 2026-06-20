@@ -4,8 +4,8 @@ import { parseDocument } from '../format/parser';
 import { serializeDocument } from '../format/serializer';
 import { HD_FORMAT_VERSION } from '../format/version';
 import { generateId, IdIndex } from '../identity';
-import { assetFolderFor } from '../assets/paths';
-import { ensureAssetFolder, saveImageBytes, moveAssetFolder } from '../assets/manager';
+import { resolveExistingAssetFolder } from '../assets/paths';
+import { ensureAssetFolder, saveImageBytes } from '../assets/manager';
 
 interface InboundChange {
   type: 'change';
@@ -41,13 +41,7 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
         supportsMultipleEditorsPerDocument: false
       }
     );
-    const rename = vscode.workspace.onWillRenameFiles(async (e) => {
-      for (const f of e.files) {
-        if (!f.oldUri.path.toLowerCase().endsWith('.hd')) continue;
-        await provider.handleRename(f.oldUri, f.newUri);
-      }
-    });
-    return vscode.Disposable.from(reg, rename);
+    return reg;
   }
 
   constructor(private readonly context: vscode.ExtensionContext) {}
@@ -76,12 +70,10 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       if (reconciled.kind === 'regenerate') {
         m.id = generateId();
         needsPersist = true;
-      } else if (reconciled.kind === 'moved') {
-        const root = this.workspaceRootFor(document.uri);
-        if (root && typeof m.id === 'string') {
-          await moveAssetFolder(reconciled.from, document.uri, m.id, root);
-        }
       }
+      // 'moved' is a no-op under the flat asset layout — the folder is keyed
+      // only by id, so renaming or moving the doc does not require touching
+      // the file system.
 
       if (m.version === undefined || m.version === null) {
         m.version = HD_FORMAT_VERSION;
@@ -101,7 +93,7 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       }
 
       const id = typeof m.id === 'string' ? m.id : undefined;
-      const assetBaseUrl = this.computeAssetBaseUrl(webview, document.uri, id);
+      const assetBaseUrl = await this.computeAssetBaseUrl(webview, document.uri, id);
 
       webview.postMessage({
         type: 'init',
@@ -253,22 +245,6 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
     await vscode.workspace.applyEdit(edit);
   }
 
-  private async handleRename(oldUri: vscode.Uri, newUri: vscode.Uri): Promise<void> {
-    const root = this.workspaceRootFor(newUri);
-    if (!root) return;
-    try {
-      const data = await vscode.workspace.fs.readFile(oldUri);
-      const text = new TextDecoder().decode(data);
-      const { meta } = parseDocument(text);
-      const id = (meta as Record<string, unknown> | null)?.id;
-      if (typeof id !== 'string') return;
-      await moveAssetFolder(oldUri, newUri, id, root);
-      this.idIndex.register(newUri, id);
-    } catch {
-      // ignore
-    }
-  }
-
   private localResourceRoots(): vscode.Uri[] {
     const roots: vscode.Uri[] = [this.context.extensionUri];
     for (const f of vscode.workspace.workspaceFolders ?? []) {
@@ -281,15 +257,15 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
     return vscode.workspace.getWorkspaceFolder(uri)?.uri;
   }
 
-  private computeAssetBaseUrl(
+  private async computeAssetBaseUrl(
     webview: vscode.Webview,
     docUri: vscode.Uri,
     id: string | undefined
-  ): string {
+  ): Promise<string> {
     if (!id) return '';
     const root = this.workspaceRootFor(docUri);
     if (!root) return '';
-    const folder = assetFolderFor(docUri, id, root);
+    const folder = await resolveExistingAssetFolder(docUri, id, root);
     return webview.asWebviewUri(folder).toString();
   }
 

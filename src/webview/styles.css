@@ -1,11 +1,15 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
   font-family: var(--vscode-font-family);
   font-size: var(--vscode-font-size);
   color: var(--vscode-foreground);
   background: var(--vscode-editor-background);
+}
+
+body {
+  /* JS sets padding-top at runtime to match the fixed toolbar's actual height. */
+  padding-top: var(--hd-toolbar-height, 48px);
 }
 
 #toolbar {
@@ -15,9 +19,12 @@ html, body {
   padding: 8px;
   border-bottom: 1px solid var(--vscode-panel-border);
   background: var(--vscode-editor-background);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 #toolbar button {

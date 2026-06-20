@@ -36,7 +36,8 @@
     ],
     "commands": [
       { "command": "hd.copyAsMarkdown", "title": "HD: Copy as Markdown" },
-      { "command": "hd.regenerateId", "title": "HD: Regenerate Document ID" }
+      { "command": "hd.regenerateId", "title": "HD: Regenerate Document ID" },
+      { "command": "hd.migrateAssetsToFlat", "title": "HD: Migrate Workspace Assets to Flat Layout" }
     ]
   },
   "scripts": {

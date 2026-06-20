@@ -14,6 +14,7 @@ import { setupToolbar } from './toolbar';
 import { makePasteHandler } from './paste';
 import { setupTableUI } from './tables';
 import { setupCodeCopy } from './code-copy';
+import { showLinkDialog } from './link-dialog';
 
 const vscode = getVsCodeApi();
 const bridge = new Bridge(vscode);
@@ -50,7 +51,21 @@ function createEditor(initialBody: string) {
       Underline,
       Subscript,
       Superscript,
-      Link.configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener' } }),
+      Link.extend({
+        addKeyboardShortcuts() {
+          return {
+            'Mod-k': () => {
+              const ed = this.editor;
+              const existing = ed.getAttributes('link') as { href?: string } | undefined;
+              void showLinkDialog(bridge, { initialHref: existing?.href }).then((result) => {
+                if (!result) return;
+                ed.chain().focus().extendMarkRange('link').setLink({ href: result.href }).run();
+              });
+              return true;
+            }
+          };
+        }
+      }).configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener' } }),
       Image.configure({ allowBase64: false }),
       Table.configure({ resizable: true, allowTableNodeSelection: true }),
       TableRow,
@@ -72,6 +87,20 @@ function createEditor(initialBody: string) {
   setupTableUI(editor, editorEl);
   setupCodeCopy(editorEl);
   setupClickBelowToFocus(editor, editorEl, toolbarEl);
+  trackToolbarHeight(toolbarEl);
+}
+
+function trackToolbarHeight(toolbar: HTMLElement): void {
+  const apply = () => {
+    const h = toolbar.offsetHeight;
+    if (h > 0) document.body.style.setProperty('--hd-toolbar-height', `${h}px`);
+  };
+  apply();
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(apply);
+    ro.observe(toolbar);
+  }
+  window.addEventListener('resize', apply);
 }
 
 function isBlankBody(body: string): boolean {

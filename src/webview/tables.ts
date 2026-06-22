@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/core';
+import { showContextMenu } from './context-menu';
 
 const HOVER_THRESHOLD_TOP = 28;   // px above the table top to count as "near top"
 const HOVER_THRESHOLD_LEFT = 28;  // px left of the table to count as "near left"
@@ -15,11 +16,6 @@ export function setupTableUI(editor: Editor, container: HTMLElement): void {
 }
 
 // ---------- right-click context menu -------------------------------------
-
-interface MenuItem {
-  label: string;
-  action?: () => void;
-}
 
 function setupContextMenu(editor: Editor): void {
   editor.view.dom.addEventListener('contextmenu', (e) => {
@@ -45,51 +41,6 @@ function setupContextMenu(editor: Editor): void {
       { label: 'Delete table', action: () => editor.chain().focus().deleteTable().run() }
     ]);
   });
-}
-
-function showContextMenu(x: number, y: number, items: MenuItem[]): void {
-  document.querySelectorAll('.hd-context-menu').forEach((m) => m.remove());
-
-  const menu = document.createElement('div');
-  menu.className = 'hd-context-menu';
-  menu.style.left = `${x}px`;
-  menu.style.top = `${y}px`;
-
-  for (const item of items) {
-    if (item.label === '---') {
-      const sep = document.createElement('div');
-      sep.className = 'hd-context-separator';
-      menu.appendChild(sep);
-    } else {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.textContent = item.label;
-      btn.addEventListener('mousedown', (e) => e.preventDefault());
-      btn.addEventListener('click', () => {
-        item.action?.();
-        menu.remove();
-      });
-      menu.appendChild(btn);
-    }
-  }
-
-  document.body.appendChild(menu);
-
-  const rect = menu.getBoundingClientRect();
-  if (rect.right > window.innerWidth) menu.style.left = `${window.innerWidth - rect.width - 4}px`;
-  if (rect.bottom > window.innerHeight) menu.style.top = `${window.innerHeight - rect.height - 4}px`;
-
-  const dismiss = (e: MouseEvent) => {
-    if (!menu.contains(e.target as Node)) {
-      menu.remove();
-      document.removeEventListener('mousedown', dismiss);
-      document.removeEventListener('contextmenu', dismiss);
-    }
-  };
-  setTimeout(() => {
-    document.addEventListener('mousedown', dismiss);
-    document.addEventListener('contextmenu', dismiss);
-  }, 0);
 }
 
 // ---------- hover insert buttons (column + row) --------------------------

@@ -124,6 +124,40 @@ body {
   height: auto;
 }
 
+/* ---------- Figures & captions ----------------------------------------- */
+
+.ProseMirror figure {
+  margin: 1em 0;
+  text-align: center; /* default; the `align` attribute overrides this inline */
+}
+
+/* inline-block so the figure's text-align controls horizontal alignment of
+   both the image and the caption together */
+.ProseMirror figure img {
+  display: inline-block;
+}
+
+.ProseMirror figcaption {
+  margin-top: 0.5em;
+  font-size: 0.875em;
+  line-height: 1.4;
+  opacity: 0.75;
+  text-align: inherit;
+}
+
+.ProseMirror figcaption:empty::before {
+  content: 'Add a caption…';
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.ProseMirror img.ProseMirror-selectednode,
+.ProseMirror figure.ProseMirror-selectednode {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .ProseMirror hr {
   border: none;
   border-top: 1px solid var(--vscode-panel-border);
@@ -447,4 +481,87 @@ body {
 
 .hd-link-actions .hd-link-ok:hover {
   background: var(--vscode-button-hoverBackground);
+}
+
+/* ---------- Element configurator popover ------------------------------- */
+
+.hd-config-popover {
+  position: fixed;
+  z-index: 1500;
+  min-width: 240px;
+  background: var(--vscode-menu-background, var(--vscode-editor-background));
+  color: var(--vscode-menu-foreground, var(--vscode-foreground));
+  border: 1px solid var(--vscode-menu-border, var(--vscode-panel-border));
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  padding: 12px;
+  font-family: var(--vscode-font-family);
+  font-size: 13px;
+}
+
+.hd-config-header {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.hd-config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.hd-config-label {
+  opacity: 0.85;
+}
+
+.hd-config-input {
+  width: 120px;
+  box-sizing: border-box;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.hd-config-input:focus {
+  border-color: var(--vscode-focusBorder);
+}
+
+.hd-config-hint {
+  font-size: 11px;
+  opacity: 0.6;
+  margin: -2px 0 8px;
+}
+
+.hd-config-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.hd-config-footer button {
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border, transparent);
+  border-radius: 3px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.hd-config-footer .hd-config-done {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.hd-config-footer button:hover {
+  filter: brightness(1.1);
 }

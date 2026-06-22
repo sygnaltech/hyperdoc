@@ -1,6 +1,5 @@
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Table from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
@@ -14,7 +13,10 @@ import { setupToolbar } from './toolbar';
 import { makePasteHandler } from './paste';
 import { setupTableUI } from './tables';
 import { setupCodeCopy } from './code-copy';
+import { setupElementUI } from './element-ui';
 import { showLinkDialog } from './link-dialog';
+import { HdImage } from './extensions/image';
+import { Figure } from './extensions/figure';
 
 const vscode = getVsCodeApi();
 const bridge = new Bridge(vscode);
@@ -66,7 +68,8 @@ function createEditor(initialBody: string) {
           };
         }
       }).configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener' } }),
-      Image.configure({ allowBase64: false }),
+      HdImage.configure({ allowBase64: false }),
+      Figure,
       Table.configure({ resizable: true, allowTableNodeSelection: true }),
       TableRow,
       TableHeader,
@@ -85,6 +88,7 @@ function createEditor(initialBody: string) {
 
   setupToolbar(toolbarEl, editor, { bridge });
   setupTableUI(editor, editorEl);
+  setupElementUI(editor);
   setupCodeCopy(editorEl);
   setupClickBelowToFocus(editor, editorEl, toolbarEl);
   trackToolbarHeight(toolbarEl);
@@ -122,7 +126,7 @@ function setupClickBelowToFocus(ed: Editor, editorRoot: HTMLElement, toolbar: HT
     if (toolbar.contains(target)) return;
     if (target.closest(
       'button, input, textarea, select, [contenteditable="true"], ' +
-      '.hd-context-menu, .hd-link-backdrop, .hd-link-dialog, .hd-code-copy'
+      '.hd-context-menu, .hd-link-backdrop, .hd-link-dialog, .hd-code-copy, .hd-config-popover'
     )) return;
 
     e.preventDefault();

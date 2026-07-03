@@ -4,3 +4,7 @@ node_modules/
 dist/
 *.vsix
 .vscode-test/
+
+.gestalt/wal.jsonl
+.gestalt/backups/
+

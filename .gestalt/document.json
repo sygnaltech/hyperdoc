@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "nodes": [
+    {
+      "id": "4gGkTPzXBuEhpS4jUIQVaW",
+      "x": 365.3359375,
+      "y": 236.6640625,
+      "text": "Editor",
+      "source": "user",
+      "status": "active",
+      "links": [],
+      "createdAt": "2026-06-25T22:52:14.868Z"
+    },
+    {
+      "id": "3knydw0QfUYGIoI5gYOABl",
+      "x": 665.3359375,
+      "y": 236.6640625,
+      "text": "CTRL+SHIFT+V Paste as plaintext",
+      "source": "user",
+      "status": "active",
+      "links": [],
+      "createdAt": "2026-06-25T22:52:19.614Z"
+    },
+    {
+      "id": "1kXACUYw9EDw50Ma22n1ti",
+      "x": 965.3359375,
+      "y": 236.6640625,
+      "text": "If the cursor is inside of a code block or blockquote element, CTRL+V should always paste as plaintext. ",
+      "source": "user",
+      "status": "active",
+      "links": [],
+      "createdAt": "2026-06-25T22:52:34.993Z"
+    },
+    {
+      "id": "0kExBqXBPzoTmdWCuZgNuh",
+      "x": 665.3359375,
+      "y": 320.6640625,
+      "text": "CTRL+; Insert date, in the format \nDD MMM YYYY",
+      "source": "user",
+      "status": "active",
+      "links": [],
+      "createdAt": "2026-06-25T22:53:47.659Z"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__4gGkTPzXBuEhpS4jUIQVaWright-3knydw0QfUYGIoI5gYOABlleft",
+      "sourceId": "4gGkTPzXBuEhpS4jUIQVaW",
+      "targetId": "3knydw0QfUYGIoI5gYOABl",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "xy-edge__3knydw0QfUYGIoI5gYOABlright-1kXACUYw9EDw50Ma22n1tileft",
+      "sourceId": "3knydw0QfUYGIoI5gYOABl",
+      "targetId": "1kXACUYw9EDw50Ma22n1ti",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    },
+    {
+      "id": "xy-edge__4gGkTPzXBuEhpS4jUIQVaWright-0kExBqXBPzoTmdWCuZgNuhleft",
+      "sourceId": "4gGkTPzXBuEhpS4jUIQVaW",
+      "targetId": "0kExBqXBPzoTmdWCuZgNuh",
+      "sourceHandle": "right",
+      "targetHandle": "left"
+    }
+  ]
+}

@@ -4,6 +4,7 @@
   "description": "WYSIWYG editor for .hd documentation files (body-only HTML with optional YAML frontmatter).",
   "version": "0.1.1",
   "publisher": "sygnal",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
   },

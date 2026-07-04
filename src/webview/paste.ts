@@ -7,9 +7,13 @@ export type ImageHandler = (file: File) => void | Promise<void>;
 /**
  * Build a ProseMirror `handlePaste` callback that:
  *   1. Routes image files to the host save flow.
- *   2. Prefers clipboard HTML, sanitized against the HD allow-list.
- *   3. Detects markdown-flavored plain text and converts via marked.
- *   4. Otherwise falls through to ProseMirror's default plain-text handling.
+ *   2. Inside a code block or blockquote, always pastes as plain text.
+ *   3. Prefers clipboard HTML, sanitized against the HD allow-list.
+ *   4. Detects markdown-flavored plain text and converts via marked.
+ *   5. Otherwise falls through to ProseMirror's default plain-text handling.
+ *
+ * Any pasted content that yields a code block or blockquote is normalized so the
+ * block has no leading/trailing blank lines.
  */
 export function makePasteHandler(
   getEditor: () => Editor | null,
@@ -37,9 +41,16 @@ export function makePasteHandler(
     const html = clipboard.getData('text/html');
     const text = clipboard.getData('text/plain');
 
-    // 2. HTML clipboard (Notion, Linear, Google Docs, browser, etc.)
+    // 2. Inside a code block or blockquote → always plain text, never rich/markdown.
+    if ((editor.isActive('codeBlock') || editor.isActive('blockquote')) && text) {
+      event.preventDefault();
+      insertPlainText(editor, text);
+      return true;
+    }
+
+    // 3. HTML clipboard (Notion, Linear, Google Docs, browser, etc.)
     if (html && htmlHasContent(html)) {
-      const clean = sanitizeHtml(stripClipboardWrappers(html));
+      const clean = normalizePastedBlocks(sanitizeHtml(stripClipboardWrappers(html)));
       if (clean.trim()) {
         event.preventDefault();
         editor.chain().focus().insertContent(clean).run();
@@ -47,10 +58,10 @@ export function makePasteHandler(
       }
     }
 
-    // 3. Markdown-flavored plain text
+    // 4. Markdown-flavored plain text
     if (text && looksLikeMarkdown(text)) {
       const converted = markdownToHtml(text);
-      const clean = sanitizeHtml(converted);
+      const clean = normalizePastedBlocks(sanitizeHtml(converted));
       if (clean.trim()) {
         event.preventDefault();
         editor.chain().focus().insertContent(clean).run();
@@ -58,9 +69,32 @@ export function makePasteHandler(
       }
     }
 
-    // 4. Plain text — let ProseMirror handle as paragraphs.
+    // 5. Plain text — let ProseMirror handle as paragraphs.
     return false;
   };
+}
+
+/**
+ * Insert raw text as plain content, with leading/trailing blank lines trimmed.
+ * In a code block the text (including newlines) is inserted verbatim; elsewhere
+ * it becomes paragraphs (blank-line separated), with single newlines as breaks.
+ */
+export function insertPlainText(editor: Editor, raw: string): void {
+  const text = trimBlankEdges(raw);
+  if (!text) return;
+
+  if (editor.isActive('codeBlock')) {
+    const { state, view } = editor;
+    view.focus();
+    view.dispatch(state.tr.insertText(text));
+    return;
+  }
+
+  const paragraphs = text
+    .split(/\n{2,}/)
+    .map((block) => `<p>${escapeHtml(block).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+  editor.chain().focus().insertContent(paragraphs).run();
 }
 
 /**
@@ -80,6 +114,50 @@ export function looksLikeMarkdown(text: string): boolean {
   if (/^\|.+\|/m.test(text)) score += 2;
   if (/^---\s*$/m.test(text)) score += 1;
   return score >= 2;
+}
+
+/** Remove blank (whitespace-only) lines from the start and end of a string. */
+export function trimBlankEdges(text: string): string {
+  return text.replace(/^(?:[ \t]*\r?\n)+/, '').replace(/(?:\r?\n[ \t]*)+$/, '');
+}
+
+/**
+ * Ensure any code block (`<pre>`) or `<blockquote>` in the pasted HTML has no
+ * leading/trailing blank lines or empty edge paragraphs.
+ */
+export function normalizePastedBlocks(html: string): string {
+  const doc = new DOMParser().parseFromString(`<div id="hd-paste-root">${html}</div>`, 'text/html');
+  const root = doc.getElementById('hd-paste-root');
+  if (!root) return html;
+
+  root.querySelectorAll('pre').forEach((pre) => {
+    const codeEl = pre.querySelector('code') ?? pre;
+    codeEl.textContent = trimBlankEdges(codeEl.textContent ?? '');
+  });
+
+  root.querySelectorAll('blockquote').forEach((bq) => {
+    trimEmptyEdgeChildren(bq);
+  });
+
+  return root.innerHTML;
+}
+
+function trimEmptyEdgeChildren(container: Element): void {
+  while (container.firstElementChild && isBlankBlock(container.firstElementChild)) {
+    container.firstElementChild.remove();
+  }
+  while (container.lastElementChild && isBlankBlock(container.lastElementChild)) {
+    container.lastElementChild.remove();
+  }
+}
+
+function isBlankBlock(el: Element): boolean {
+  const text = (el.textContent ?? '').replace(/ /g, ' ').trim();
+  return text === '' && el.querySelector('img, svg') == null;
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function htmlHasContent(html: string): boolean {

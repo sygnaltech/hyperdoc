@@ -84,6 +84,18 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
         writeGuard = true;
         try {
           await this.persist(document, m, body);
+          // The id/version injection above is an editor-initiated change the
+          // user never made. Leaving it as an unsaved edit is the root of two
+          // problems: (1) the doc shows a mystery "dirty" state the user can't
+          // account for, and (2) a dirty doc blocks VS Code from auto-reverting
+          // when an agent rewrites the file on disk, so the editor silently
+          // desyncs. Save it straight to disk so memory and disk stay in sync.
+          if (document.isDirty) {
+            await document.save();
+          }
+        } catch {
+          // Best effort — if the save fails the doc simply stays dirty (the
+          // previous behavior); nothing is lost.
         } finally {
           writeGuard = false;
         }

@@ -14,6 +14,7 @@ import { makePasteHandler } from './paste';
 import { setupTableUI } from './tables';
 import { setupCodeCopy } from './code-copy';
 import { setupElementUI } from './element-ui';
+import { setupShortcuts } from './shortcuts';
 import { showLinkDialog } from './link-dialog';
 import { HdImage } from './extensions/image';
 import { Figure } from './extensions/figure';
@@ -89,6 +90,7 @@ function createEditor(initialBody: string) {
   setupToolbar(toolbarEl, editor, { bridge });
   setupTableUI(editor, editorEl);
   setupElementUI(editor);
+  setupShortcuts(editor);
   setupCodeCopy(editorEl);
   setupClickBelowToFocus(editor, editorEl, toolbarEl);
   trackToolbarHeight(toolbarEl);

@@ -45,7 +45,8 @@
     "vscode:prepublish": "npm run build",
     "build": "node esbuild.js",
     "watch": "node esbuild.js --watch",
-    "typecheck": "tsc -p . --noEmit"
+    "typecheck": "tsc -p . --noEmit",
+    "package": "node scripts/clean-vsix.mjs && npx @vscode/vsce package --allow-missing-repository"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

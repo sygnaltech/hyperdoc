@@ -5,18 +5,30 @@ press F5 to start debugging mode
 
 # Deploy
 
-npm run build
+1. Build + package in one step:
 
-npx @vscode/vsce package
+    npm run package
 
+   This deletes any old `hd-editor-*.vsix`, builds the bundle (via the
+   `vscode:prepublish` hook), and produces a fresh `hd-editor-<version>.vsix` in
+   the project root, where `<version>` is the `version` field in package.json
+   (e.g. `hd-editor-0.1.2.vsix`). Warnings about missing repository / LICENSE /
+   README are fine to ignore for internal use.
 
-This produces hd-editor-0.1.0.vsix in the project root. You'll see warnings about missing repository, LICENSE, README.md etc. — those are fine to ignore for personal/internal use. If vsce refuses to package due to one of them, add --allow-missing-repository or create a stub file.
+   Because the clean step runs first, only the current version's `.vsix` is ever
+   left in the root — you can't accidentally install a stale one.
 
-3. Install the .vsix into your main VS Code
+2. Install the .vsix into your main VS Code.
 
-Either via UI: Extensions panel → "…" menu → "Install from VSIX…" → pick the file.
+   Either via UI: Extensions panel → "…" menu → "Install from VSIX…" → pick the file.
 
-Or via CLI:
+   Or via CLI — let the shell fill in the current version so you never install a
+   stale file (PowerShell):
 
+    code --install-extension "hd-editor-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force
 
-code --install-extension hd-editor-0.1.0.vsix
+3. Reload EVERY already-open VS Code window: Ctrl+Shift+P → "Developer: Reload
+   Window" (or restart VS Code). Installing a VSIX does NOT update windows that are
+   already running — that's the usual reason a fresh build still shows the old
+   editor. For an open .hd tab, close and reopen it too (the custom editor retains
+   its webview while hidden).

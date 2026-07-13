@@ -14,7 +14,12 @@ esbuild.js
 tsconfig.json
 node_modules/**
 !node_modules/.bin
+plugin/**
+scripts/**
+.gestalt/**
+*.vsix
 *.hd
+DEV.md
 CORE-DECISIONS.md
 HD-FORMAT.hd
 ASSETS-TRADEOFFS.hd

@@ -48,6 +48,15 @@ body {
   color: var(--vscode-button-foreground);
 }
 
+/* Highlight button: a yellow marker stroke under the label so it reads as a
+   highlighter rather than a heading. */
+#toolbar button.hd-btn-highlight {
+  text-decoration: underline;
+  text-decoration-color: #eab308;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 2px;
+}
+
 #editor {
   position: relative;
   padding: 16px 24px;
@@ -117,6 +126,18 @@ body {
 .ProseMirror a {
   color: var(--vscode-textLink-foreground);
   text-decoration: underline;
+}
+
+/* Standard yellow highlight. Text is forced dark so it stays readable on the
+   yellow in both light and dark editor themes; box-decoration-break keeps the
+   padding/rounding intact when a highlight wraps across lines. */
+.ProseMirror mark {
+  background-color: #e0cb78;
+  color: #1f1f1f;
+  padding: 0 0.15em;
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .ProseMirror img {

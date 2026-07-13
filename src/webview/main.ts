@@ -18,6 +18,7 @@ import { setupShortcuts } from './shortcuts';
 import { showLinkDialog } from './link-dialog';
 import { HdImage } from './extensions/image';
 import { Figure } from './extensions/figure';
+import { Highlight } from './extensions/highlight';
 
 const vscode = getVsCodeApi();
 const bridge = new Bridge(vscode);
@@ -54,6 +55,7 @@ function createEditor(initialBody: string) {
       Underline,
       Subscript,
       Superscript,
+      Highlight,
       Link.extend({
         addKeyboardShortcuts() {
           return {

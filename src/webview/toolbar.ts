@@ -9,6 +9,7 @@ interface ToolbarContext {
 interface ButtonSpec {
   label: string;
   title: string;
+  className?: string;
   command: (editor: Editor, ctx: ToolbarContext) => void;
   isActive?: (editor: Editor) => boolean;
 }
@@ -43,6 +44,11 @@ const BUTTONS: ButtonSpec[] = [
     label: 'U', title: 'Underline',
     command: (e) => e.chain().focus().toggleUnderline().run(),
     isActive: (e) => e.isActive('underline')
+  },
+  {
+    label: 'H', title: 'Highlight (Ctrl+Shift+H)', className: 'hd-btn-highlight',
+    command: (e) => e.chain().focus().toggleMark('highlight').run(),
+    isActive: (e) => e.isActive('highlight')
   },
   {
     label: '</>', title: 'Inline code',
@@ -98,6 +104,7 @@ export function setupToolbar(root: HTMLElement, editor: Editor, ctx: ToolbarCont
     btn.type = 'button';
     btn.title = spec.title;
     btn.textContent = spec.label;
+    if (spec.className) btn.classList.add(spec.className);
     btn.addEventListener('mousedown', (e) => e.preventDefault()); // keep selection
     btn.addEventListener('click', () => spec.command(editor, ctx));
     root.appendChild(btn);

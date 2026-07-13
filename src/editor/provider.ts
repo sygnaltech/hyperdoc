@@ -2,7 +2,9 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { parseDocument } from '../format/parser';
 import { serializeDocument } from '../format/serializer';
-import { HD_FORMAT_VERSION } from '../format/version';
+import { defaultVersionForFlavor } from '../format/version';
+import { flavorForUri, HdFlavor } from '../format/flavor';
+import { hd2BodyToEditorHtml, editorHtmlToHd2Body } from '../conversion/hd2';
 import { generateId, IdIndex } from '../identity';
 import { resolveExistingAssetFolder } from '../assets/paths';
 import { ensureAssetFolder, saveImageBytes } from '../assets/manager';
@@ -51,6 +53,7 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken
   ): Promise<void> {
+    const flavor = flavorForUri(document.uri);
     const webview = webviewPanel.webview;
     webview.options = {
       enableScripts: true,
@@ -76,7 +79,7 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       // the file system.
 
       if (m.version === undefined || m.version === null) {
-        m.version = HD_FORMAT_VERSION;
+        m.version = defaultVersionForFlavor(flavor);
         needsPersist = true;
       }
 
@@ -107,10 +110,14 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       const id = typeof m.id === 'string' ? m.id : undefined;
       const assetBaseUrl = await this.computeAssetBaseUrl(webview, document.uri, id);
 
+      // For hd2 the on-disk body is Markdown; the webview only understands HTML,
+      // so convert on the way in. hd1 bodies are already HTML — pass through.
+      const editorBody = flavor === 'hd2' ? hd2BodyToEditorHtml(body) : body;
+
       webview.postMessage({
         type: 'init',
         meta: m,
-        body,
+        body: editorBody,
         assetBaseUrl
       });
     };
@@ -130,9 +137,12 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
     webview.onDidReceiveMessage(async (msg: Inbound) => {
       switch (msg.type) {
         case 'change': {
+          // The webview emits HTML for both flavors. For hd2, serialize it back
+          // to Markdown-primary before it hits disk; hd1 stores the HTML as-is.
+          const diskBody = flavor === 'hd2' ? editorHtmlToHd2Body(msg.body) : msg.body;
           writeGuard = true;
           try {
-            await this.persist(document, msg.meta, msg.body);
+            await this.persist(document, msg.meta, diskBody);
           } finally {
             writeGuard = false;
           }

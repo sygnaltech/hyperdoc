@@ -1,0 +1,45 @@
+---
+title: HD2 Format (Experimental)
+date: 2026-07-13T00:00:00.000Z
+description: Overview of the experimental Markdown-primary HD2 flavor — what it is, why it exists, and how it relates to HD.
+id: 7CyJ0AFZ7aLdE1IOjkJM0R
+version: 1
+---
+
+<h1>HD2 Format (Experimental)</h1>
+
+<p><strong>HD2</strong> is an experimental flavor of the HD documentation format that stores its content as <strong>Markdown first, HTML only where Markdown can't express the intent</strong>. It uses the <code>.hd2</code> file extension and opens in the same WYSIWYG editor as HD. It exists so the Markdown-primary approach can be tested end-to-end, side by side with the stable <code>.hd</code> format, before either replaces the other.</p>
+
+<aside>
+  <p><strong>Status: experimental.</strong> HD2 runs alongside HD; it does not replace it. Newly created <code>.hd</code> files remain HD (version 1). HD2 exists to validate the Markdown-primary model. Once validated, the two flavors are intended to consolidate — at which point promoting a document is a pure rename, because HD2 files are already stamped <code>version: 2</code> in their frontmatter.</p>
+</aside>
+
+<h2>The one-sentence difference</h2>
+
+<p>HD stores <strong>body-only HTML</strong> on disk; HD2 stores <strong>Markdown with raw-HTML islands</strong> on disk. Everything else — the editor, the frontmatter, the asset model, the document identity — is shared.</p>
+
+<h2>What's identical to HD</h2>
+
+<ul>
+  <li><strong>The editor.</strong> The same VS Code WYSIWYG editor opens both. Typing, tables, paste, image handling, and the toolbar are unchanged.</li>
+  <li><strong>Frontmatter.</strong> The same bare <code>---</code> YAML fence, the same fields (<code>id</code>, <code>title</code>, <code>date</code>, <code>version</code>, …).</li>
+  <li><strong>Document identity.</strong> The same 22-character base62 <code>id</code>, injected on first open.</li>
+  <li><strong>Assets.</strong> The same <code>.hd/&lt;id&gt;/</code> asset folders, keyed by <code>id</code>. HD2 deliberately reuses the existing asset directory so a document can move between flavors without touching its assets.</li>
+  <li><strong>The editing capability set.</strong> Anything you can author in HD, you can author in HD2 — merged table cells, inline SVG, styled spans, and so on. The difference is only how those things are <em>serialized to disk</em>.</li>
+</ul>
+
+<h2>What's different from HD</h2>
+
+<ul>
+  <li><strong>On-disk representation.</strong> Prose, headings, lists, simple tables, and other Markdown-expressible content are stored as Markdown. Everything Markdown can't represent is stored as a verbatim HTML island.</li>
+  <li><strong>Frontmatter version.</strong> HD2 files carry <code>version: 2</code>; HD files carry <code>version: 1</code>.</li>
+  <li><strong>Cleaner diffs, more familiar source.</strong> The raw file reads like Markdown and produces smaller, line-oriented git diffs for prose edits.</li>
+  <li><strong>A first-save reformat.</strong> Because the editor re-serializes to a single canonical Markdown style, the first save of a hand-written or imported file may reflow it once. See <a target="_blank" rel="noopener" href="how-it-works.hd">How HD2 Works</a>.</li>
+</ul>
+
+<h2>In this section</h2>
+
+<ul>
+  <li><p><a target="_blank" rel="noopener" href="how-it-works.hd">How HD2 Works</a> — the Markdown-primary model, the conversion boundary, the load/save round-trip, and the caveats that come with it.</p></li>
+  <li><p><a target="_blank" rel="noopener" href="capabilities.hd">HD2 Capabilities</a> — the element-by-element map of what is stored as Markdown versus what becomes an HTML island, including the exact rules for tables and images.</p></li>
+</ul>

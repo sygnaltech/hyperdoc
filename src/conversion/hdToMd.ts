@@ -18,7 +18,7 @@ turndown.keep([
   'dl', 'dt', 'dd',
   'details', 'summary',
   'svg'
-]);
+] as unknown as TurndownService.Filter);
 
 export function htmlToMarkdown(html: string): string {
   return turndown.turndown(html);

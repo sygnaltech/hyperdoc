@@ -1,0 +1,61 @@
+---
+title: How HD2 Works
+date: 2026-07-13T00:00:00.000Z
+description: The Markdown-primary model behind HD2 — the conversion boundary, the load/save round-trip, and its caveats.
+id: 5t4sT2Ov13bUIQLmiJCphw
+version: 1
+---
+
+<h1>How HD2 Works</h1>
+
+<p>HD2 changes exactly one thing about HD: <strong>what lives on disk</strong>. HD writes body-only HTML. HD2 writes Markdown, dropping down to raw HTML only for the parts Markdown can't express. The editor, and everything you do inside it, is identical.</p>
+
+<h2>The conversion boundary</h2>
+
+<p>The WYSIWYG editor is built on TipTap, whose internal document model is HTML. That never changes. For HD2, a thin conversion layer sits between the editor and the file:</p>
+
+<pre><code class="language-text">  file on disk (Markdown + HTML islands)
+        │  load: Markdown → HTML
+        ▼
+  editor (HTML / TipTap)
+        │  save: HTML → Markdown + HTML islands
+        ▼
+  file on disk (Markdown + HTML islands)</code></pre>
+
+<p>On <strong>load</strong>, the Markdown body is converted to HTML and handed to the editor. On <strong>save</strong>, the editor's HTML is converted back to Markdown, emitting a raw-HTML island for any element Markdown can't represent losslessly. For HD (<code>.hd</code>) files, neither conversion runs — the HTML is read and written verbatim.</p>
+
+<p>The consequence worth remembering: <strong>the editor and the paste pipeline are flavor-agnostic.</strong> They only ever see HTML. All HD2-specific behavior is the load/save conversion, and nothing else.</p>
+
+<h2>Where the boundary is drawn</h2>
+
+<p>The guiding rule is simple: <em>emit Markdown when Markdown is lossless; otherwise emit a verbatim HTML island.</em> Concretely:</p>
+
+<ul>
+  <li>Headings, paragraphs, bold/italic, inline code, links, blockquotes, lists, horizontal rules, fenced code blocks, and <strong>strikethrough</strong> are stored as Markdown.</li>
+  <li><strong>Simple tables</strong> — rectangular, with a header row and single-span, inline-only cells — are stored as GFM Markdown tables.</li>
+  <li><strong>Complex tables</strong> — any <code>colspan</code>/<code>rowspan</code>, multi-paragraph or block cell content, or a missing header row — are stored as a raw HTML island, so no structure is lost.</li>
+  <li><strong>Plain images</strong> become Markdown; images carrying <code>width</code>, <code>height</code>, <code>style</code>, or <code>class</code> stay HTML so that styling survives.</li>
+  <li>Everything with no clean Markdown equivalent — <code>section</code>/<code>article</code>/<code>aside</code> and other sectioning wrappers, <code>figure</code>, <code>mark</code>, <code>sub</code>/<code>sup</code>, <code>u</code>, definition lists, <code>details</code>, inline SVG, styled <code>div</code>/<code>span</code> — is stored as an HTML island.</li>
+</ul>
+
+<p>The full element-by-element map lives in <a target="_blank" rel="noopener" href="capabilities.hd">HD2 Capabilities</a>.</p>
+
+<h2>Round-trip behavior and its caveats</h2>
+
+<p>Because the editor's model is HTML and the file is Markdown, saving is a re-serialization, not a text edit. Two consequences follow.</p>
+
+<h3>1. First-save reformatting</h3>
+
+<p>The serializer emits a single canonical Markdown style (ATX headings, <code>-</code> bullets, <code>*</code> emphasis, fenced code). Markdown is many-to-one — <code>*</code> and <code>_</code>, <code>-</code> and <code>*</code> bullets, and setext versus ATX headings all mean the same thing — so a hand-written or imported file that uses different spellings will be normalized to the canonical style the first time it is saved from the editor. That first save can produce a large diff; every save after it is stable. Opening a file <em>without editing it</em> never rewrites the body.</p>
+
+<h3>2. Block wrappers carry their whole subtree as HTML</h3>
+
+<p>When a block-level element becomes an HTML island — for example a <code>&lt;section&gt;</code> — its entire contents are stored as HTML, not as Markdown nested inside HTML. This is intentional: it keeps the island self-contained and unambiguous. If you want Markdown prose, keep it outside sectioning wrappers.</p>
+
+<h2>Frontmatter and versioning</h2>
+
+<p>HD2 uses the identical frontmatter structure as HD. The only value that differs is <code>version</code>, which HD2 sets to <code>2</code> on first open (HD uses <code>1</code>). Stamping the version now means that if HD2 is later adopted as the standard, promoting a document is a pure file rename — the frontmatter already declares version 2, so nothing inside the file has to change.</p>
+
+<h2>Assets are shared, deliberately</h2>
+
+<p>HD2 does not introduce a new asset mechanism. It reuses the existing <code>.hd/&lt;id&gt;/</code> folders keyed by the document <code>id</code>. Because both flavors resolve assets the same way, a document can be converted between <code>.hd</code> and <code>.hd2</code> without moving, renaming, or re-referencing a single asset — avoiding any merge or migration conflict when the flavors eventually consolidate.</p>

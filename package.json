@@ -2,7 +2,7 @@
   "name": "hd-editor",
   "displayName": "HD Editor",
   "description": "WYSIWYG editor for .hd documentation files (body-only HTML with optional YAML frontmatter).",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "sygnal",
   "license": "MIT",
   "engines": {
@@ -25,13 +25,26 @@
           "light": "./icons/hd.svg",
           "dark": "./icons/hd.svg"
         }
+      },
+      {
+        "id": "hd2",
+        "aliases": ["HD2", "hd2"],
+        "extensions": [".hd2"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/hd.svg",
+          "dark": "./icons/hd.svg"
+        }
       }
     ],
     "customEditors": [
       {
         "viewType": "sygnal.hd-editor",
         "displayName": "HD Editor",
-        "selector": [{ "filenamePattern": "*.hd" }],
+        "selector": [
+          { "filenamePattern": "*.hd" },
+          { "filenamePattern": "*.hd2" }
+        ],
         "priority": "default"
       }
     ],

@@ -19,6 +19,8 @@ import { showLinkDialog } from './link-dialog';
 import { HdImage } from './extensions/image';
 import { Figure } from './extensions/figure';
 import { Highlight } from './extensions/highlight';
+import { HdTaskList, HdTaskItem } from './extensions/task';
+import { RadioGroup, RadioItem } from './extensions/radio';
 
 const vscode = getVsCodeApi();
 const bridge = new Bridge(vscode);
@@ -29,6 +31,7 @@ const toolbarEl = document.getElementById('toolbar')!;
 let editor: Editor | null = null;
 let docMeta: Record<string, unknown> = {};
 let assetBaseUrl = '';
+let docFlavor: 'hd' | 'hd2' = 'hd';
 let suppressChange = false;
 
 async function handleImageFile(file: File): Promise<void> {
@@ -76,7 +79,11 @@ function createEditor(initialBody: string) {
       Table.configure({ resizable: true, allowTableNodeSelection: true }),
       TableRow,
       TableHeader,
-      TableCell
+      TableCell,
+      // Interactive checkboxes/radios are an HD2-only capability for now.
+      ...(docFlavor === 'hd2'
+        ? [HdTaskList, HdTaskItem.configure({ nested: false }), RadioGroup, RadioItem]
+        : [])
     ],
     content: rewriteImgSrcs(initialBody, assetBaseUrl, 'in'),
     onUpdate: ({ editor: ed }) => {
@@ -162,6 +169,7 @@ window.addEventListener('message', (event) => {
     case 'init': {
       docMeta = (msg.meta ?? {}) as Record<string, unknown>;
       assetBaseUrl = (msg.assetBaseUrl ?? '') as string;
+      docFlavor = (msg.flavor === 'hd2' ? 'hd2' : 'hd');
       const body = (msg.body ?? '') as string;
       if (!editor) {
         createEditor(body);

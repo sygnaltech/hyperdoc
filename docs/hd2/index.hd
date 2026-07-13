@@ -42,4 +42,5 @@ version: 1
 <ul>
   <li><p><a target="_blank" rel="noopener" href="how-it-works.hd">How HD2 Works</a> — the Markdown-primary model, the conversion boundary, the load/save round-trip, and the caveats that come with it.</p></li>
   <li><p><a target="_blank" rel="noopener" href="capabilities.hd">HD2 Capabilities</a> — the element-by-element map of what is stored as Markdown versus what becomes an HTML island, including the exact rules for tables and images.</p></li>
+  <li><p><a target="_blank" rel="noopener" href="interactive-controls.hd">Interactive Controls</a> — clickable checkboxes and radio buttons, the markdown syntax for each, how selection state is saved, and the agent review-and-approve workflow they enable.</p></li>
 </ul>

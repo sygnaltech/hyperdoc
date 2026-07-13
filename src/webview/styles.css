@@ -586,3 +586,71 @@ body {
 .hd-config-footer button:hover {
   filter: brightness(1.1);
 }
+
+/* ------------------------------------------------------------------ *
+ * HD2 interactive controls: checkboxes (task list) and radio groups.  *
+ * Both drop the list bullet and lay the indicator beside the content. *
+ * ------------------------------------------------------------------ */
+
+ul[data-type="tasklist"],
+ul[data-type="radiogroup"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul[data-type="tasklist"] > li,
+ul[data-type="radiogroup"] > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  margin: 0.15em 0;
+}
+
+/* TaskItem's node view renders <label><input></label><div>content</div>. */
+ul[data-type="tasklist"] > li > label {
+  flex: 0 0 auto;
+  margin-top: 0.15em;
+  user-select: none;
+}
+
+ul[data-type="tasklist"] > li > label > input[type="checkbox"] {
+  cursor: pointer;
+  width: 1em;
+  height: 1em;
+}
+
+ul[data-type="tasklist"] > li > div,
+.hd-radio-content {
+  flex: 1 1 auto;
+}
+
+ul[data-type="tasklist"] > li > div > p,
+.hd-radio-content > p {
+  margin: 0;
+}
+
+/* Radio indicator: a hollow circle that fills when selected. */
+.hd-radio-indicator {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+  margin-top: 0.2em;
+  border: 1px solid var(--vscode-foreground, currentColor);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+li[data-type="radio"][data-checked="true"] > .hd-radio-indicator {
+  border-color: var(--vscode-focusBorder, var(--vscode-textLink-foreground));
+  background:
+    radial-gradient(
+      circle,
+      var(--vscode-focusBorder, var(--vscode-textLink-foreground)) 0 45%,
+      transparent 55%
+    );
+}
+
+.hd-radio-indicator:hover {
+  border-color: var(--vscode-focusBorder, var(--vscode-textLink-foreground));
+}

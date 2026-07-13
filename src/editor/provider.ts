@@ -118,7 +118,8 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
         type: 'init',
         meta: m,
         body: editorBody,
-        assetBaseUrl
+        assetBaseUrl,
+        flavor
       });
     };
 

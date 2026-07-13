@@ -63,6 +63,11 @@ version: 1
     <tr><td><code>table</code> (simple)</td><td>Markdown</td><td>GFM table when rectangular, with a header row, single-span cells, and inline-only cell content.</td></tr>
     <tr><td><code>table</code> (complex)</td><td>HTML island</td><td>Any <code>colspan</code>/<code>rowspan</code>, block/multi-paragraph cell content, non-rectangular shape, or missing header row keeps the whole table as HTML.</td></tr>
     <tr><td><code>thead</code>, <code>tbody</code>, <code>tfoot</code>, <code>tr</code>, <code>th</code>, <code>td</code>, <code>caption</code>, <code>colgroup</code>, <code>col</code></td><td>Conditional</td><td>Follow the parent table's ruling — Markdown when the table is GFM-expressible, HTML otherwise.</td></tr>
+
+    <tr><td colspan="3"><strong>Interactive controls (HD2-only)</strong></td></tr>
+    <tr><td>Checkbox / task list</td><td>Markdown</td><td>GFM <code>- [x]</code> / <code>- [ ]</code>. Stored as <code>&lt;li data-type="task" data-checked&gt;</code>; interactive in the editor. See <a target="_blank" rel="noopener" href="interactive-controls.hd">Interactive Controls</a>.</td></tr>
+    <tr><td>Radio group (unnamed)</td><td>Markdown</td><td>HD2 syntax <code>- (x)</code> / <code>- ( )</code>. One list = one single-select, deselectable group.</td></tr>
+    <tr><td>Radio group (named)</td><td>HTML island</td><td>A <code>data-group</code> name can't live in the paren markers, so a named group is kept as an HTML block.</td></tr>
   </tbody>
 </table>
 

@@ -2,7 +2,7 @@
   "name": "hd-editor",
   "displayName": "HD Editor",
   "description": "WYSIWYG editor for .hd documentation files (body-only HTML with optional YAML frontmatter).",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "publisher": "sygnal",
   "license": "MIT",
   "engines": {
@@ -13,6 +13,7 @@
   ],
   "activationEvents": [
     "onCustomEditor:sygnal.hd-editor",
+    "onCustomEditor:sygnal.md-editor",
     "onCommand:hd.copyAsMarkdown"
   ],
   "main": "./dist/extension.js",
@@ -62,6 +63,16 @@
           }
         ],
         "priority": "default"
+      },
+      {
+        "viewType": "sygnal.md-editor",
+        "displayName": "Markdown (HD)",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "default"
       }
     ],
     "commands": [
@@ -76,8 +87,23 @@
       {
         "command": "hd.migrateAssetsToFlat",
         "title": "HD: Migrate Workspace Assets to Flat Layout"
+      },
+      {
+        "command": "hd.md.openRaw",
+        "title": "HD: Edit Markdown as Raw Text"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "HD Editor",
+      "properties": {
+        "hd.markdown.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "markdownDescription": "Open Markdown (`.md`) files in the HD Markdown editor. Turn this off to use VS Code's built-in text editor for Markdown instead. Applies to newly opened files."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
@@ -95,6 +121,12 @@
     "typescript": "^5.3.0"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.10.4",
+    "@codemirror/lang-markdown": "^6.5.1",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.1",
+    "@codemirror/view": "^6.43.6",
+    "@lezer/highlight": "^1.2.3",
     "@tiptap/core": "^2.2.0",
     "@tiptap/extension-image": "^2.2.0",
     "@tiptap/extension-link": "^2.2.0",

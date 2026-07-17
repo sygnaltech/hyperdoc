@@ -1,0 +1,153 @@
+---
+title: Markdown Image Handling & Configuration
+version: 2
+id: 3biXHPVmPzqimCzD7CoNZy
+date: 2026-07-17
+description: How pasted images are stored for plain .md files, the folder conventions in the wild, the template-token model, and a simple in-editor helper for choosing the convention per project or system-wide.
+---
+
+# Markdown Image Handling & Configuration
+
+How the WYSIWYG editor stores images for plain `.md` files, and how the user chooses where they go — simply, mid-edit, per project or globally.
+
+## The problem
+
+In `.hd` / `.hd2`, every document has an injected `id`, so pasted images live in an `id`-keyed folder (`.hd/<id>/`) and are referenced by bare filename. A `.md` file has **no id and no injected frontmatter** (the editor is a guest — see [MD-FORMAT.hd2](MD-FORMAT.hd2)), so that mechanism is unavailable. An image in Markdown is just a **relative path written into the source**:
+
+```markdown
+![diagram](guide.assets/diagram.png)
+```
+
+That path has to be chosen, the file written to disk, and the link computed relative to the document. The open question is *which folder* — and the answer must avoid colliding with folders a project already uses.
+
+## Conventions in the wild
+
+| Tool | Convention | Type |
+| --- | --- | --- |
+| Typora | `./${filename}.assets/` — a sibling folder named after the doc | Per-document |
+| Obsidian | Configurable: subfolder next to the note, or a central `attachments/` | Per-doc or central |
+| Hugo | Page bundles — `my-post/index.md` with images in the same `my-post/` folder | Co-located |
+| Gatsby (gatsby-remark-images) | Images co-located next to the `.md`, referenced relatively | Co-located |
+| Docusaurus | `static/img/` (served from `/img/`) or co-located | Central or co-located |
+| Jekyll | `/assets/` or `/images/` at the site root | Central |
+
+Two families: **per-document / co-located** (self-contained) and **central shared folder** (`assets/`, `images/`, `static/`).
+
+## Why the default should be a per-document folder
+
+The central conventions — `assets/`, `images/`, `static/`, `public/` — are exactly the folders a website project **already uses**, with build-pipeline meaning. Dropping editor images into them pollutes or collides. That is the risk to design against.
+
+A **per-document folder named after the file** (Typora's `${filename}.assets/`) avoids it entirely:
+
+- **No collision** — it's namespaced by the document's own name, so it can't clash with a project-wide `assets/` or `images/`.
+- **Self-contained** — one folder holds exactly one document's images; easy to see, move, or delete.
+- **Renames cleanly** — the folder moves with the document (it's the direct analog of HD keying by `id`, except keyed by filename since there is no id).
+- **Signals intent** — the `.assets` suffix reads as "this document's managed images."
+
+**Recommended default: `${name}.assets/`.** But because the right layout genuinely depends on the host project (a Hugo site wants co-location; a Docusaurus site wants `static/img`), it must be **overridable** — which is what the rest of this document is about.
+
+## How a folder is resolved
+
+The configured value is a **template** that resolves to a target folder, from which the Markdown link is computed:
+
+1. Expand the template's tokens for the current document.
+2. If the result is relative, resolve it **against the document's own folder**; a `${workspaceFolder}` token anchors it at the project root instead.
+3. Save the pasted image into that folder.
+4. Write the image link as a **path relative to the document**, so the Markdown stays portable.
+
+Example — active document `docs/guide.md`, template `${name}.assets`:
+→ target folder `docs/guide.assets/` → link `![](guide.assets/image-1.png)`.
+
+## Tokens
+
+A **token** is a placeholder written `${…}` that the editor substitutes with a real value when it resolves the path. It lets one setting be correct for every document instead of a hardcoded path that only fits one file. (This is the same mechanism VS Code uses in `tasks.json` — `${workspaceFolder}`, `${fileBasenameNoExtension}` — and that Typora uses with `${filename}`.)
+
+The supported set is deliberately small:
+
+| Token | Means | For `docs/guide.md` |
+| --- | --- | --- |
+| `${name}` | Document filename without extension | `guide` |
+| `${dir}` | The document's containing folder | `docs` |
+| `${workspaceFolder}` | The project root | (repo root) |
+
+So `${name}.assets` → `guide.assets`, and `${workspaceFolder}/static/img` points at a central build folder regardless of where the document sits.
+
+## Preset patterns
+
+The value is a template, so one setting expresses every convention — the user just changes the string. These are the presets the helper offers (examples for `docs/guide.md`):
+
+| Preset | Template | Images go to |
+| --- | --- | --- |
+| Folder named after the document (recommended) | `${name}.assets` | `docs/guide.assets/` |
+| Next to the document | `.` | `docs/` |
+| Shared `assets/` folder | `assets` | `docs/assets/` |
+| Shared `images/` folder | `images` | `docs/images/` |
+| Central project media folder | `${workspaceFolder}/static/img` | `static/img/` |
+| Custom… | (user-edited) | (live preview) |
+
+## Configuration: project-level and system-wide
+
+The convention is a normal VS Code setting the extension declares (e.g. `hd.markdown.assetFolder`, a string, default `${name}.assets`). VS Code's built-in settings hierarchy gives both scopes for free:
+
+- **Project (Workspace)** — written to the project's `.vscode/settings.json`. Committable, so the whole team shares one convention. **This is the recommended scope**, and the one to lead with, since image layout is a property of the repository.
+- **System-wide (User)** — written to the user's global settings; a personal default that applies to every project that doesn't override it.
+
+**Precedence:** Workspace overrides User overrides the built-in default. So a user can set a personal default and still let individual projects override it. The extension reads the effective value per-document (`getConfiguration('hd.markdown', documentUri).get('assetFolder')`), so VS Code resolves the right scope automatically.
+
+## The in-editor helper (the important part)
+
+Users will hit this mid-edit — while pasting an image — so it must be **discoverable and concept-first**: they pick a plain-language layout, not a template string. Template editing exists, but only for those who want something custom.
+
+### The picker command
+
+A command — **"HD: Set Where Pasted Images Go"** — reachable from the command palette, a status-bar item, and the editor toolbar. It runs a two-step flow:
+
+**Step 1 — pick the layout.** A quick-pick lists the presets in plain language, each showing a **live preview computed for the current document** and, as secondary detail, the template it maps to:
+
+```
+Where should pasted images be saved?
+
+  📁  A folder named after the document        docs/guide.assets/     recommended · ${name}.assets
+  📄  Next to the document                      docs/                  · .
+  🗂  A shared "assets" folder                  docs/assets/           · assets
+  🗂  A shared "images" folder                  docs/images/           · images
+  🏗  A central project media folder            static/img/            · ${workspaceFolder}/static/img
+  ⚙️  Custom pattern…
+```
+
+Because each row shows the actual folder for *this* document, the user chooses by seeing the result — they never have to reason about tokens.
+
+**Step 2 — pick the scope.** A second quick-pick:
+
+```
+Apply this to…
+
+  ●  This project (recommended)     saved in .vscode/settings.json, shared with your team
+  ○  All my projects                your personal default
+```
+
+The extension then writes the value with `config.update(key, value, target)` using the chosen target (Workspace or Global) and confirms: *"Pasted images will go to `docs/guide.assets/` — this project."*
+
+**Custom pattern.** Choosing *Custom…* opens an input box **pre-filled with the current template**, with the token list shown as a hint and a **live-resolved preview** updating as they type (and validation that the result stays inside the workspace). This is the escape hatch — everyone else never sees a token.
+
+### Discoverability
+
+- **Status-bar item** — while a Markdown/hd2 document is active, a small item like `🖼 guide.assets` shows where images currently go; clicking it opens the picker. This is the always-present, mid-edit entry point.
+- **First-paste nudge** — the first time an image is pasted in a workspace that hasn't set the option, save to the default and show a non-blocking toast: *"Saved to `guide.assets/`. Change where images go?"* with **[Configure]** / **[Keep]**. It teaches the setting exactly when it's relevant, without blocking the paste.
+- **Command palette** — for deliberate access.
+
+## Rename & move
+
+Because links are real relative paths (not id-indirected), renaming or moving a document must **rewrite its image references**, or rely on a per-document folder that moves with it. The `${name}.assets` default plus the editor's existing rename hook (which already renames HD asset folders) is the least-fragile combination; central-folder layouts push more of this burden onto the user.
+
+## Publishing caveat
+
+If the `.md` is served by a static site, the resolved relative path must exist in the build output. Per-document and co-located layouts are safe for page-bundle generators (Hugo, Gatsby) that process the whole document folder; central layouts must point at a directory the site actually publishes (e.g. `static/`). This host-dependence is the reason the convention is a setting rather than a fixed rule — and the reason the default is the safe, isolated per-document folder.
+
+## Open sub-decisions
+
+- Exact setting key and default (`hd.markdown.assetFolder` = `${name}.assets`?).
+- Whether the status-bar item is on by default or opt-in.
+- Whether the first-paste nudge appears once per workspace, or once per user.
+- Filename scheme inside the folder (`image-1.png` incrementing, as HD does today, vs. a hash or the source filename).
+- Whether to auto-detect the host generator (Hugo/Astro/Docusaurus config present) and pre-select a matching preset.

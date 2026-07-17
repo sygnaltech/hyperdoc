@@ -27,23 +27,37 @@ async function build() {
     target: 'es2022'
   });
 
+  const ctxWebviewMd = await esbuild.context({
+    entryPoints: ['src/webview-md/main.ts'],
+    bundle: true,
+    outfile: 'dist/webview-md.js',
+    platform: 'browser',
+    format: 'iife',
+    sourcemap: true,
+    target: 'es2022'
+  });
+
   if (watch) {
     await ctxHost.watch();
     await ctxWebview.watch();
+    await ctxWebviewMd.watch();
     copyStatic();
     console.log('Watching for changes…');
   } else {
     await ctxHost.rebuild();
     await ctxWebview.rebuild();
+    await ctxWebviewMd.rebuild();
     copyStatic();
     await ctxHost.dispose();
     await ctxWebview.dispose();
+    await ctxWebviewMd.dispose();
     console.log('Build complete.');
   }
 }
 
 function copyStatic() {
   copyFileSync('src/webview/styles.css', 'dist/styles.css');
+  copyFileSync('src/webview-md/styles.css', 'dist/styles-md.css');
 }
 
 build().catch((e) => {

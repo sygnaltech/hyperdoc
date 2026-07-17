@@ -1,0 +1,196 @@
+---
+title: WYSIWYG Editing for Plain Markdown — Feature Audit
+version: 2
+id: 1bGwT5GpUeDyLuz7RnUHME
+date: 2026-07-17
+description: Feature-by-feature audit of bringing the HD WYSIWYG editing experience to plain .md files, and where the two must diverge.
+---
+
+# WYSIWYG Editing for Plain Markdown (`.md`) — Feature-by-Feature Audit
+
+Goal: give `.md` files nearly the same WYSIWYG editing we have for `.hd` / `.hd2`, using the same TipTap editor. This document audits every editor feature and states, for each, whether it works unchanged, changes shape, or cannot exist in a plain-Markdown file — and why.
+
+## The one principle everything follows from
+
+In `.hd` and `.hd2`, **the editor owns the file.** It can inject frontmatter (`id`, `version`), fall back to HTML islands for anything Markdown can't express, and canonicalise the whole document on save. The file only ever has to satisfy *our* tools.
+
+In a `.md` file, **the editor is a guest.** The file must stay portable, standards-compliant Markdown that renders correctly on GitHub and in every other Markdown pipeline the user already relies on — and it must preserve content and formatting the user (or their static-site generator) put there. The editor cannot silently rewrite it into "our" dialect.
+
+Almost every difference below is a direct consequence of *owner vs. guest*.
+
+## Short answers to the questions you raised
+
+- **Media.** No document `id`, so assets can't live in an `id`-keyed folder. They become **explicit relative paths** written into the Markdown (`![](images/x.png)`) — portable, but rename-fragile.
+- **Ids / frontmatter.** The editor injects **nothing**. No `id`, no `version`. Any frontmatter the user already has is preserved verbatim and left alone.
+- **Linking.** Plain relative links to sibling `.md` files and URLs. No `id`-based links; the link picker lists files by name / first heading instead of a frontmatter title.
+- **Blank lines.** They **collapse**. We can't use the `<p></p>` island trick without polluting the Markdown, so extra vertical space is not preserved (Markdown has no representation for it).
+- **Checkboxes vs. radios.** One correction to your mental model: **checkboxes survive** — GFM task lists (`- [x]`) are standard Markdown. It's **radio buttons that collapse**, because our `- ( )` syntax is a private convention with no Markdown meaning; elsewhere it renders as the literal text `( )`.
+- **Protecting the content.** Yes — this is the crux. The md editor must minimise reformatting, preserve raw HTML the user wrote, and never inject metadata. See *Round-trip & reformatting* below.
+
+## The four fates of any feature
+
+For every editor feature, the md editor must pick one of:
+
+1. **Native** — Markdown expresses it cleanly. Full support, identical to hd2.
+2. **Constrain** — the editor doesn't offer it (button hidden/disabled) so the file stays pure Markdown.
+3. **HTML island** — emit raw HTML inside the Markdown. GitHub and many renderers accept block-level HTML, but it pollutes the source and some pipelines (or stricter renderers) choke. Should be an explicit, opt-in escape hatch, not a silent default.
+4. **Degrade** — allow it in the editor, lose it on save. Almost always the wrong answer; avoid.
+
+hd2's answer is "island everything non-native." A plain-`.md` editor's default answer should be **constrain**, with **island** as an opt-in mode for users who knowingly accept HTML in their Markdown.
+
+## Audit — inline text
+
+| Feature | hd2 | Plain `.md` | Difference |
+| --- | --- | --- | --- |
+| Bold, italic | `**` / `*` | Native | None |
+| Strikethrough | `~~` (GFM) | Native (GFM) | None |
+| Inline code | Backticks | Native | None |
+| Link | `[text](url)` | Native | `target`/`rel`/`download` dropped; no id links |
+| Hard line break | trailing space / `\` | Native | None |
+| Underline | `<u>` island | **Constrain** or island | No Markdown syntax |
+| Highlight (mark) | `<mark>` island | **Constrain** or island | No Markdown syntax |
+| Sub / superscript | island | **Constrain** or island | No Markdown syntax |
+| kbd / samp / var / abbr / cite / q / small | island | **Constrain** or island | No Markdown syntax |
+| Coloured / styled span | island | **Constrain** | No Markdown syntax |
+
+The whole "island → constrain" column is the visible cost of portability: the toolbar in md mode should drop underline, highlight, sub/sup, and the semantic-inline buttons, or gate them behind an "allow HTML" toggle.
+
+## Audit — blocks
+
+| Feature | hd2 | Plain `.md` | Difference |
+| --- | --- | --- | --- |
+| Headings H1–H6 | ATX `#` | Native | None |
+| Paragraph | Native | Native | None |
+| Blockquote | `>` | Native | None |
+| Fenced code + language | Native | Native | None |
+| Horizontal rule | `---` | Native | None |
+| Definition list | island | **Constrain** or island | Not standard Markdown |
+| Details / summary (collapsible) | island | **Island only** | GitHub renders raw HTML; no Markdown syntax |
+| Figure + caption | island | **Island** or plain image | No Markdown construct |
+| Section / article / aside / nav / header / footer | island | **Constrain** or island | No Markdown construct |
+| Generic div | island | **Constrain** | No Markdown construct |
+| Inline SVG | island | **Island only** | Raw HTML |
+| Extra blank-line spacing | `<p></p>` island | **Collapses** | See *Whitespace* |
+
+## Audit — lists & interactive controls
+
+| Feature | hd2 | Plain `.md` | Difference |
+| --- | --- | --- | --- |
+| Bullet / ordered / nested lists | Native | Native | None |
+| Ordered-list start number | GFM `start` | Native | `type` / `reversed` dropped |
+| Checkbox / task list | `- [x]` | Native (GFM) | **None — this works** |
+| Radio group | `- ( )` private syntax | **Collapses** | No Markdown meaning; renders as literal `( )`. Constrain, or island as `<ul>` |
+
+## Audit — tables
+
+| Feature | hd2 | Plain `.md` | Difference |
+| --- | --- | --- | --- |
+| Simple table | GFM | Native (GFM) | None |
+| Header row + alignment | GFM | Native | None |
+| colspan / rowspan / merged cells | island | **Constrain** (or island) | Not expressible in GFM |
+| Multi-paragraph / block cells | island | **Constrain** or island | Not expressible in GFM |
+| Inline-styled cells | island | **Constrain** | No attributes in GFM |
+| Column resize (stored widths) | inline-style island | **Editor-only, not saved** | GFM has no width attribute |
+
+The table editor in md mode should **prevent** cell merges and block cell content (grey out those menu items), because a merged table has no GFM form. Column-resize can still work as a viewing aid but won't persist.
+
+## Audit — media & assets
+
+| Feature | hd2 | Plain `.md` | Difference |
+| --- | --- | --- | --- |
+| Image reference | Bare filename resolved via `.hd/<id>/` | **Relative path in the Markdown** | Core divergence |
+| Paste / drop image to save | Saved to `.hd/<id>/` | Saved to a sibling assets folder, referenced by relative path | New path convention needed |
+| Rename / move the document | Free — folder keyed by `id` | **References must be rewritten** (or use a per-doc folder that moves with it) | id indirection is gone |
+| Image sizing (width/height) | `<img width>` island | `![]()` drops size; sizing needs an island | Lossy or island |
+| External (http) images | Native | Native | None |
+
+## Audit — links, identity, structure
+
+| Feature | hd2 | Plain `.md` | Difference |
+| --- | --- | --- | --- |
+| Link to URL | Native | Native | None |
+| Link to sibling document | Relative to `.hd`; picker uses frontmatter title | Relative to `.md`; picker uses filename / first heading | No guaranteed title |
+| Heading anchors | — | Native (`#slug`) | Markdown-standard, easy win |
+| Frontmatter | Injects `id` + `version` | **Injects nothing; preserves the user's verbatim** | Core divergence |
+| Document id / version | base62 `id`, `version: 2` | **None** | Core divergence |
+| Raw HTML the user wrote | Island passthrough | **Must be preserved untouched** | Guest principle |
+
+## Deep dives
+
+### 1. Identity — no id, no injected metadata
+
+The hd model hangs everything (assets, move-safety, duplicate detection) off an injected `id`. A `.md` editor **cannot** inject an `id`/`version` block: it would corrupt files consumed by Jekyll/Hugo/Astro/Docusaurus, show up as noise in every diff, and surprise users who never asked for it. So in md mode there is **no stable identity**. Consequences: assets must be path-based (below), move-safety is the editor's job (rewrite links on rename), and duplicate detection by id is gone. Existing frontmatter is read-only context the editor round-trips untouched.
+
+### 2. Media — path-based assets
+
+Without an `id`, an image is just a relative path in the source: `![alt](images/diagram.png)`. On paste/drop, the editor must:
+
+- choose a folder convention (candidates: `./assets/`, `./images/`, or a per-document `<name>.assets/` sibling — the last renames cleanly with the doc),
+- write the file there, and
+- insert a **relative** link from the document's own location.
+
+Rename/move then has to **rewrite references** (or rely on the per-doc sibling folder). This is strictly more fragile than hd's id-keyed folders — the fragility is the price of a portable file. Width/height/styling on an image has no Markdown form, so a sized image is either lossy (`![]()`) or an `<img>` island.
+
+### 3. Interactive controls — checkboxes yes, radios no
+
+**Checkboxes are free:** GFM task lists are standard, so the existing checkbox node serialises to `- [x]` / `- [ ]` and renders everywhere. Keep it.
+
+**Radios have no Markdown.** Our `- ( )` convention is meaningful only to our editor; in any other renderer it's the literal characters `( )`. Options in md mode: (a) **constrain** — no radio button in the toolbar; or (b) **island** — store the group as a raw `<ul data-type="radiogroup">…` HTML block (portable-ish on GitHub, but now the file carries HTML). Given radios are the marquee hd2 remediation feature, this is the sharpest "portable vs. capable" trade to decide deliberately.
+
+### 4. Whitespace — blank lines collapse
+
+Markdown has exactly one blank line of meaning (the paragraph separator); everything beyond that is discarded, and it has no representation for an intentionally empty line. In hd2 we solved this with `<p></p>` islands, but doing that in `.md` would sprinkle `<p></p>` through otherwise-clean prose. So in md mode: **extra blank lines collapse**, and the "click below the content to place the cursor there" behaviour can't persist the blank lines it creates — it should either be disabled in md mode or simply drop the caret at the end. (A whitespace-only line is not a reliable substitute — most formatters and `trimTrailingWhitespace` strip it.) This is a genuine, unavoidable capability loss.
+
+### 5. Rich formatting Markdown lacks — the island question
+
+Underline, highlight, sub/sup, `<kbd>`, definition lists, figures, sections, coloured spans, merged tables — none have Markdown syntax. The product decision is a single toggle:
+
+- **Pure mode (recommended default):** the editor only exposes what Markdown can express. The file is guaranteed clean and portable; those features simply aren't in the toolbar.
+- **HTML-allowed mode (opt-in):** the editor may emit raw HTML islands for them, exactly like hd2. The file stays GitHub-renderable but is no longer minimal Markdown, and stricter pipelines may reject it.
+
+Whichever is default, the *file* should never contain HTML the user didn't knowingly opt into.
+
+**Resolved:** Pure mode is the default. HTML-allowed is a single boolean setting (`hd.markdown.allowHtml`, default `false`) with a quick-toggle command and the same Workspace/User scoping as the image-folder setting, so it can be flipped on for a project (or system-wide) the moment the user needs to paste HTML. In the source-of-truth editing model (see §7), the toggle governs whether the rich-format buttons are offered and whether pasted HTML is kept in the source; raw HTML the user already has is always preserved.
+
+### 6. Tables — GFM-simple only
+
+GFM tables are rectangular, single-span, header-plus-body, inline-only cells. The md table editor must **prevent** merges, block content, and per-cell styling (or route them to islands in HTML-allowed mode). This is the biggest functional gap from hd's full-HTML tables.
+
+### 7. Round-trip & reformatting — the biggest risk
+
+This is the hardest problem and deserves the most attention. hd2 canonicalises freely because it owns the format. A `.md` editor that rewrites a hand-authored file into "our" canonical style on first save will produce **enormous diffs, broken `git blame`, and lost trust** — users are famously precise about their Markdown (bullet char, emphasis char, list indentation, hard-wrapping at 80 columns, spacing). The TipTap/HTML model inherently loses the original *spelling* of the Markdown, so naive serialisation reformats everything.
+
+**Resolved — do it right: make the Markdown source the single source of truth.** Rather than editing a structured document and serialising back to Markdown (which loses the original spelling no matter how clever the serialiser), the md editor edits the **source text directly** and renders it **live** — the model Obsidian and Typora use, built on CodeMirror rather than TipTap/ProseMirror. In that architecture round-trip fidelity is not "mitigated", it is the **identity function**: you never leave the text, so nothing outside an edit can reformat, `git blame` and hard-wrapping survive, and a file left unopened-but-saved is byte-identical. `remark` is used to *parse for the live preview*, not to rewrite the file.
+
+Consequences to accept:
+
+- This is a **different editor** from the hd2 WYSIWYG — a **live-preview** surface, where the raw syntax on the line you're editing may be visible (Obsidian-style). Markdown users generally prefer this, but it is deliberately not the identical hd2 canvas, which softens the "feature-for-feature" goal into "feature-for-feature, live-preview style".
+- Node-view interactions that are trivial in TipTap (table hover-insert UI, click-toggle checkboxes, drag handles, the link picker, image paste) become **CodeMirror widgets/decorations to reimplement** — a build cost, not a design blocker.
+- **Line wrapping** and **raw HTML** stop being problems: the source is authoritative, so wrapping is whatever the user typed and embedded HTML simply stays put.
+
+### 8. Being a good guest
+
+Concretely, the md editor must: preserve unknown frontmatter verbatim; preserve raw HTML blocks it doesn't model; avoid injecting anything; and minimise byte churn on save. If it can't honour these, it will quietly corrupt real repositories — a much higher bar than the hd editor, which only ever answers to itself.
+
+## Recommended stance
+
+1. **Default to Pure mode** — the md editor exposes only Markdown-native features; the file stays portable by construction. Offer **HTML-allowed mode** as an explicit opt-in for users who want hd2-style islands in their Markdown.
+2. **Checkboxes in, radios out** of Pure mode (radios only in HTML-allowed mode).
+3. **Path-based assets** with a documented sibling-folder convention and reference-rewriting on rename.
+4. **No injected frontmatter/id/version**; preserve the user's frontmatter and raw HTML untouched.
+5. **Make the Markdown source the source of truth** — a live-preview editor (CodeMirror + remark for rendering), so round-trip is the identity function and untouched Markdown is never reformatted. This is the make-or-break item, and it means md editing is a **different editor** from the hd2 WYSIWYG.
+
+## Resolved
+
+- **Asset folder** — default to a per-document `${name}.assets/` folder (avoids collisions with a project's existing `assets/`/`images/`), overridable via a template setting with a simple in-editor picker, configurable per project or system-wide. Full design in [MD-FORMAT-IMAGES.hd2](MD-FORMAT-IMAGES.hd2).
+- **Rich formatting / HTML islands** — Pure mode is the default; HTML-allowed is an opt-in boolean setting with a quick toggle, scoped per project or system-wide (§5).
+- **Tables** — GFM-simple only (§6).
+- **Round-trip** — source-of-truth Markdown with a live-preview editor; fidelity by construction, not by serialiser cleverness (§7).
+
+## Open decisions
+
+- **Two editors / two engines** — the extension hosts TipTap for `.hd`/`.hd2` and a CodeMirror live-preview editor for `.md`. Keep hd2 on turndown+marked and md on remark, or unify later? (Lean: keep separate — the island model and the source-truth model want different engines.)
+- **Feature-reimplementation inventory** — which hd2 interactions get rebuilt as CodeMirror widgets (tables UI, checkboxes, image paste, link picker). Build-time list, not a design decision.
+- **Radios in `.md`** — constrain out of Pure mode entirely, or allow as an HTML-island group only in HTML-allowed mode?
+- **Flavor target** — GFM only for v1 (CommonMark superset); MDX/JSX is a separate, larger effort, out of scope for v1.
+- **Link picker** — list sibling `.md` files by filename / first heading (no guaranteed frontmatter title).

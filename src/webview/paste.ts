@@ -7,10 +7,14 @@ export type ImageHandler = (file: File) => void | Promise<void>;
 /**
  * Build a ProseMirror `handlePaste` callback that:
  *   1. Routes image files to the host save flow.
- *   2. Inside a code block or blockquote, always pastes as plain text.
- *   3. Prefers clipboard HTML, sanitized against the HD allow-list.
- *   4. Detects markdown-flavored plain text and converts via marked.
- *   5. Otherwise falls through to ProseMirror's default plain-text handling.
+ *   2. Inside a code block or blockquote, always pastes as plain text (so pasted
+ *      HTML source lands verbatim/raw in the block).
+ *   3. Plain text that is itself HTML markup → render it as HTML, sanitized to
+ *      the allowed elements (preferred over clipboard HTML, which for such
+ *      copies is only syntax highlighting of the same source).
+ *   4. Otherwise, clipboard HTML, sanitized against the HD allow-list.
+ *   5. Detects markdown-flavored plain text and converts via marked.
+ *   6. Otherwise falls through to ProseMirror's default plain-text handling.
  *
  * Any pasted content that yields a code block or blockquote is normalized so the
  * block has no leading/trailing blank lines.
@@ -42,13 +46,28 @@ export function makePasteHandler(
     const text = clipboard.getData('text/plain');
 
     // 2. Inside a code block or blockquote → always plain text, never rich/markdown.
+    //    Pasted HTML source therefore lands raw in the block.
     if ((editor.isActive('codeBlock') || editor.isActive('blockquote')) && text) {
       event.preventDefault();
       insertPlainText(editor, text);
       return true;
     }
 
-    // 3. HTML clipboard (Notion, Linear, Google Docs, browser, etc.)
+    // 3. Plain text that is literally HTML markup (copied source, AI output, or a
+    //    code editor that only exposes highlighted HTML). Render it as HTML,
+    //    sanitized to the allowed elements, preserving structure as closely as
+    //    possible. Preferred over clipboard text/html, which for such copies is
+    //    just syntax highlighting whose text content is the escaped source.
+    if (text && looksLikeHtml(text)) {
+      const clean = normalizePastedBlocks(sanitizeHtml(stripClipboardWrappers(text)));
+      if (clean.trim()) {
+        event.preventDefault();
+        editor.chain().focus().insertContent(clean).run();
+        return true;
+      }
+    }
+
+    // 4. HTML clipboard (Notion, Linear, Google Docs, browser, etc.)
     if (html && htmlHasContent(html)) {
       const clean = normalizePastedBlocks(sanitizeHtml(stripClipboardWrappers(html)));
       if (clean.trim()) {
@@ -58,7 +77,7 @@ export function makePasteHandler(
       }
     }
 
-    // 4. Markdown-flavored plain text
+    // 5. Markdown-flavored plain text
     if (text && looksLikeMarkdown(text)) {
       const converted = markdownToHtml(text);
       const clean = normalizePastedBlocks(sanitizeHtml(converted));
@@ -69,9 +88,28 @@ export function makePasteHandler(
       }
     }
 
-    // 5. Plain text — let ProseMirror handle as paragraphs.
+    // 6. Plain text — let ProseMirror handle as paragraphs.
     return false;
   };
+}
+
+/**
+ * Whether a plain-text string is actually HTML markup the user wants rendered.
+ * Deliberately strict — a matched tag pair, a self-closing tag, or a known void
+ * element — so ordinary prose containing a stray `<` or an `<email@x>`-style
+ * angle bracket is not mistaken for HTML.
+ */
+export function looksLikeHtml(text: string): boolean {
+  const t = text.trim();
+  // Must begin with a tag (or comment/doctype) — genuine HTML source starts with
+  // markup, whereas prose that merely contains a tag does not. This keeps
+  // markdown with an inline `<br>` from being treated as HTML.
+  if (!/^<(?:!|[a-z])/i.test(t)) return false;
+  return (
+    /<([a-z][\w-]*)\b[^>]*>[\s\S]*<\/\1\s*>/i.test(t) || // <tag>…</tag>
+    /<[a-z][\w-]*\b[^>]*\/>/i.test(t) ||                  // <tag .../>
+    /<(?:br|hr|img|source|col|input)\b[^>]*>/i.test(t)    // void element
+  );
 }
 
 /**

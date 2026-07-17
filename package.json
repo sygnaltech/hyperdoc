@@ -2,7 +2,7 @@
   "name": "hd-editor",
   "displayName": "HD Editor",
   "description": "WYSIWYG editor for .hd documentation files (body-only HTML with optional YAML frontmatter).",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "publisher": "sygnal",
   "license": "MIT",
   "engines": {

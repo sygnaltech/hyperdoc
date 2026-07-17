@@ -216,11 +216,27 @@ window.addEventListener('message', (event) => {
       if (!editor) {
         createEditor(body);
       } else {
-        suppressChange = true;
-        try {
-          editor.commands.setContent(rewriteImgSrcs(body, assetBaseUrl, 'in'));
-        } finally {
-          suppressChange = false;
+        const incoming = rewriteImgSrcs(body, assetBaseUrl, 'in');
+        // A re-init can be triggered by a change the user didn't make in the
+        // editor — most commonly VS Code normalizing the file on save (final
+        // newline / trailing whitespace). setContent replaces the whole doc and
+        // maps the selection to the end, which would jump the cursor. Skip the
+        // reset when nothing actually changed, and otherwise restore the caret.
+        if (editor.getHTML() !== incoming) {
+          suppressChange = true;
+          try {
+            const { from, to } = editor.state.selection;
+            const hadFocus = editor.isFocused;
+            editor.commands.setContent(incoming);
+            const size = editor.state.doc.content.size;
+            editor.commands.setTextSelection({
+              from: Math.min(from, size),
+              to: Math.min(to, size)
+            });
+            if (hadFocus) editor.commands.focus();
+          } finally {
+            suppressChange = false;
+          }
         }
       }
       break;

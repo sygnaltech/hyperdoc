@@ -21,6 +21,7 @@ import { Figure } from './extensions/figure';
 import { Highlight } from './extensions/highlight';
 import { HdTaskList, HdTaskItem } from './extensions/task';
 import { RadioGroup, RadioItem } from './extensions/radio';
+import { ControlGrouping } from './extensions/control-grouping';
 
 const vscode = getVsCodeApi();
 const bridge = new Bridge(vscode);
@@ -82,7 +83,7 @@ function createEditor(initialBody: string) {
       TableCell,
       // Interactive checkboxes/radios are an HD2-only capability for now.
       ...(docFlavor === 'hd2'
-        ? [HdTaskList, HdTaskItem.configure({ nested: false }), RadioGroup, RadioItem]
+        ? [HdTaskList, HdTaskItem.configure({ nested: false }), RadioGroup, RadioItem, ControlGrouping]
         : [])
     ],
     content: rewriteImgSrcs(initialBody, assetBaseUrl, 'in'),

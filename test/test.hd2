@@ -5,16 +5,35 @@ version: 1
 
 skdlfjs
 
-- [ ] This is a test
+- [x] This is a test
 
-() a list item
-
-() another item
+- (x) list item A
+- ( ) list item B
 
 a break
 
-( ) test
+- ( ) list item C
 
 - [ ] sadfsd
 
 OK
+
+- ( ) list item D
+- (x) list item E
+
+- [ ] asdfasdf
+
+- ( ) test 1
+- ( ) test 2
+- (x) test 3
+
+- (x) test 4
+- ( ) test 5
+
+- [ ] abc
+- [x] def
+- [ ] ghijkl
+
+asdf
+
+asdfsadf

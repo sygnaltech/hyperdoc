@@ -596,6 +596,9 @@ ul[data-type="tasklist"],
 ul[data-type="radiogroup"] {
   list-style: none;
   padding-left: 0;
+  /* Space between two separate groups is larger than between items in a group,
+     so an adjacent (but distinct) group reads as its own block. */
+  margin: 0.85em 0;
 }
 
 ul[data-type="tasklist"] > li,

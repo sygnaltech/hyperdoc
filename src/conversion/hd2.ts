@@ -110,12 +110,12 @@ export function hd2BodyToEditorHtml(markdownBody: string): string {
 //
 // GFM would render `- [x]` with a forbidden `<input>`, and our radio syntax
 // `- ( )` is not standard Markdown at all. Both are also grouped by ADJACENCY:
-// a contiguous run of the same marker is one control list, and ANY break — a
-// blank line, other text, or a switch of marker kind — starts a new one. That
-// grouping can't be recovered from parsed HTML (a single blank line makes the
-// whole list "loose"), so we segment the runs directly from the raw Markdown
-// lines here, emitting the HD-allowed representation as an HTML block that the
-// Markdown parser then passes through untouched:
+// a run of consecutive marker lines is one control list, and ANY break — a
+// blank line, other content, or a switch of marker kind — starts a new one.
+// (A blank line separates groups and survives the round-trip as block spacing
+// between the two lists.) That grouping can't be recovered from parsed HTML, so
+// we segment the runs directly from the raw Markdown lines here, emitting the
+// HD-allowed representation as an HTML block that the parser passes through:
 //
 //   <ul data-type="tasklist">   <li data-type="task"  data-checked="…">label
 //   <ul data-type="radiogroup"> <li data-type="radio" data-checked="…">label
@@ -126,11 +126,13 @@ export function hd2BodyToEditorHtml(markdownBody: string): string {
 type ControlKind = 'task' | 'radio';
 interface ControlItem { checked: boolean; label: string; }
 
-// A control occupies a whole line: an optional-indent list bullet, then the
+// A control occupies a whole line: an OPTIONAL list bullet, then the
 // bracket/paren marker, then the label. `[ ]`/`[x]` = checkbox, `( )`/`(x)` =
-// radio. Case-insensitive on the fill character.
-const TASK_LINE = /^\s*[-*+]\s+\[([ xX])\]\s+(.*)$/;
-const RADIO_LINE = /^\s*[-*+]\s+\(([ xX])\)\s+(.*)$/;
+// radio. The bullet is optional so a hand-typed `() foo` is recognized the same
+// way the editor's input rule treats it; the fill character is case-insensitive
+// and may be empty (`[]` / `()`).
+const TASK_LINE = /^\s*(?:[-*+]\s+)?\[([ xX]?)\]\s+(.*)$/;
+const RADIO_LINE = /^\s*(?:[-*+]\s+)?\(([ xX]?)\)\s+(.*)$/;
 
 function matchControl(line: string): { kind: ControlKind; item: ControlItem } | null {
   const task = line.match(TASK_LINE);
@@ -153,8 +155,8 @@ function segmentControls(md: string): string {
       continue;
     }
 
-    // Consume the maximal contiguous run of the SAME control kind. A blank line
-    // or any non-matching line ends the run (and hence the group).
+    // Consume the run of consecutive SAME-kind markers. A blank line, other
+    // content, or a different marker kind ends the run (and the group).
     const kind = start.kind;
     const items: ControlItem[] = [];
     while (i < lines.length) {
@@ -171,12 +173,21 @@ function segmentControls(md: string): string {
 
 function renderControlBlock(kind: ControlKind, items: ControlItem[]): string {
   const listType = kind === 'task' ? 'tasklist' : 'radiogroup';
+  // A radio group may have at most one selection; if the source marked several,
+  // keep only the first so the loaded document is a valid single-select group.
+  let radioTaken = false;
   const lis = items
-    .map(
-      (it) =>
-        `<li data-type="${kind}" data-checked="${it.checked ? 'true' : 'false'}">` +
+    .map((it) => {
+      let checked = it.checked;
+      if (kind === 'radio') {
+        if (checked && radioTaken) checked = false;
+        else if (checked) radioTaken = true;
+      }
+      return (
+        `<li data-type="${kind}" data-checked="${checked ? 'true' : 'false'}">` +
         `${markdownInlineToHtml(it.label)}</li>`
-    )
+      );
+    })
     .join('\n');
   // Blank lines around the block so the Markdown parser treats it as raw HTML.
   return `\n<ul data-type="${listType}">\n${lis}\n</ul>\n`;

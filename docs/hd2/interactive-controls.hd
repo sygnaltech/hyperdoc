@@ -39,7 +39,7 @@ version: 1
 <p><code>(x)</code> is the selected option; <code>( )</code> is unselected. Radios behave as a single-select group with two important rules:</p>
 
 <ul>
-  <li><strong>One list is one group.</strong> All radio items in the same list are mutually exclusive — selecting one clears the others. A new list (separated by other content or a blank line) starts a new group.</li>
+  <li><strong>Consecutive radios are one group.</strong> They are mutually exclusive — selecting one clears the others. A blank line (or any content) between two radios starts a separate group.</li>
   <li><strong>Selecting is reversible.</strong> Clicking the already-selected radio <em>deselects</em> it, so a group can legitimately have nothing selected — useful when "no decision yet" is a meaningful state during review.</li>
 </ul>
 
@@ -86,12 +86,12 @@ version: 1
 
 <h2>Grouping is by adjacency</h2>
 
-<p>A radio group is simply a <strong>contiguous run</strong> of radio lines. There is no explicit group syntax for the common case — adjacency defines the group:</p>
+<p>A radio group is a <strong>run of consecutive radio lines</strong>. There is no explicit group syntax — adjacency defines the group:</p>
 
 <ul>
-  <li>Consecutive <code>- ( )</code> lines with nothing between them are <strong>one</strong> mutually-exclusive group.</li>
-  <li><strong>Any</strong> interruption starts a new group: a blank line, a line of text, or a switch to checkbox markers. A blank line between two radio items puts them in <em>separate</em> groups.</li>
-  <li>Toggling only ever affects the clicked item's own adjacent run — never a neighbouring group.</li>
+  <li>Radio lines with nothing between them are <strong>one</strong> mutually-exclusive group.</li>
+  <li>A <strong>blank line</strong> — or any other content — between two radios starts a new group. This is how you split a set of options into separate questions.</li>
+  <li>At most one item in a group can be selected (zero is allowed). Toggling only ever affects the clicked item's own group — never a neighbouring one.</li>
 </ul>
 
 <p>Use a <a target="_blank" rel="noopener" href="#">named group</a> (the <code>data-group</code> form above) only when you need to label a group for an agent to reference; otherwise adjacency is all you need.</p>
@@ -100,7 +100,9 @@ version: 1
 
 <ul>
   <li>Each control is a <strong>whole line</strong> — a list item whose marker is at the start: <code>- [ ]</code> or <code>- ( )</code>.</li>
-  <li><strong>In the editor</strong>, typing the marker at the start of a line creates the control: <code>[]&nbsp;</code> (or <code>[x]&nbsp;</code>) makes a checkbox, <code>()&nbsp;</code> (or <code>(x)&nbsp;</code>) makes a radio. Pressing Enter continues the list; Enter on an empty item ends the group.</li>
+  <li><strong>In the editor</strong>, typing the marker at the start of a line creates the control: <code>[]&nbsp;</code> makes a checkbox, <code>()&nbsp;</code> makes a radio. A control is only ever created by typing its marker — <strong>Enter never auto-creates one</strong>.</li>
+  <li><strong>Enter</strong> behaves by position: on the last item of a group it ends the group and drops you to a normal new line; on an item that has items after it, it <strong>splits the group</strong> there (the following items become a separate group); on an empty item it removes it.</li>
+  <li>Typing a second control right after the first <strong>joins the same group</strong>. To start a separate group, leave a blank line before it.</li>
   <li>Don't mix checkbox and radio markers in the same run; each run is one kind of control.</li>
   <li>Checkbox syntax is standard GFM, so agents already know how to produce it. Radio syntax (<code>( )</code>) is HD2-specific — tell the agent the convention when you want single-select groups.</li>
   <li>Controls survive a full round-trip: opening, toggling, and saving re-emits the same clean Markdown, changing only the marker state.</li>

@@ -27,6 +27,10 @@ OK
 - ( ) test 2
 - (x) test 3
 
+<p></p>
+
+<p></p>
+
 - (x) test 4
 - ( ) test 5
 
@@ -37,3 +41,17 @@ OK
 asdf
 
 asdfsadf
+
+The grouping seems to be fixed, which is great. However, it's still deleting the blank lines in my document automatically. I don't know why. I never wanted that. I create those blank lines for a reason. They need to not be deleted. I suspect the problem might be intrinsic to the limitations of markdown. In which case, I think that from the purposes of markdown, you could probably go ahead, and make those lines either HTML islands if necessary, or use a single white space character to ensure that the line has content, and is recognized as content. .NET.js.
+
+The grouping seems to be fixed, which is great. However, it's still deleting the blank lines in my document automatically. I don't know why. I never wanted that. I create those blank lines for a reason. They need to not be deleted. I suspect the problem might be intrinsic to the limitations of markdown. In which case, I think that from the purposes of markdown, you could probably go ahead, and make those lines either HTML islands if necessary, or use a single white space character to ensure that the line has content, and is recognized as content. .NET.js.
+
+sdf
+
+<p></p>
+
+<p></p>
+
+sdfsdf
+
+<p></p>

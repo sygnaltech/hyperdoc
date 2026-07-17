@@ -1,4 +1,5 @@
 import { Editor } from '@tiptap/core';
+import { Fragment, Node as PMNode } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Table from '@tiptap/extension-table';
@@ -131,37 +132,77 @@ function setupClickBelowToFocus(ed: Editor, editorRoot: HTMLElement, toolbar: HT
   const editable = ed.view.dom;
 
   document.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
     const target = e.target as Element | null;
     if (!target) return;
 
-    if (editable.contains(target)) return;
     if (toolbar.contains(target)) return;
+    // Skip interactive widgets (dialogs, popovers, buttons) — but not the editor.
     if (target.closest(
-      'button, input, textarea, select, [contenteditable="true"], ' +
+      'button, input, textarea, select, ' +
       '.hd-context-menu, .hd-link-backdrop, .hd-link-dialog, .hd-code-copy, .hd-config-popover'
     )) return;
 
+    let contentBottom: number | null = null;
+    try {
+      contentBottom = ed.view.coordsAtPos(ed.state.doc.content.size).bottom;
+    } catch {
+      contentBottom = null;
+    }
+
+    // Click below the last line: drop the cursor there, adding blank lines up to
+    // the clicked position.
+    if (contentBottom != null && e.clientY > contentBottom + 2) {
+      e.preventDefault();
+      fillToClick(ed, e.clientY, contentBottom);
+      return;
+    }
+
+    // Otherwise only handle clicks outside the editor surface (e.g. side gutters);
+    // clicks on real content are left to the editor.
+    if (editable.contains(target)) return;
     e.preventDefault();
-    focusNewLineAtEnd(ed);
+    ed.commands.focus('end');
   });
 }
 
-function focusNewLineAtEnd(ed: Editor): void {
-  const { state } = ed;
+// Insert enough empty paragraphs after the content that the cursor lands at (or
+// just above) the clicked Y, then focus the last line. Blank lines added this
+// way are preserved on save as `<p></p>`.
+function fillToClick(ed: Editor, clickY: number, contentBottom: number): void {
+  const { state, view } = ed;
+  const paragraph = state.schema.nodes.paragraph;
+  if (!paragraph) {
+    ed.commands.focus('end');
+    return;
+  }
+
+  const perLine = emptyLineHeight(view.dom);
+  const gap = clickY - contentBottom;
+  let toAdd = gap > 0 ? Math.floor(gap / perLine) : 0;
+
   const lastNode = state.doc.lastChild;
   const lastIsEmptyParagraph =
-    lastNode != null &&
-    lastNode.type.name === 'paragraph' &&
-    lastNode.content.size === 0;
+    lastNode != null && lastNode.type.name === 'paragraph' && lastNode.content.size === 0;
+  if (toAdd === 0 && !lastIsEmptyParagraph) toAdd = 1;
 
-  if (!lastIsEmptyParagraph) {
-    const paragraphType = state.schema.nodes.paragraph;
-    if (paragraphType) {
-      const tr = state.tr.insert(state.doc.content.size, paragraphType.create());
-      ed.view.dispatch(tr);
-    }
+  if (toAdd > 0) {
+    const nodes: PMNode[] = [];
+    for (let i = 0; i < toAdd; i++) nodes.push(paragraph.create());
+    const tr = state.tr.insert(state.doc.content.size, Fragment.fromArray(nodes));
+    view.dispatch(tr);
   }
   ed.commands.focus('end');
+}
+
+// Approximate rendered height of one empty paragraph: its line box plus the
+// (collapsed) 0.5em vertical margin from the editor stylesheet.
+function emptyLineHeight(dom: HTMLElement): number {
+  const cs = getComputedStyle(dom);
+  const fontSize = parseFloat(cs.fontSize) || 14;
+  let lineHeight = parseFloat(cs.lineHeight);
+  if (!isFinite(lineHeight) || lineHeight <= 0) lineHeight = fontSize * 1.6;
+  return lineHeight + fontSize * 0.5;
 }
 
 window.addEventListener('message', (event) => {

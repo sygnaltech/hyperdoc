@@ -52,6 +52,10 @@ version: 1
 
 <p>When a block-level element becomes an HTML island — for example a <code>&lt;section&gt;</code> — its entire contents are stored as HTML, not as Markdown nested inside HTML. This is intentional: it keeps the island self-contained and unambiguous. If you want Markdown prose, keep it outside sectioning wrappers.</p>
 
+<h3>3. Blank lines are preserved as empty-paragraph islands</h3>
+
+<p>Markdown has no way to represent a deliberately empty line — a single blank line is just the separator between two paragraphs, and any extra blank lines are normally discarded. Because that whitespace is often intentional (spacing, or room to keep typing), HD2 preserves each empty paragraph as a tiny <code>&lt;p&gt;&lt;/p&gt;</code> HTML island. So the vertical spacing you add in the editor — including by clicking in the empty area below the content to place the cursor there — survives a save and reload unchanged. Normal paragraph separation stays clean Markdown; only <em>extra</em> empty lines become islands.</p>
+
 <h2>Frontmatter and versioning</h2>
 
 <p>HD2 uses the identical frontmatter structure as HD. The only value that differs is <code>version</code>, which HD2 sets to <code>2</code> on first open (HD uses <code>1</code>). Stamping the version now means that if HD2 is later adopted as the standard, promoting a document is a pure file rename — the frontmatter already declares version 2, so nothing inside the file has to change.</p>

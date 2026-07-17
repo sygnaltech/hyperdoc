@@ -28,14 +28,15 @@ const HTML_ISLAND_TAGS = [
   'svg'
 ];
 
-function baseTurndown(): TurndownService {
+function baseTurndown(extra: Partial<TurndownService.Options> = {}): TurndownService {
   const td = new TurndownService({
     headingStyle: 'atx',
     codeBlockStyle: 'fenced',
     bulletListMarker: '-',
     emDelimiter: '*',
     hr: '---',
-    linkStyle: 'inlined'
+    linkStyle: 'inlined',
+    ...extra
   });
 
   td.keep(HTML_ISLAND_TAGS as unknown as TurndownService.Filter);
@@ -61,7 +62,20 @@ function baseTurndown(): TurndownService {
 const cellTurndown = baseTurndown();
 
 // Full-document converter, with table handling layered on top.
-const docTurndown = baseTurndown();
+//
+// An empty paragraph is intentional vertical space the user added, but Markdown
+// can't represent an empty line — turndown would drop it. We keep it as a tiny
+// `<p></p>` HTML island so blank lines survive the round-trip. (A single blank
+// line between two real paragraphs is still the normal Markdown separator; only
+// *extra* empty paragraphs become islands.)
+const docTurndown = baseTurndown({
+  blankReplacement: (_content, node) =>
+    (node as unknown as HtmlEl).nodeName === 'P'
+      ? '\n\n<p></p>\n\n'
+      : (node as unknown as { isBlock?: boolean }).isBlock
+        ? '\n\n'
+        : ''
+});
 docTurndown.addRule('table', {
   filter: (node) => node.nodeName === 'TABLE',
   replacement: (_content, node) => {

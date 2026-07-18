@@ -10,7 +10,7 @@ import {
 } from '@codemirror/view';
 import type { DecorationSet, ViewUpdate } from '@codemirror/view';
 import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
-import { markdown } from '@codemirror/lang-markdown';
+import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { syntaxHighlighting, HighlightStyle, syntaxTree } from '@codemirror/language';
 import { tags as t } from '@lezer/highlight';
 
@@ -108,24 +108,40 @@ class ImageWidget extends WidgetType {
 
 // alt = group 1; url = angle-bracketed group 2 (may contain spaces) or bare group 3.
 const IMAGE_RE = /^!\[([^\]]*)\]\(\s*(?:<([^>]*)>|([^\s)]+))(?:\s+(?:"[^"]*"|'[^']*'))?\s*\)$/;
+// A badge: a link whose entire content is an image — [![alt](img)](target).
+const LINKED_IMAGE_RE = /^\[!\[([^\]]*)\]\(\s*(?:<([^>]*)>|([^\s)]+))(?:\s+(?:"[^"]*"|'[^']*'))?\s*\)\]\([^)]*\)$/;
 
 function buildImageDecorations(view: EditorView): DecorationSet {
   const builder = new RangeSetBuilder<Decoration>();
   const ranges = view.state.selection.ranges;
+  const touches = (from: number, to: number) => ranges.some((r) => r.from <= to && r.to >= from);
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
       from,
       to,
       enter: (node) => {
-        if (node.name !== 'Image') return;
-        // Reveal the source while the selection touches this image.
-        if (ranges.some((r) => r.from <= node.to && r.to >= node.from)) return;
-        const text = view.state.doc.sliceString(node.from, node.to);
-        const m = IMAGE_RE.exec(text);
-        if (!m) return;
-        const url = m[2] ?? m[3];
-        if (!url) return;
-        builder.add(node.from, node.to, Decoration.replace({ widget: new ImageWidget(url, m[1]) }));
+        // Badge: render the linked image as one unit and don't descend into the
+        // inner image node.
+        if (node.name === 'Link') {
+          const text = view.state.doc.sliceString(node.from, node.to);
+          const m = LINKED_IMAGE_RE.exec(text);
+          if (!m) return; // ordinary link — descend as usual
+          if (touches(node.from, node.to)) return false; // caret on it → show source
+          const url = m[2] ?? m[3];
+          if (!url) return false;
+          builder.add(node.from, node.to, Decoration.replace({ widget: new ImageWidget(url, m[1]) }));
+          return false;
+        }
+        if (node.name === 'Image') {
+          if (touches(node.from, node.to)) return; // reveal source
+          const text = view.state.doc.sliceString(node.from, node.to);
+          const m = IMAGE_RE.exec(text);
+          if (!m) return;
+          const url = m[2] ?? m[3];
+          if (!url) return;
+          builder.add(node.from, node.to, Decoration.replace({ widget: new ImageWidget(url, m[1]) }));
+        }
+        return undefined;
       }
     });
   }
@@ -210,7 +226,9 @@ function createView(initialText: string): void {
       EditorView.lineWrapping,
       drawSelection(),
       highlightActiveLine(),
-      markdown(),
+      // GFM base: tables, task lists, strikethrough, autolinks — what most
+      // people mean by "Markdown" and what GitHub renders.
+      markdown({ base: markdownLanguage }),
       syntaxHighlighting(mdHighlight),
       imagePreview,
       pasteImages,

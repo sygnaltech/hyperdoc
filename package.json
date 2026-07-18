@@ -101,6 +101,12 @@
           "default": true,
           "scope": "resource",
           "markdownDescription": "Open Markdown (`.md`) files in the HD Markdown editor. Turn this off to use VS Code's built-in text editor for Markdown instead. Applies to newly opened files."
+        },
+        "hd.markdown.assetFolder": {
+          "type": "string",
+          "default": "${name}.assets",
+          "scope": "resource",
+          "markdownDescription": "Folder where images pasted into the Markdown editor are saved, as a template resolved relative to the document. Tokens: `${name}` (file name without extension), `${dir}` (the document's folder), `${workspaceFolder}` (project root). The inserted image link is written relative to the document. Examples: `${name}.assets` (a per-document folder — recommended, avoids collisions), `.` (next to the document), `assets` (a shared folder), `${workspaceFolder}/static/img` (a central build folder)."
         }
       }
     }

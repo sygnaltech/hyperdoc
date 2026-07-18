@@ -19,6 +19,8 @@ A single-file sweep of the Markdown features the editor should handle. Use it to
 
 ###### Heading level 6
 
+![](TEST%20copy.assets/image-1.png)
+
 Setext heading level 1
 ======================
 

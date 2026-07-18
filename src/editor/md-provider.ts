@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import { saveImageBytes } from '../assets/manager';
 
 interface InboundChange {
   type: 'change';
@@ -10,7 +12,13 @@ interface InboundOpenRaw {
 interface InboundReady {
   type: 'ready';
 }
-type Inbound = InboundChange | InboundOpenRaw | InboundReady;
+interface InboundSaveImage {
+  type: 'saveImage';
+  requestId: number;
+  bytes: number[];
+  ext: string;
+}
+type Inbound = InboundChange | InboundOpenRaw | InboundReady | InboundSaveImage;
 
 /**
  * WYSIWYG-ish editor for plain Markdown (`.md`).
@@ -55,13 +63,18 @@ export class MdEditorProvider implements vscode.CustomTextEditorProvider {
     }
 
     const webview = webviewPanel.webview;
-    webview.options = { enableScripts: true, localResourceRoots: [this.context.extensionUri] };
+    webview.options = { enableScripts: true, localResourceRoots: this.localResourceRoots(document.uri) };
     webview.html = this.renderShell(webview);
+
+    // Webview URI of the document's own folder, so relative image links resolve.
+    const baseUri = webview
+      .asWebviewUri(vscode.Uri.joinPath(document.uri, '..'))
+      .toString();
 
     let writeGuard = false;
 
     const pushInit = () => {
-      webview.postMessage({ type: 'init', text: document.getText() });
+      webview.postMessage({ type: 'init', text: document.getText(), baseUri });
     };
 
     const changeSub = vscode.workspace.onDidChangeTextDocument((e) => {
@@ -69,7 +82,7 @@ export class MdEditorProvider implements vscode.CustomTextEditorProvider {
       if (writeGuard) return;
       // External edit (agent, git, format-on-save): resync while the webview
       // preserves the caret.
-      webview.postMessage({ type: 'external', text: document.getText() });
+      webview.postMessage({ type: 'external', text: document.getText(), baseUri });
     });
 
     webviewPanel.onDidDispose(() => changeSub.dispose());
@@ -95,8 +108,45 @@ export class MdEditorProvider implements vscode.CustomTextEditorProvider {
           await openAsRawText(document.uri);
           break;
         }
+        case 'saveImage': {
+          await this.handleSaveImage(webview, document, msg);
+          break;
+        }
       }
     });
+  }
+
+  private async handleSaveImage(
+    webview: vscode.Webview,
+    document: vscode.TextDocument,
+    msg: InboundSaveImage
+  ): Promise<void> {
+    try {
+      const template = vscode.workspace
+        .getConfiguration('hd.markdown', document.uri)
+        .get<string>('assetFolder', '${name}.assets');
+      const folder = resolveAssetFolder(document.uri, template);
+      await vscode.workspace.fs.createDirectory(folder);
+
+      const saved = await saveImageBytes(folder, new Uint8Array(msg.bytes), msg.ext || 'png');
+
+      const docDir = path.dirname(document.uri.fsPath);
+      const rel = path.relative(docDir, saved.fsPath).replace(/\\/g, '/');
+      // URL-encode each segment so spaces (e.g. from a doc named "My File.md" →
+      // "My File.assets") and other special characters produce a valid Markdown
+      // image link that actually parses as an image.
+      const src = rel.split('/').map((seg) => (seg === '..' ? seg : encodeURIComponent(seg))).join('/');
+      webview.postMessage({ type: 'imageSaved', requestId: msg.requestId, src });
+    } catch (err) {
+      webview.postMessage({ type: 'imageSaved', requestId: msg.requestId, error: String(err) });
+    }
+  }
+
+  private localResourceRoots(docUri: vscode.Uri): vscode.Uri[] {
+    const roots: vscode.Uri[] = [this.context.extensionUri];
+    for (const f of vscode.workspace.workspaceFolders ?? []) roots.push(f.uri);
+    roots.push(vscode.Uri.joinPath(docUri, '..'));
+    return roots;
   }
 
   private isEnabledFor(uri: vscode.Uri): boolean {
@@ -142,6 +192,27 @@ export class MdEditorProvider implements vscode.CustomTextEditorProvider {
 /** Reopen the document in VS Code's built-in text editor, replacing this tab. */
 async function openAsRawText(uri: vscode.Uri): Promise<void> {
   await vscode.commands.executeCommand('vscode.openWith', uri, 'default');
+}
+
+/**
+ * Expand the asset-folder template (`${name}` / `${dir}` / `${workspaceFolder}`)
+ * for a document into an absolute folder. A relative result is resolved against
+ * the document's own folder, so the default `${name}.assets` sits beside the
+ * document and can't collide with a project-wide `assets/`.
+ */
+function resolveAssetFolder(docUri: vscode.Uri, template: string): vscode.Uri {
+  const docFs = docUri.fsPath;
+  const dir = path.dirname(docFs);
+  const name = path.basename(docFs, path.extname(docFs));
+  const ws = vscode.workspace.getWorkspaceFolder(docUri)?.uri.fsPath ?? dir;
+
+  let out = (template || '${name}.assets')
+    .replace(/\$\{name\}/g, name)
+    .replace(/\$\{dir\}/g, dir)
+    .replace(/\$\{workspaceFolder\}/g, ws);
+
+  if (!path.isAbsolute(out)) out = path.join(dir, out);
+  return vscode.Uri.file(out);
 }
 
 function nonceStr(): string {

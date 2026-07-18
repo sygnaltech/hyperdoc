@@ -13,6 +13,9 @@ import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { syntaxHighlighting, HighlightStyle, syntaxTree } from '@codemirror/language';
 import { tags as t } from '@lezer/highlight';
+import { tableExtension } from './table-view';
+import { setupTableUI } from './table-ui';
+import { blankTable, serializeTable } from './table-model';
 
 declare function acquireVsCodeApi(): { postMessage(msg: unknown): void };
 const vscode = acquireVsCodeApi();
@@ -341,6 +344,7 @@ function createView(initialText: string): void {
       // people mean by "Markdown" and what GitHub renders.
       markdown({ base: markdownLanguage }),
       syntaxHighlighting(mdHighlight),
+      tableExtension(),
       imagePreview,
       alertCallouts,
       pasteImages,
@@ -353,6 +357,24 @@ function createView(initialText: string): void {
     ]
   });
   view = new EditorView({ state, parent: editorEl });
+  setupTableUI(view, editorEl);
+}
+
+// Insert a blank GFM table at the caret, on its own lines (with blank-line
+// separation) so it parses as a table block.
+function insertTable(): void {
+  if (!view) return;
+  const md = serializeTable(blankTable(3));
+  const at = view.state.selection.main.head;
+  const line = view.state.doc.lineAt(at);
+  const before = line.from === at && line.text === '' ? '' : '\n\n';
+  const after = '\n\n';
+  const insert = before + md + after;
+  view.dispatch({
+    changes: { from: at, insert },
+    selection: EditorSelection.cursor(at + insert.length)
+  });
+  view.focus();
 }
 
 // Replace the whole document with host content. For an external resync the
@@ -436,6 +458,7 @@ function setupToolbar(): void {
     button('•', 'Bullet list item', () => prefixLine('- ')),
     button('“”', 'Quote', () => prefixLine('> ')),
     button('🔗', 'Link', () => wrapSelection('[', '](url)')),
+    button('▦', 'Insert table', () => insertTable()),
     button('🏷', 'Insert badge', () => post({ type: 'insertBadge' }))
   );
 

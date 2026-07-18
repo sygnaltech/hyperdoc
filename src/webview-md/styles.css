@@ -57,6 +57,7 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .cm-editor {
@@ -100,3 +101,123 @@ body {
 .cm-gh-alert-title-important { color: #ab7df8; }
 .cm-gh-alert-title-warning { color: #d29922; }
 .cm-gh-alert-title-caution { color: #f85149; }
+
+/* ---------- Rendered GFM tables ---------------------------------------- */
+
+.hd-md-table {
+  border-collapse: collapse;
+  margin: 6px 0;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  cursor: text;
+}
+
+.hd-md-table th,
+.hd-md-table td {
+  border: 1px solid var(--vscode-panel-border, rgba(127, 127, 127, 0.35));
+  padding: 4px 10px;
+  text-align: left;
+  vertical-align: top;
+  min-width: 32px;
+}
+
+.hd-md-table th {
+  background: var(--vscode-editor-lineHighlightBackground, rgba(127, 127, 127, 0.12));
+  font-weight: 700;
+}
+
+.hd-md-table code {
+  font-family: var(--vscode-editor-font-family, monospace);
+  background: var(--vscode-textCodeBlock-background, rgba(127, 127, 127, 0.15));
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+.hd-md-table a {
+  color: var(--vscode-textLink-foreground);
+}
+
+.hd-md-cell-empty {
+  display: inline-block;
+  min-height: 1em;
+  min-width: 8px;
+}
+
+/* ---------- Table hover insert buttons --------------------------------- */
+
+.hd-md-table-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.hd-md-table-col-insert,
+.hd-md-table-row-insert {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border, transparent);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  pointer-events: auto;
+  opacity: 0.55;
+  transition: opacity 0.12s, background 0.12s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hd-md-table-col-insert:hover,
+.hd-md-table-row-insert:hover {
+  opacity: 1;
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+/* ---------- Right-click context menu (mirrors the HD webview) ----------- */
+
+.hd-context-menu {
+  position: fixed;
+  background: var(--vscode-menu-background, var(--vscode-editor-background));
+  color: var(--vscode-menu-foreground, var(--vscode-foreground));
+  border: 1px solid var(--vscode-menu-border, var(--vscode-panel-border));
+  border-radius: 4px;
+  padding: 4px 0;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  font-size: 13px;
+  font-family: var(--vscode-font-family);
+}
+
+.hd-context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 14px;
+  text-align: left;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  white-space: nowrap;
+}
+
+.hd-context-menu button:hover {
+  background: var(--vscode-menu-selectionBackground, var(--vscode-list-hoverBackground));
+  color: var(--vscode-menu-selectionForeground, inherit);
+}
+
+.hd-context-separator {
+  height: 1px;
+  background: var(--vscode-menu-separatorBackground, var(--vscode-panel-border));
+  margin: 4px 0;
+}

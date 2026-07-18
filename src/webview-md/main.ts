@@ -164,6 +164,117 @@ const imagePreview = ViewPlugin.fromClass(
 );
 
 // ---------------------------------------------------------------------------
+// GitHub alert callouts: a blockquote whose first line is `[!NOTE]` (or TIP /
+// IMPORTANT / WARNING / CAUTION). Rendered as a coloured box with a titled
+// header; the `[!TYPE]` marker becomes a title unless the caret is on it. The
+// `>` prefixes stay in the source — this is a view-layer decoration only.
+// ---------------------------------------------------------------------------
+
+const ALERT_META: Record<string, { label: string; icon: string }> = {
+  note: { label: 'Note', icon: 'ⓘ' },
+  tip: { label: 'Tip', icon: '💡' },
+  important: { label: 'Important', icon: '❗' },
+  warning: { label: 'Warning', icon: '⚠' },
+  caution: { label: 'Caution', icon: '🛑' }
+};
+
+const ALERT_TITLE_RE = /^\s*>\s?\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/i;
+
+class AlertTitleWidget extends WidgetType {
+  constructor(readonly type: string) {
+    super();
+  }
+  eq(other: AlertTitleWidget): boolean {
+    return other.type === this.type;
+  }
+  toDOM(): HTMLElement {
+    const meta = ALERT_META[this.type] ?? { label: this.type, icon: '' };
+    const span = document.createElement('span');
+    span.className = `cm-gh-alert-title cm-gh-alert-title-${this.type}`;
+    span.textContent = `${meta.icon} ${meta.label}`;
+    return span;
+  }
+  ignoreEvent(): boolean {
+    return false;
+  }
+}
+
+function buildAlertDecorations(view: EditorView): DecorationSet {
+  const decos: Array<ReturnType<Decoration['range']>> = [];
+  const ranges = view.state.selection.ranges;
+  const tree = syntaxTree(view.state);
+  const seen = new Set<number>();
+
+  for (const { from, to } of view.visibleRanges) {
+    tree.iterate({
+      from,
+      to,
+      enter: (node) => {
+        if (node.name !== 'Blockquote' || seen.has(node.from)) return;
+        const firstLine = view.state.doc.lineAt(node.from);
+        const m = ALERT_TITLE_RE.exec(firstLine.text);
+        if (!m) return;
+        seen.add(node.from);
+
+        const type = m[1].toLowerCase();
+        const total = view.state.doc.lines;
+        for (let n = firstLine.number; n <= total; n++) {
+          const line = view.state.doc.line(n);
+          // The alert runs while lines stay part of the blockquote (start with `>`).
+          if (n > firstLine.number && !/^\s*>/.test(line.text)) break;
+          const head = n === firstLine.number ? ' cm-gh-alert-head' : '';
+          decos.push(
+            Decoration.line({ attributes: { class: `cm-gh-alert cm-gh-alert-${type}${head}` } }).range(line.from)
+          );
+        }
+
+        // Turn `[!TYPE]` into a title, unless the caret is on the first line.
+        const caretOnHead = ranges.some((r) => r.from <= firstLine.to && r.to >= firstLine.from);
+        if (!caretOnHead) {
+          const start = firstLine.text.indexOf('[!');
+          const end = firstLine.text.indexOf(']', start);
+          if (start >= 0 && end > start) {
+            decos.push(
+              Decoration.replace({ widget: new AlertTitleWidget(type) }).range(
+                firstLine.from + start,
+                firstLine.from + end + 1
+              )
+            );
+          }
+        }
+        return false;
+      }
+    });
+  }
+  return Decoration.set(decos, true);
+}
+
+const alertCallouts = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+    constructor(view: EditorView) {
+      this.decorations = buildAlertDecorations(view);
+    }
+    update(u: ViewUpdate): void {
+      if (u.docChanged || u.selectionSet || u.viewportChanged) {
+        this.decorations = buildAlertDecorations(u.view);
+      }
+    }
+  },
+  { decorations: (v) => v.decorations }
+);
+
+function insertAtCursor(text: string): void {
+  if (!view) return;
+  const at = view.state.selection.main.head;
+  view.dispatch({
+    changes: { from: at, insert: text },
+    selection: EditorSelection.cursor(at + text.length)
+  });
+  view.focus();
+}
+
+// ---------------------------------------------------------------------------
 // Image paste — save via the host, then insert a relative Markdown reference.
 // ---------------------------------------------------------------------------
 
@@ -231,6 +342,7 @@ function createView(initialText: string): void {
       markdown({ base: markdownLanguage }),
       syntaxHighlighting(mdHighlight),
       imagePreview,
+      alertCallouts,
       pasteImages,
       theme,
       EditorView.updateListener.of((u) => {
@@ -323,7 +435,8 @@ function setupToolbar(): void {
     button('H', 'Heading', () => prefixLine('# ')),
     button('•', 'Bullet list item', () => prefixLine('- ')),
     button('“”', 'Quote', () => prefixLine('> ')),
-    button('🔗', 'Link', () => wrapSelection('[', '](url)'))
+    button('🔗', 'Link', () => wrapSelection('[', '](url)')),
+    button('🏷', 'Insert badge', () => post({ type: 'insertBadge' }))
   );
 
   const spacer = document.createElement('span');
@@ -347,6 +460,8 @@ window.addEventListener('message', (e) => {
     setText((msg.text ?? '') as string, true);
   } else if (msg?.type === 'imageSaved') {
     onImageSaved(msg);
+  } else if (msg?.type === 'insertText') {
+    insertAtCursor((msg.text ?? '') as string);
   }
 });
 

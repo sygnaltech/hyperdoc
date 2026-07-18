@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { saveImageBytes } from '../assets/manager';
+import { pickBadge } from './md-badges';
 
 interface InboundChange {
   type: 'change';
@@ -18,7 +19,15 @@ interface InboundSaveImage {
   bytes: number[];
   ext: string;
 }
-type Inbound = InboundChange | InboundOpenRaw | InboundReady | InboundSaveImage;
+interface InboundInsertBadge {
+  type: 'insertBadge';
+}
+type Inbound =
+  | InboundChange
+  | InboundOpenRaw
+  | InboundReady
+  | InboundSaveImage
+  | InboundInsertBadge;
 
 /**
  * WYSIWYG-ish editor for plain Markdown (`.md`).
@@ -110,6 +119,11 @@ export class MdEditorProvider implements vscode.CustomTextEditorProvider {
         }
         case 'saveImage': {
           await this.handleSaveImage(webview, document, msg);
+          break;
+        }
+        case 'insertBadge': {
+          const md = await pickBadge();
+          if (md) webview.postMessage({ type: 'insertText', text: md });
           break;
         }
       }

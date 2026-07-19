@@ -2,7 +2,7 @@
   "$schema": "https://claude.com/schemas/marketplace.json",
   "name": "sygnal-hd",
   "description": "Plugins for the HD documentation format.",
-  "url": "https://github.com/sygnaltech/hd",
+  "url": "https://github.com/sygnaltech/hyperdoc",
   "owner": {
     "name": "Sygnal",
     "url": "https://github.com/sygnaltech"

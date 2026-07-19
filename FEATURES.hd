@@ -1,6 +1,60 @@
 ---
 id: 4Lk8Fxdvw6OETgtE3vO35q
-version: 1
+version: 2
 ---
 
-<p></p><p></p><p>Hotkeys- in editor, avoid conflicts with VS code</p><p>CTRL-B</p><p></p><h2>Copy code</h2><p>On code blocks, hover to copy, from right edge</p><p>Instant execute in current terminal?</p><h1><strong>Show More ✅</strong></h1><p>Constrain lengthy content areas behind a Show more button.</p><h3><strong>Overview</strong></h3><p>Constrain lengthy content areas with a height constraint, and a "Show more" button. When the user clicks it, the area fully unveils.</p><p>Supports custom button designs, breakpoint-specific constraints and auto-hides when the content is not long enough to require constraint.</p><img src="https://sygnal.gitbook.io/sygnal-webflow-components/~gitbook/image?url=https%3A%2F%2F2784689242-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252Fijt1q5GHhhw4y4FjjPNG%252Fuploads%252FAzWDFxPk7GSlALz7kPo6%252Fimage.png%3Falt%3Dmedia%26token%3D81d26202-f9dc-47eb-a528-aa2784366bf3&amp;width=768&amp;dpr=3&amp;quality=100&amp;sign=d44ff8fd&amp;sv=2"><h2></h2><img src="image-1.png" alt="image-1.png"><h2>Paste</h2><ul><li><p>Smart paste ( CTRL-V )</p><ul><li><p>Markdown</p></li><li><p>HTML</p></li></ul></li><li><p>Simple paste ( CTRL-SHIFT-V )</p></li></ul><p></p><p></p><p></p><h1>Advanced</h1><ul><li><p>Block drag?</p></li></ul><p></p><p></p>
+# Features
+
+<p></p>
+
+Hotkeys- in editor, avoid conflicts with VS code
+
+CTRL-B
+
+<p></p>
+
+## Copy code
+
+On code blocks, hover to copy, from right edge
+
+Instant execute in current terminal?
+
+# **Show More ✅**
+
+Constrain lengthy content areas behind a Show more button.
+
+### **Overview**
+
+Constrain lengthy content areas with a height constraint, and a "Show more" button. When the user clicks it, the area fully unveils.
+
+Supports custom button designs, breakpoint-specific constraints and auto-hides when the content is not long enough to require constraint.
+
+![](https://sygnal.gitbook.io/sygnal-webflow-components/~gitbook/image?url=https%3A%2F%2F2784689242-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252Fijt1q5GHhhw4y4FjjPNG%252Fuploads%252FAzWDFxPk7GSlALz7kPo6%252Fimage.png%3Falt%3Dmedia%26token%3D81d26202-f9dc-47eb-a528-aa2784366bf3&width=768&dpr=3&quality=100&sign=d44ff8fd&sv=2)
+
+![image-1.png](image-1.png)
+
+## Paste
+
+-   Smart paste ( CTRL-V )
+    
+    -   Markdown
+        
+    -   HTML
+        
+-   Simple paste ( CTRL-SHIFT-V )
+    
+
+<p></p>
+
+<p></p>
+
+<p></p>
+
+# Advanced
+
+-   Block drag?
+    
+
+<p></p>
+
+<p></p>

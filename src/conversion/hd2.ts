@@ -54,6 +54,26 @@ function baseTurndown(extra: Partial<TurndownService.Options> = {}): TurndownSer
     replacement: (_content, node) => (node as unknown as HtmlEl).outerHTML
   });
 
+  // Fenced code blocks. Turndown's built-in rule preserves a trailing newline in
+  // the code text — and there always is one, because marked appends `\n` before
+  // `</code>` on load and TipTap keeps it. Left alone, the closing fence lands
+  // after a blank line and the block grows by one empty line on EVERY save.
+  // Strip all trailing newlines so the fence is exact. (This also heals a file
+  // that already picked up the extra line — the next save normalizes it.)
+  // Mirrors plugin/hd/scripts/converters/nextra4.mjs.
+  td.addRule('fencedCodeBlock', {
+    filter: (node) => {
+      const el = node as unknown as HtmlEl;
+      return el.nodeName === 'PRE' && el.firstChild != null && el.firstChild.nodeName === 'CODE';
+    },
+    replacement: (_content, node) => {
+      const code = (node as unknown as HtmlEl).firstChild!;
+      const lang = (code.getAttribute('class') ?? '').match(/language-(\S+)/)?.[1] ?? '';
+      const text = (code.textContent ?? '').replace(/\n+$/, '');
+      return '\n\n```' + lang + '\n' + text + '\n```\n\n';
+    }
+  });
+
   return td;
 }
 
@@ -116,7 +136,12 @@ docTurndown.addRule('namedRadioGroup', {
 });
 
 export function hd2BodyToEditorHtml(markdownBody: string): string {
-  return markdownToHtml(segmentControls(markdownBody));
+  const html = markdownToHtml(segmentControls(markdownBody));
+  // marked emits `<code>…\n</code></pre>` for every fenced block. That trailing
+  // newline shows as a phantom blank line at the bottom of the code block in the
+  // editor; strip it so what you see matches the source (the save side strips it
+  // too, so the file never carries it either).
+  return html.replace(/\n(<\/code><\/pre>)/g, '$1');
 }
 
 // ---------------------------------------------------------------------------
@@ -223,6 +248,8 @@ interface HtmlEl {
   nodeName: string;
   innerHTML: string;
   outerHTML: string;
+  textContent: string | null;
+  firstChild: HtmlEl | null;
   children: ArrayLike<HtmlEl>;
   getAttribute(name: string): string | null;
   hasAttribute(name: string): boolean;

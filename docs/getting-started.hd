@@ -14,14 +14,14 @@ version: 1
 
 <ol>
   <li>Install dependencies once: <code>npm install</code></li>
-  <li>Build + package: <code>npm run package</code>. This cleans any old <code>hd-editor-*.vsix</code>, builds the bundle, and writes a fresh <code>hd-editor-&lt;version&gt;.vsix</code> — so only the current version's file is ever left in the root.</li>
-  <li>Install into your main VS Code — the <code>.vsix</code> filename carries the version from <code>package.json</code>, so let the shell fill it in rather than hardcoding it: <code>code --install-extension "hd-editor-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force</code></li>
+  <li>Build + package: <code>npm run package</code>. This cleans any old <code>hyperdoc-*.vsix</code>, builds the bundle, and writes a fresh <code>hyperdoc-&lt;version&gt;.vsix</code> — so only the current version's file is ever left in the root.</li>
+  <li>Install into your main VS Code — the <code>.vsix</code> filename carries the version from <code>package.json</code>, so let the shell fill it in rather than hardcoding it: <code>code --install-extension "hyperdoc-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force</code></li>
   <li>Reload <strong>every already-open VS Code window</strong>: <strong>Ctrl+Shift+P</strong> → "Developer: Reload Window" (or restart VS Code). Installing a VSIX does not update windows that are already running — this is the most common reason a rebuild still shows the old editor.</li>
 </ol>
 
 <p>For ongoing iteration the build / package / install steps can be chained (PowerShell):</p>
 
-<pre><code>npm run package; code --install-extension "hd-editor-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force</code></pre>
+<pre><code>npm run package; code --install-extension "hyperdoc-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force</code></pre>
 
 <h2>Create your first .hd file</h2>
 

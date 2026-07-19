@@ -9,10 +9,10 @@ press F5 to start debugging mode
 
     npm run package
 
-   This deletes any old `hd-editor-*.vsix`, builds the bundle (via the
-   `vscode:prepublish` hook), and produces a fresh `hd-editor-<version>.vsix` in
+   This deletes any old `hyperdoc-*.vsix`, builds the bundle (via the
+   `vscode:prepublish` hook), and produces a fresh `hyperdoc-<version>.vsix` in
    the project root, where `<version>` is the `version` field in package.json
-   (e.g. `hd-editor-0.1.2.vsix`). Warnings about missing repository / LICENSE /
+   (e.g. `hyperdoc-0.1.2.vsix`). Warnings about missing repository / LICENSE /
    README are fine to ignore for internal use.
 
    Because the clean step runs first, only the current version's `.vsix` is ever
@@ -25,7 +25,7 @@ press F5 to start debugging mode
    Or via CLI — let the shell fill in the current version so you never install a
    stale file (PowerShell):
 
-    code --install-extension "hd-editor-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force
+    code --install-extension "hyperdoc-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force
 
 3. Reload EVERY already-open VS Code window: Ctrl+Shift+P → "Developer: Reload
    Window" (or restart VS Code). Installing a VSIX does NOT update windows that are

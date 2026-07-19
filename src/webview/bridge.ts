@@ -38,10 +38,39 @@ interface PendingLinkOptions {
   reject: (err: unknown) => void;
 }
 
+export interface DocInfo {
+  fileName: string;
+  relPath: string;
+  ext: 'hd' | 'hd2';
+  version: number;
+  onDisk: 'markdown' | 'html';
+  id: string | null;
+  meta: Record<string, unknown>;
+  assetFolder: {
+    path: string;
+    exists: boolean;
+    layout: 'flat' | 'legacy' | 'none';
+    assets: { name: string; size: number }[];
+  } | null;
+}
+
+interface DocInfoResult {
+  type: 'docInfoResult';
+  requestId: number;
+  info?: DocInfo;
+  error?: string;
+}
+
+interface PendingDocInfo {
+  resolve: (info: DocInfo) => void;
+  reject: (err: unknown) => void;
+}
+
 export class Bridge {
   private nextRequestId = 1;
   private pendingImages = new Map<number, PendingImage>();
   private pendingLinkOptions = new Map<number, PendingLinkOptions>();
+  private pendingDocInfo = new Map<number, PendingDocInfo>();
   private changeTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingChange: { meta: Record<string, unknown>; body: string } | null = null;
 
@@ -95,6 +124,35 @@ export class Bridge {
     if (!pending) return;
     this.pendingLinkOptions.delete(msg.requestId);
     pending.resolve({ options: msg.options ?? [], publishRoot: msg.publishRoot ?? null });
+  }
+
+  requestDocInfo(): Promise<DocInfo> {
+    const requestId = this.nextRequestId++;
+    return new Promise((resolve, reject) => {
+      this.pendingDocInfo.set(requestId, { resolve, reject });
+      this.vscode.postMessage({ type: 'requestDocInfo', requestId });
+    });
+  }
+
+  resolveDocInfo(msg: DocInfoResult): void {
+    const pending = this.pendingDocInfo.get(msg.requestId);
+    if (!pending) return;
+    this.pendingDocInfo.delete(msg.requestId);
+    if (msg.error || !msg.info) {
+      pending.reject(new Error(msg.error || 'unknown doc-info error'));
+    } else {
+      pending.resolve(msg.info);
+    }
+  }
+
+  /** Reveal the document's asset folder in the OS file explorer. */
+  revealAssetFolder(): void {
+    this.vscode.postMessage({ type: 'revealAssetFolder' });
+  }
+
+  /** Reveal a single asset file in the OS file explorer. */
+  revealAsset(name: string): void {
+    this.vscode.postMessage({ type: 'revealAsset', name });
   }
 }
 

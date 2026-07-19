@@ -247,6 +247,9 @@ window.addEventListener('message', (event) => {
     case 'linkOptionsResult':
       bridge.resolveLinkOptions(msg);
       break;
+    case 'docInfoResult':
+      bridge.resolveDocInfo(msg);
+      break;
   }
 });
 

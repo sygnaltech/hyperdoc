@@ -504,6 +504,127 @@ body {
   background: var(--vscode-button-hoverBackground);
 }
 
+/* ---------- Document info / diagnostics popover ------------------------ */
+
+.hd-toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+#toolbar button.hd-btn-info {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.hd-info-popover {
+  position: fixed;
+  z-index: 1600;
+  min-width: 320px;
+  max-width: 460px;
+  max-height: 70vh;
+  overflow: auto;
+  background: var(--vscode-menu-background, var(--vscode-editor-background));
+  color: var(--vscode-menu-foreground, var(--vscode-foreground));
+  border: 1px solid var(--vscode-menu-border, var(--vscode-panel-border));
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  padding: 12px 14px;
+  font-family: var(--vscode-font-family);
+  font-size: 13px;
+}
+
+.hd-info-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.hd-info-section {
+  margin-bottom: 12px;
+}
+
+.hd-info-section:last-child {
+  margin-bottom: 0;
+}
+
+.hd-info-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.65;
+  margin-bottom: 6px;
+}
+
+.hd-info-row {
+  display: flex;
+  gap: 10px;
+  padding: 2px 0;
+  align-items: baseline;
+}
+
+.hd-info-key {
+  flex: 0 0 30%;
+  opacity: 0.75;
+  word-break: break-word;
+}
+
+.hd-info-val {
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+  font-family: var(--vscode-editor-font-family, monospace);
+}
+
+.hd-info-note {
+  opacity: 0.7;
+  font-size: 12px;
+  margin: 4px 0;
+}
+
+.hd-info-empty {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.hd-info-link {
+  color: var(--vscode-textLink-foreground);
+  cursor: pointer;
+  word-break: break-all;
+}
+
+.hd-info-link:hover {
+  text-decoration: underline;
+}
+
+.hd-info-assets {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.hd-info-asset {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 3px 0;
+  cursor: pointer;
+}
+
+.hd-info-asset:hover .hd-info-asset-name {
+  text-decoration: underline;
+  color: var(--vscode-textLink-foreground);
+}
+
+.hd-info-asset-name {
+  font-family: var(--vscode-editor-font-family, monospace);
+  word-break: break-all;
+}
+
+.hd-info-asset-size {
+  flex: 0 0 auto;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- Element configurator popover ------------------------------- */
 
 .hd-config-popover {

@@ -1,6 +1,7 @@
 import type { Editor } from '@tiptap/core';
 import type { Bridge } from './bridge';
 import { showLinkDialog } from './link-dialog';
+import { toggleDocInfo } from './doc-info';
 
 interface ToolbarContext {
   bridge: Bridge;
@@ -119,4 +120,20 @@ export function setupToolbar(root: HTMLElement, editor: Editor, ctx: ToolbarCont
   editor.on('selectionUpdate', refresh);
   editor.on('update', refresh);
   refresh();
+
+  // Right-aligned diagnostics: a spacer pushes the info button to the far end
+  // of the toolbar. Clicking it toggles the document-info popover.
+  const spacer = document.createElement('span');
+  spacer.className = 'hd-toolbar-spacer';
+  root.appendChild(spacer);
+
+  const infoBtn = document.createElement('button');
+  infoBtn.type = 'button';
+  infoBtn.title = 'Document info';
+  infoBtn.setAttribute('aria-label', 'Document info');
+  infoBtn.textContent = 'ⓘ';
+  infoBtn.className = 'hd-btn-info';
+  infoBtn.addEventListener('mousedown', (e) => e.preventDefault());
+  infoBtn.addEventListener('click', () => toggleDocInfo(ctx.bridge, infoBtn));
+  root.appendChild(infoBtn);
 }

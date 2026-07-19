@@ -6,7 +6,7 @@ import { effectiveVersion, HD_V2 } from '../format/version';
 import { extForUri } from '../format/flavor';
 import { hd2BodyToEditorHtml, editorHtmlToHd2Body } from '../conversion/hd2';
 import { generateId, IdIndex } from '../identity';
-import { resolveExistingAssetFolder } from '../assets/paths';
+import { assetFolderFor, resolveExistingAssetFolder } from '../assets/paths';
 import { ensureAssetFolder, saveImageBytes } from '../assets/manager';
 
 interface InboundChange {
@@ -27,7 +27,22 @@ interface InboundLinkOptionsRequest {
   requestId: number;
 }
 
-type Inbound = InboundChange | InboundImageRequest | InboundLinkOptionsRequest;
+interface InboundDocInfoRequest {
+  type: 'requestDocInfo';
+  requestId: number;
+}
+
+interface InboundReveal {
+  type: 'revealAssetFolder' | 'revealAsset';
+  name?: string;
+}
+
+type Inbound =
+  | InboundChange
+  | InboundImageRequest
+  | InboundLinkOptionsRequest
+  | InboundDocInfoRequest
+  | InboundReveal;
 
 export class HdEditorProvider implements vscode.CustomTextEditorProvider {
   public static readonly viewType = 'sygnal.hd-editor';
@@ -172,8 +187,119 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
           await this.handleLinkOptions(webview, document, msg);
           break;
         }
+        case 'requestDocInfo': {
+          await this.handleDocInfo(webview, document, msg);
+          break;
+        }
+        case 'revealAssetFolder': {
+          await this.handleReveal(document, null);
+          break;
+        }
+        case 'revealAsset': {
+          await this.handleReveal(document, msg.name ?? null);
+          break;
+        }
       }
     });
+  }
+
+  private async handleDocInfo(
+    webview: vscode.Webview,
+    document: vscode.TextDocument,
+    msg: InboundDocInfoRequest
+  ): Promise<void> {
+    try {
+      const ext = extForUri(document.uri);
+      const { meta, body } = parseDocument(document.getText());
+      const m = (meta ?? {}) as Record<string, unknown>;
+      const version = effectiveVersion(m, ext, body);
+      const id = typeof m.id === 'string' ? m.id : null;
+
+      const root = this.workspaceRootFor(document.uri);
+      const relPath = root
+        ? path.relative(root.fsPath, document.uri.fsPath).replace(/\\/g, '/')
+        : document.uri.fsPath;
+
+      let assetFolder: {
+        path: string;
+        exists: boolean;
+        layout: 'flat' | 'legacy' | 'none';
+        assets: { name: string; size: number }[];
+      } | null = null;
+
+      if (id && root) {
+        const flat = assetFolderFor(document.uri, id, root);
+        const folder = await resolveExistingAssetFolder(document.uri, id, root);
+        let folderExists = false;
+        try {
+          await vscode.workspace.fs.stat(folder);
+          folderExists = true;
+        } catch {
+          folderExists = false;
+        }
+        const layout: 'flat' | 'legacy' | 'none' = !folderExists
+          ? 'none'
+          : folder.fsPath === flat.fsPath
+            ? 'flat'
+            : 'legacy';
+
+        const assets: { name: string; size: number }[] = [];
+        if (folderExists) {
+          const entries = await vscode.workspace.fs.readDirectory(folder);
+          for (const [name, type] of entries) {
+            if (type & vscode.FileType.File) {
+              let size = 0;
+              try {
+                size = (await vscode.workspace.fs.stat(vscode.Uri.joinPath(folder, name))).size;
+              } catch {
+                /* leave size 0 */
+              }
+              assets.push({ name, size });
+            }
+          }
+          assets.sort((a, b) => a.name.localeCompare(b.name));
+        }
+        assetFolder = { path: folder.fsPath, exists: folderExists, layout, assets };
+      }
+
+      webview.postMessage({
+        type: 'docInfoResult',
+        requestId: msg.requestId,
+        info: {
+          fileName: path.basename(document.uri.fsPath),
+          relPath,
+          ext,
+          version,
+          onDisk: version >= HD_V2 ? 'markdown' : 'html',
+          id,
+          meta: m,
+          assetFolder
+        }
+      });
+    } catch (err) {
+      webview.postMessage({
+        type: 'docInfoResult',
+        requestId: msg.requestId,
+        error: String(err)
+      });
+    }
+  }
+
+  private async handleReveal(
+    document: vscode.TextDocument,
+    assetName: string | null
+  ): Promise<void> {
+    const root = this.workspaceRootFor(document.uri);
+    const { meta } = parseDocument(document.getText());
+    const id = (meta as Record<string, unknown> | null)?.id;
+    if (!root || typeof id !== 'string') return;
+    const folder = await resolveExistingAssetFolder(document.uri, id, root);
+    const target = assetName ? vscode.Uri.joinPath(folder, assetName) : folder;
+    try {
+      await vscode.commands.executeCommand('revealFileInOS', target);
+    } catch {
+      /* best effort — nothing to surface if the OS reveal fails */
+    }
   }
 
   private async handleLinkOptions(

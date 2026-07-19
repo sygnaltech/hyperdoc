@@ -22,7 +22,7 @@ version: 1
         ▼
   file on disk (Markdown + HTML islands)</code></pre>
 
-<p>On <strong>load</strong>, the Markdown body is converted to HTML and handed to the editor. On <strong>save</strong>, the editor's HTML is converted back to Markdown, emitting a raw-HTML island for any element Markdown can't represent losslessly. For HD (<code>.hd</code>) files, neither conversion runs — the HTML is read and written verbatim.</p>
+<p>On <strong>load</strong>, the Markdown body is converted to HTML and handed to the editor. On <strong>save</strong>, the editor's HTML is converted back to Markdown, emitting a raw-HTML island for any element Markdown can't represent losslessly. Whether the load conversion runs is decided by the document's <code>version</code>, not its file extension: a legacy version-1 body is already HTML and is read verbatim, while a version-2 body is Markdown and is converted. <strong>Every save writes version 2</strong>, so a v1 document is migrated to Markdown the first time it is edited.</p>
 
 <p>The consequence worth remembering: <strong>the editor and the paste pipeline are flavor-agnostic.</strong> They only ever see HTML. All HD2-specific behavior is the load/save conversion, and nothing else.</p>
 
@@ -58,8 +58,8 @@ version: 1
 
 <h2>Frontmatter and versioning</h2>
 
-<p>HD2 uses the identical frontmatter structure as HD. The only value that differs is <code>version</code>, which HD2 sets to <code>2</code> on first open (HD uses <code>1</code>). Stamping the version now means that if HD2 is later adopted as the standard, promoting a document is a pure file rename — the frontmatter already declares version 2, so nothing inside the file has to change.</p>
+<p>Both versions use the identical frontmatter structure. The only value that differs is <code>version</code>: a v2 document declares <code>version: 2</code>, a legacy document <code>version: 1</code>. That field — not the file extension — is the source of truth for how the body is stored. A new document is created as v2, and every save writes <code>version: 2</code>, so a legacy file is stamped and migrated the first time it is edited. A <code>.hd</code> whose body is non-empty and carries no version is read as legacy v1 HTML, so a hand-authored Markdown body must declare <code>version: 2</code> explicitly.</p>
 
 <h2>Assets are shared, deliberately</h2>
 
-<p>HD2 does not introduce a new asset mechanism. It reuses the existing <code>.hd/&lt;id&gt;/</code> folders keyed by the document <code>id</code>. Because both flavors resolve assets the same way, a document can be converted between <code>.hd</code> and <code>.hd2</code> without moving, renaming, or re-referencing a single asset — avoiding any merge or migration conflict when the flavors eventually consolidate.</p>
+<p>Version 2 does not introduce a new asset mechanism. It reuses the existing <code>.hd/&lt;id&gt;/</code> folders keyed by the document <code>id</code>. Because both versions resolve assets the same way, a document migrates from v1 to v2 without moving, renaming, or re-referencing a single asset — and a legacy <code>.hd2</code> file is identical on disk to a <code>.hd</code> carrying <code>version: 2</code>.</p>

@@ -1,35 +1,45 @@
 ---
 name: hd-format
-description: Read, write, and edit .hd documentation files — body-only HTML with optional YAML frontmatter. Use when handling files with the .hd extension, discussing the HD format, or producing content meant to be saved as .hd.
+description: Read, write, and edit .hd documentation files — Markdown-primary (GFM) with raw-HTML islands and optional YAML frontmatter. Use when handling files with the .hd extension, discussing the HD format, or producing content meant to be saved as .hd.
 ---
 
 # .hd Format
 
-The `.hd` format is body-only HTML used for documentation. Use this skill whenever you're reading, writing, or editing files with the `.hd` extension, or producing content that will be saved as `.hd`.
+The `.hd` format is **Markdown-primary** documentation: the body is GitHub-Flavored Markdown, dropping down to **raw-HTML islands** only for the things Markdown can't express losslessly. Use this skill whenever you're reading, writing, or editing files with the `.hd` extension, or producing content that will be saved as `.hd`.
+
+> **Two on-disk versions exist.** Version **2** (the current default, described here) stores the body as Markdown + HTML islands. Version **1** is the older body-only-HTML format. The `version:` frontmatter field — not the file extension — says which one a file is. See [Reading and migrating version 1](#reading-and-migrating-version-1) before editing an older file. The `.hd2` extension is a deprecated alias for a version-2 `.hd` file; it still opens but should not be used for new content.
 
 ## File structure
 
 1. **Optional YAML frontmatter** at the top of the file, fenced with `---` on its own line. **No HTML comment wrapper.**
 2. **One blank line** after the frontmatter is a convention for readability, not a requirement.
-3. **Body-only HTML content** follows. The file must not contain `<html>`, `<head>`, or `<body>` tags.
+3. **Markdown body** follows (GFM), with raw-HTML islands wherever Markdown can't represent an element (see [Markdown vs HTML islands](#markdown-vs-html-islands)). The file must not contain `<html>`, `<head>`, or `<body>` tags.
 
 Example:
 
 ```
 ---
 title: Getting Started
-format: hd-doc v1
+version: 2
 date: 2026-06-12
 ---
 
-<h1>Getting Started</h1>
-<p>Welcome.</p>
+# Getting Started
+
+Welcome. This is **Markdown**, with an HTML island only where needed:
+
+<figure>
+  <img src="hero.png" alt="The dashboard" style="max-width:640px">
+  <figcaption>The dashboard on first run.</figcaption>
+</figure>
 ```
+
+> **Always write `version: 2`** in the frontmatter of a document you author or convert. A `.hd` file whose body is non-empty and has **no** `version` is read as legacy version-1 HTML — so a Markdown body without `version: 2` will be misinterpreted as HTML and render as literal text.
 
 ## Recommended frontmatter fields
 
 - `id` — **required when the doc has media** (images, etc.); optional otherwise. 22-character base62 identifier. The editor auto-generates one on first open if absent, but if you are authoring a doc *with* images you must assign it yourself before placing the images — see [Media](#media). Stable across renames/moves. Never change an existing id; clearing the value (leaving the key) forces the editor to regenerate.
-- `version` — HD format version number. Current version: **1**. If absent, treat as the latest version.
+- `version` — HD format version. **Current version: `2`** (Markdown-primary). Always set it to `2` on new or converted docs. `1` marks a legacy body-only-HTML file.
 - `title`
 - `date`
 - `author`
@@ -37,51 +47,53 @@ date: 2026-06-12
 - `tags`
 - `purpose`
 
-## Supported elements
+## Markdown vs HTML islands
 
-### Block
-- `h1` through `h6`
-- `p`
-- `blockquote`
-- `pre`
-- `hr`
-- `div`
+Write everything Markdown can express as Markdown; use a raw-HTML island only for what it can't. This is the same boundary the editor uses when it saves.
 
-### Lists
-- `ul`, `ol`, `li`
-- `dl`, `dt`, `dd`
+### Write as Markdown
 
-### Tables
-- `table`, `caption`
-- `thead`, `tbody`, `tfoot`
-- `tr`, `th`, `td`
-- `colgroup`, `col`
+| Content | Markdown |
+|---|---|
+| Headings `h1`–`h6` | `#` … `######` (ATX) |
+| Paragraphs | plain text |
+| Bold | `**…**` |
+| Italic | `*…*` |
+| Strikethrough | `~~…~~` (GFM) |
+| Inline code | `` `…` `` |
+| Links | `[text](href)` — `target`/`rel`/`download` are dropped |
+| Blockquotes | `> …` |
+| Lists (`ul`/`ol`) | `-` bullets, `1.` numbers; `ol start` preserved |
+| Horizontal rule | `---` |
+| Fenced code | ` ```lang ` — the language is the info string |
+| Hard line break | trailing two spaces / `\` |
+| Plain images | `![alt](filename)` — see [Media](#media) |
+| Simple tables | GFM pipe tables (see below) |
+| Task lists | `- [ ]` / `- [x]` (GFM) |
+| Radio groups (unnamed) | `- ( )` / `- (x)` (HD syntax) |
 
-### Inline text
-- `a`
-- `strong`, `em`, `b`, `i`, `u`, `s`
-- `code`, `kbd`, `samp`, `var`
-- `mark`
-- `sub`, `sup`
-- `abbr`, `cite`, `q`, `small`
-- `span`
-- `br`
+**Simple tables** qualify for GFM only when they are rectangular, have a header row, single-span cells, and inline-only cell content. Column alignment is preserved via the delimiter row (`:---`, `:---:`, `---:`).
 
-### Media
-- `img`
-- `figure`, `figcaption`
-- `svg` and its standard children for inline diagrams
+### Write as an HTML island
 
-### Sectioning
-- `section`, `article`, `aside`
-- `header`, `footer`, `nav`, `main`
+Markdown has no lossless form for these, so write them as raw HTML inside the body:
 
-### Disclosure
-- `details`, `summary`
+- **Sectioning wrappers** — `section`, `article`, `aside`, `header`, `footer`, `nav`, `main`. The **entire subtree** of a wrapper is stored as HTML; keep Markdown prose *outside* wrappers.
+- **`div`** and **`span`** — generic containers that carry `class`/`style`/`id`/`data-*`.
+- **Figures** — `figure`, `figcaption`.
+- **Styled/sized images** — an `<img>` with `width`, `height`, `style`, or `class` (plain images use Markdown).
+- **Definition lists** — `dl`, `dt`, `dd`.
+- **Disclosure** — `details`, `summary`.
+- **Inline semantics with no Markdown** — `u`, `mark`, `sub`, `sup`, `kbd`, `samp`, `var`, `abbr`, `cite`, `q`, `small`.
+- **Complex tables** — any `colspan`/`rowspan`, block/multi-paragraph cells, non-rectangular shape, or missing header row keeps the **whole table** as an HTML island.
+- **Inline `svg`** — passes through verbatim.
+- **Named radio groups** — a `data-group` name can't live in the `- ( )` markers, so a named group is an HTML block.
 
-## Excluded elements
+> **Attributes on Markdown-native elements have nowhere to live.** Markdown can't hold `id`/`class`/`style`/`data-*` on a heading, paragraph, or list. When one of those matters, promote the element to an HTML island (e.g. wrap it in a `<div>`/`<span>`, or use a styled `<img>`).
 
-These must not appear in a `.hd` file:
+### Allowed HTML (islands) and hard exclusions
+
+Islands may use only the elements above plus the inline/block tags Markdown already covers. The following are **never** allowed, in an island or anywhere:
 
 - `html`, `head`, `body` — body-only rule
 - `script`, `style` — no executable code or stylesheets
@@ -90,46 +102,35 @@ These must not appear in a `.hd` file:
 - `canvas`, `audio`, `video` — no programmatic graphics or media playback
 - `meta`, `link`, `base`, `title` — head-only elements
 
-## Supported attributes
+Excluded attributes anywhere: event handlers (`onclick`, `onload`, any `on*`), form-control attributes, and interactivity attributes (`contenteditable`, `draggable`, `hidden`).
 
-### Universal (allowed on any element)
-- `id`, `class`
-- `title`
-- `lang`, `dir`
-- `style` — inline only; the `<style>` tag itself is excluded
-- `data-*`
-
-### Element-specific
-- `a`: `href`, `target`, `rel`, `download`
-- `img`: `src`, `alt`, `width`, `height`, `loading` — size images with CSS in `style` (`width`/`max-width`/`max-height`), see [Media](#media)
-- `td`, `th`: `colspan`, `rowspan`, `scope`, `headers`
-- `ol`: `start`, `type`, `reversed`
-- `details`: `open`
-- `col`, `colgroup`: `span`
-- `code`, `pre`: `class` for syntax-language hints (e.g., `language-typescript`)
-
-## Excluded attributes
-- Event handlers: `onclick`, `onload`, and any `on*` attribute
-- Form-control attributes
-- Interactivity attributes: `contenteditable`, `draggable`, `hidden`
+Allowed island attributes: `id`, `class`, `title`, `lang`, `dir`, `style` (inline only), `data-*`; plus element-specific `a`(`href`/`target`/`rel`/`download`), `img`(`src`/`alt`/`width`/`height`/`loading`), `td`/`th`(`colspan`/`rowspan`/`scope`/`headers`), `ol`(`start`/`type`/`reversed`), `details`(`open`), `col`/`colgroup`(`span`), `code`/`pre`(`class` for `language-*`).
 
 ## Media
 
 Images, image sizing/constraints, and figures have their own detailed rules. **Load [reference/media.md](reference/media.md) whenever the doc you are authoring or editing contains images or figures.** The essentials:
 
-- **Images live in a sidecar folder keyed by the doc `id`**, not next to the file. `<img src="hero.png">` resolves to `<workspace>/.hd/<id>/hero.png`. The `src` **must be a bare filename** — no subfolders or relative paths. A doc with media **must** have an `id` in frontmatter, and you must create `.hd/<id>/` before placing files. Inline `<svg>` is exempt (it lives in the body, not a file).
-- **Size images with CSS in the `style` attribute** — `width`, `max-width`, `max-height` — not the HTML `width`/`height` attributes (only CSS expresses *max* constraints). `max-height` is the key control for tall mobile screenshots. Don't set explicit `height`; let it follow from width.
+- **Images live in a sidecar folder keyed by the doc `id`**, not next to the file. Both the Markdown form `![alt](hero.png)` and the HTML form `<img src="hero.png">` resolve to `<workspace>/.hd/<id>/hero.png`. The reference **must be a bare filename** — no subfolders or relative paths. A doc with media **must** have an `id` in frontmatter, and you must create `.hd/<id>/` before placing files. Inline `<svg>` is exempt (it lives in the body, not a file).
+- **Plain images use Markdown** — `![alt](file.png)`. **Sized/styled images use an HTML `<img>` island** so the styling survives the round-trip. Size with CSS in the `style` attribute — `width`, `max-width`, `max-height` — not the HTML `width`/`height` attributes (only CSS expresses *max* constraints). `max-height` is the key control for tall mobile screenshots. Don't set explicit `height`; let it follow from width.
 - **Set a meaningful `alt`** on every content image (`alt=""` only if decorative). **Align** images with `display:block` + auto `margin` and figures with `text-align` on the `<figure>`.
-- **Use `<figure>` + `<figcaption>`** for captioned images and screenshot grids: exactly one `<img>` plus an optional caption.
+- **Use `<figure>` + `<figcaption>`** (an HTML island) for captioned images and screenshot grids: exactly one `<img>` plus an optional caption.
 
-reference/media.md covers all of the above in full, plus **id generation** (use `node plugin/hd/scripts/new-id.mjs` — never hand-author an id), the legacy asset layout, and the device-screenshot-report pattern.
+reference/media.md covers all of the above in full, plus **id generation** (use `node plugin/hd/scripts/new-id.mjs` — never hand-author an id), the legacy asset layout, and the device-screenshot-report pattern. The asset convention is **identical across versions 1 and 2** — nothing about media folders changed.
+
+## Reading and migrating version 1
+
+Older `.hd` files (and any file with `version: 1`) store the body as **body-only HTML** rather than Markdown. They still open in the editor unchanged.
+
+- **The editor migrates on first edit.** Opening a v1 file leaves it byte-for-byte identical; the first save from the editor re-serializes the body to v2 Markdown and stamps `version: 2`. Opening without editing never rewrites it.
+- **When hand-editing a v1 file**, either (a) leave it as v1 HTML and keep `version: 1` (or no version), or (b) convert the whole body to Markdown + islands and set `version: 2`. Do not mix a Markdown body with a v1/absent version — it will be read as HTML.
+- **The `.hd2` extension** is a deprecated alias: a `.hd2` file is just a version-2 `.hd`. It still opens, but author new content as `.hd` with `version: 2`.
 
 ## Authoring guidance
 
-- When writing a `.hd` file, use only the elements and attributes listed above.
-- Frontmatter is bare YAML — never wrap it in `<!-- ... -->`.
-- Prefer semantic block elements (`section`, `article`, `figure`) over generic `div` where it fits.
-- Tables are a primary motivator for the format — use them freely, including `colspan`/`rowspan` and multi-paragraph cell content.
+- Write the body as GFM Markdown; reach for an HTML island only when the [boundary](#markdown-vs-html-islands) requires it.
+- Frontmatter is bare YAML — never wrap it in `<!-- ... -->`. Always include `version: 2`.
+- Prefer Markdown constructs over equivalent HTML (`## Heading`, not `<h2>`); prefer semantic wrappers (`section`, `figure`) over generic `div` when an island is unavoidable.
+- Tables are a primary motivator for the format — use GFM tables for simple cases, and an HTML-island table when you need `colspan`/`rowspan` or multi-paragraph cells.
 
 ## Publishing to an external platform
 

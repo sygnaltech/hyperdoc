@@ -2,6 +2,8 @@
 
 Detailed rules for `<img>`, image sizing/constraints, and `<figure>`/`<figcaption>` in `.hd` documents. Load this file whenever a doc you are authoring or editing contains images or figures. The parent [SKILL.md](../SKILL.md) has the one-paragraph summary; this file is the authority.
 
+**Markdown vs HTML for images (format v2).** A **plain** image is written in Markdown: `![alt](file.png)`. As soon as an image needs **sizing, alignment, styling, or a caption** — anything in this file below "bare filename" — write it as an HTML `<img>` (or `<figure>`) island, exactly as shown throughout. The asset-folder rules in §1 apply identically to both spellings. **The `.hd/<id>/` asset convention is unchanged across format versions 1 and 2** — none of the folder/id rules below depend on the version.
+
 ## 1. Asset folders and the document `id`
 
 **Images are not stored next to the `.hd` file and are not referenced with relative paths.** They live in a sidecar folder keyed by the document's `id`, at the workspace root:
@@ -18,7 +20,7 @@ Detailed rules for `<img>`, image sizing/constraints, and `<figure>`/`<figcaptio
 
 The id is the entire lookup key — no document-path mirroring. Rules:
 
-1. **`<img src=>` must be a bare filename.** `<img src="hero.png">` resolves to `<workspace>/.hd/<id>/hero.png`. **Never** use subfolders, dot-paths, or workspace-relative paths like `img/hero.png`, `./hero.png`, or `../assets/hero.png` — the editor will not find the file and the published output will be broken.
+1. **The image reference must be a bare filename** — in either syntax. `<img src="hero.png">` and `![alt](hero.png)` both resolve to `<workspace>/.hd/<id>/hero.png`. **Never** use subfolders, dot-paths, or workspace-relative paths like `img/hero.png`, `./hero.png`, or `../assets/hero.png` — the editor will not find the file and the published output will be broken.
 2. **A doc with media must have its `id` set in frontmatter.** If you are authoring a new doc and also creating its images, generate a 22-char base62 id yourself (don't rely on auto-generation — you need the value *now* to know where to put the files).
 3. **Create `<workspace>/.hd/<id>/` before placing files.** Then write images into it with whatever filenames you reference from the body.
 4. **Inline SVG is fine** — `<svg>...</svg>` lives inside the body, not in a file. The asset-folder rule applies only to `<img>` references.

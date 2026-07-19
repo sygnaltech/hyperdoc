@@ -74,6 +74,22 @@ Common fields (every destination):
 Type-specific fields are owned by each converter and documented in its
 section below.
 
+## Format versions and the converter
+
+As of HD format **version 2** (the current default), a `.hd` body is
+**Markdown-primary** (GFM with raw-HTML islands), not body-only HTML. Version
+**1** files store body-only HTML. The `version:` frontmatter field says which.
+
+> **Known limitation.** The `nextra4` converter below was written for v1 (HTML)
+> bodies: it rewrites links/assets by matching HTML `href=`/`src=` attributes and
+> runs `turndown` (HTML → Markdown) on the body. A v2 Markdown body passes
+> through those steps largely untouched, so **internal `.hd` links and per-doc
+> image references in a v2 body are not rewritten** and will be wrong in the
+> output. A v2-aware normalization step (convert the Markdown body to HTML on
+> read, then reuse the existing pipeline) is the pending fix. Until it lands,
+> sync from v1 sources, or hand-check links/assets in the generated MDX for any
+> doc that has been saved as v2.
+
 ## `nextra4` converter
 
 **What it does (deterministic):**
@@ -81,7 +97,7 @@ section below.
 1. Read every `.hd` in the config's source dir; parse YAML frontmatter; drop
    HD-only fields (`id`, `version`); keep `title`, `description`, `date`,
    `author`, `tags`.
-2. Rewrite the body HTML:
+2. Rewrite the body (written for v1 HTML bodies — see the limitation above):
    - `href="foo.hd"` → `href="/foo"` (or `/<routePrefix>/foo` when set).
    - `href="foo.hd#anchor"` → `href="/foo#anchor"` (prefix applied if set).
    - `href="../foo.hd"` and `href="../foo.md"` → left unchanged, flagged as
@@ -137,17 +153,23 @@ When `contentDir` is a sub-folder of `src/content`, **always set `routePrefix`**
 
 ## Authoring .hd for clean Nextra output
 
-| Goal | Write in HD... | You get in MDX |
-| --- | --- | --- |
-| Page title | `<h1>Title</h1>` at top of body | `# Title` |
-| Section heading | `<h2>`/`<h3>`/... | `##`/`###`/... |
-| Bullet list | `<ul><li>...</li></ul>` | `- ...` |
-| Numbered list | `<ol><li>...</li></ol>` | `1. ...` |
-| Inline code | `<code>foo</code>` | `` `foo` `` |
-| Code block | `<pre><code class="language-ts">...</code></pre>` | ` ```ts ... ``` ` |
-| Link to another page | `<a href="getting-started.hd">...</a>` | `[...](/getting-started)` |
-| Image | `<img src="images/foo.png" alt="...">` with `assetMap` configured | `![...](/images/foo.png)` |
-| Simple table | Standard `<table>` with `<thead>`/`<tbody>` | GFM `\|`-table |
+Author in v2 Markdown (see the **hd-format** skill). Most of it maps 1:1 to MDX;
+the middle column shows the older v1 HTML spelling for reference.
+
+| Goal | Write in HD (v2 Markdown) | v1 HTML equivalent | You get in MDX |
+| --- | --- | --- | --- |
+| Page title | `# Title` at top of body | `<h1>Title</h1>` | `# Title` |
+| Section heading | `##`/`###`/... | `<h2>`/`<h3>`/... | `##`/`###`/... |
+| Bullet list | `- ...` | `<ul><li>...</li></ul>` | `- ...` |
+| Numbered list | `1. ...` | `<ol><li>...</li></ol>` | `1. ...` |
+| Inline code | `` `foo` `` | `<code>foo</code>` | `` `foo` `` |
+| Code block | ` ```ts ... ``` ` | `<pre><code class="language-ts">...</code></pre>` | ` ```ts ... ``` ` |
+| Link to another page | `[...](getting-started.hd)` | `<a href="getting-started.hd">...</a>` | `[...](/getting-started)` |
+| Image | `![...](foo.png)` (per-doc asset) | `<img src="images/foo.png" alt="...">` | `![...](/...)` |
+| Simple table | GFM `\|`-table | `<table>` with `<thead>`/`<tbody>` | GFM `\|`-table |
+
+(Link/image rewriting for v2 Markdown sources is subject to the [known
+limitation](#format-versions-and-the-converter) above.)
 
 ## After a sync — what to check
 

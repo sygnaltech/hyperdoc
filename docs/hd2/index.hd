@@ -1,22 +1,22 @@
 ---
-title: HD2 Format (Experimental)
+title: HD Format v2 (Markdown-primary)
 date: 2026-07-13T00:00:00.000Z
-description: Overview of the experimental Markdown-primary HD2 flavor — what it is, why it exists, and how it relates to HD.
+description: Overview of the Markdown-primary HD format (version 2), now the default — what it is, why it exists, and how it relates to legacy version 1.
 id: 7CyJ0AFZ7aLdE1IOjkJM0R
 version: 1
 ---
 
-<h1>HD2 Format (Experimental)</h1>
+<h1>HD Format v2 (Markdown-primary)</h1>
 
-<p><strong>HD2</strong> is an experimental flavor of the HD documentation format that stores its content as <strong>Markdown first, HTML only where Markdown can't express the intent</strong>. It uses the <code>.hd2</code> file extension and opens in the same WYSIWYG editor as HD. It exists so the Markdown-primary approach can be tested end-to-end, side by side with the stable <code>.hd</code> format, before either replaces the other.</p>
+<p><strong>HD version 2</strong> stores document content as <strong>Markdown first, HTML only where Markdown can't express the intent</strong>. It is <strong>now the default</strong>: new documents are created as v2, and every save writes v2 — regardless of file extension. The older body-only-HTML format is version 1, still readable and migrated to v2 the first time you edit it. (The <code>.hd2</code> extension was the original home of this format and still opens; it is now a deprecated alias for a v2 <code>.hd</code> file.)</p>
 
 <aside>
-  <p><strong>Status: experimental.</strong> HD2 runs alongside HD; it does not replace it. Newly created <code>.hd</code> files remain HD (version 1). HD2 exists to validate the Markdown-primary model. Once validated, the two flavors are intended to consolidate — at which point promoting a document is a pure rename, because HD2 files are already stamped <code>version: 2</code> in their frontmatter.</p>
+  <p><strong>Status: default format.</strong> Version 2 has replaced version 1 as the format new content is created and saved in. A legacy v1 (<code>.hd</code>, HTML) file opens unchanged and is migrated to v2 on its first edit — the <code>version:</code> frontmatter field, not the file extension, records which version a file is. There is no separate <code>.hd2</code> format to consolidate anymore; it is simply an alternate extension for the same v2 content.</p>
 </aside>
 
 <h2>The one-sentence difference</h2>
 
-<p>HD stores <strong>body-only HTML</strong> on disk; HD2 stores <strong>Markdown with raw-HTML islands</strong> on disk. Everything else — the editor, the frontmatter, the asset model, the document identity — is shared.</p>
+<p>Version 1 stores <strong>body-only HTML</strong> on disk; version 2 stores <strong>Markdown with raw-HTML islands</strong> on disk. Everything else — the editor, the frontmatter, the asset model, the document identity — is shared.</p>
 
 <h2>What's identical to HD</h2>
 
@@ -32,7 +32,7 @@ version: 1
 
 <ul>
   <li><strong>On-disk representation.</strong> Prose, headings, lists, simple tables, and other Markdown-expressible content are stored as Markdown. Everything Markdown can't represent is stored as a verbatim HTML island.</li>
-  <li><strong>Frontmatter version.</strong> HD2 files carry <code>version: 2</code>; HD files carry <code>version: 1</code>.</li>
+  <li><strong>Frontmatter version.</strong> v2 files carry <code>version: 2</code>; legacy v1 files carry <code>version: 1</code>. The field is the source of truth for how the body is stored.</li>
   <li><strong>Cleaner diffs, more familiar source.</strong> The raw file reads like Markdown and produces smaller, line-oriented git diffs for prose edits.</li>
   <li><strong>A first-save reformat.</strong> Because the editor re-serializes to a single canonical Markdown style, the first save of a hand-written or imported file may reflow it once. See <a target="_blank" rel="noopener" href="how-it-works.hd">How HD2 Works</a>.</li>
 </ul>

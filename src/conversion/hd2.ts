@@ -2,8 +2,8 @@ import TurndownService from 'turndown';
 import { markdownToHtml, markdownInlineToHtml } from './mdToHd';
 
 /**
- * hd2 conversion layer — the only thing that distinguishes the experimental
- * Markdown-primary `.hd2` flavor from stable `.hd`.
+ * hd2 conversion layer — how the Markdown-primary body (version 2, the default
+ * for all documents) is turned into editor HTML and back.
  *
  *   on-disk (Markdown + HTML islands)  ──hd2BodyToEditorHtml──▶  editor (HTML)
  *   editor (HTML)  ──editorHtmlToHd2Body──▶  on-disk (Markdown + HTML islands)

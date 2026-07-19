@@ -1,25 +1,23 @@
 import type * as vscode from 'vscode';
 
 /**
- * The two on-disk representations the editor supports:
+ * The file-extension kind. This is NO LONGER the source of truth for how a
+ * document's body is stored — the `version:` frontmatter field is (see
+ * ./version.ts, `effectiveVersion`). It only records which extension was used:
  *
- *  - `hd`  — body-only HTML (authoritative). The file stores HTML verbatim;
- *            the webview loads and saves it without conversion.
- *  - `hd2` — Markdown-primary. The file stores Markdown with raw-HTML islands;
- *            the provider converts Markdown → HTML on load and HTML → Markdown
- *            on save. The webview/TipTap layer is identical for both flavors
- *            and never sees Markdown.
- *
- * This is a temporary split: hd2 exists so the Markdown-primary format can be
- * exercised end-to-end alongside the stable hd format. Once verified, the two
- * are intended to consolidate.
+ *  - `hd`  — the `.hd` extension. Holds any version: version 2 (Markdown) for
+ *            new documents, version 1 (HTML) for un-migrated legacy files.
+ *  - `hd2` — the deprecated `.hd2` alias. Still opens and still implies version
+ *            2, but is no longer needed: a `.hd` file with `version: 2` is
+ *            identical on disk. Retained for backward compatibility only, and
+ *            no longer promoted anywhere.
  */
-export type HdFlavor = 'hd' | 'hd2';
+export type HdExt = 'hd' | 'hd2';
 
-export function flavorForPath(fsPath: string): HdFlavor {
+export function extForPath(fsPath: string): HdExt {
   return fsPath.toLowerCase().endsWith('.hd2') ? 'hd2' : 'hd';
 }
 
-export function flavorForUri(uri: vscode.Uri): HdFlavor {
-  return flavorForPath(uri.fsPath);
+export function extForUri(uri: vscode.Uri): HdExt {
+  return extForPath(uri.fsPath);
 }

@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { parseDocument } from '../format/parser';
 import { serializeDocument } from '../format/serializer';
-import { defaultVersionForFlavor } from '../format/version';
-import { flavorForUri, HdFlavor } from '../format/flavor';
+import { effectiveVersion, HD_V2 } from '../format/version';
+import { extForUri } from '../format/flavor';
 import { hd2BodyToEditorHtml, editorHtmlToHd2Body } from '../conversion/hd2';
 import { generateId, IdIndex } from '../identity';
 import { resolveExistingAssetFolder } from '../assets/paths';
@@ -53,7 +53,7 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken
   ): Promise<void> {
-    const flavor = flavorForUri(document.uri);
+    const ext = extForUri(document.uri);
     const webview = webviewPanel.webview;
     webview.options = {
       enableScripts: true,
@@ -69,6 +69,10 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       const currentId = typeof m.id === 'string' ? m.id : undefined;
       const reconciled = await this.idIndex.reconcile(document.uri, currentId);
 
+      // How the body is stored on disk right now. The `version:` field is the
+      // source of truth; extension/body are only fallbacks for docs without one.
+      const version = effectiveVersion(m, ext, body);
+
       let needsPersist = false;
       if (reconciled.kind === 'regenerate') {
         m.id = generateId();
@@ -78,9 +82,12 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       // only by id, so renaming or moving the doc does not require touching
       // the file system.
 
-      if (m.version === undefined || m.version === null) {
-        m.version = defaultVersionForFlavor(flavor);
-        needsPersist = true;
+      // Only stamp the version when we're already writing the file for another
+      // reason (an id regeneration). Opening a legacy v1 document must not
+      // rewrite it just to record a version — migration to v2 happens on the
+      // first real edit (see the save handler below).
+      if ((m.version === undefined || m.version === null) && needsPersist) {
+        m.version = version;
       }
 
       if (needsPersist) {
@@ -110,16 +117,20 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       const id = typeof m.id === 'string' ? m.id : undefined;
       const assetBaseUrl = await this.computeAssetBaseUrl(webview, document.uri, id);
 
-      // For hd2 the on-disk body is Markdown; the webview only understands HTML,
-      // so convert on the way in. hd1 bodies are already HTML — pass through.
-      const editorBody = flavor === 'hd2' ? hd2BodyToEditorHtml(body) : body;
+      // On disk a v2 body is Markdown (with HTML islands); the webview only
+      // understands HTML, so convert on the way in. A legacy v1 body is already
+      // HTML and passes through unchanged. Either way the editor now runs in v2
+      // mode and the next save serializes back to Markdown.
+      const editorBody = version >= HD_V2 ? hd2BodyToEditorHtml(body) : body;
 
       webview.postMessage({
         type: 'init',
         meta: m,
         body: editorBody,
         assetBaseUrl,
-        flavor
+        // The editor always operates in v2 mode now — every save is v2, so its
+        // v2-only capabilities (interactive checkboxes/radios) are always on.
+        flavor: 'hd2'
       });
     };
 
@@ -138,12 +149,16 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
     webview.onDidReceiveMessage(async (msg: Inbound) => {
       switch (msg.type) {
         case 'change': {
-          // The webview emits HTML for both flavors. For hd2, serialize it back
-          // to Markdown-primary before it hits disk; hd1 stores the HTML as-is.
-          const diskBody = flavor === 'hd2' ? editorHtmlToHd2Body(msg.body) : msg.body;
+          // Every edit is saved in the current format — version 2 (Markdown-
+          // primary). The webview always emits HTML; serialize it to Markdown
+          // with HTML islands before it hits disk, and stamp version 2. A legacy
+          // v1 (HTML) document is migrated to v2 here, on its first save —
+          // nothing rewrites it until the user actually edits.
+          const diskBody = editorHtmlToHd2Body(msg.body);
+          const meta = { ...msg.meta, version: HD_V2 };
           writeGuard = true;
           try {
-            await this.persist(document, msg.meta, diskBody);
+            await this.persist(document, meta, diskBody);
           } finally {
             writeGuard = false;
           }

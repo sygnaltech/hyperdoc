@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { parseDocument } from '../format/parser';
 import { htmlToMarkdown } from './hdToMd';
-import { flavorForPath } from '../format/flavor';
+import { extForPath } from '../format/flavor';
+import { effectiveVersion } from '../format/version';
 
 function isHdLike(name: string): boolean {
   const n = name.toLowerCase();
@@ -19,9 +20,11 @@ export function registerClipboardCommands(): vscode.Disposable[] {
         return;
       }
 
-      const { body } = parseDocument(active.getText());
-      // hd2 bodies are already Markdown; hd1 bodies are HTML and need converting.
-      const md = flavorForPath(active.fileName) === 'hd2' ? body : htmlToMarkdown(body);
+      const { meta, body } = parseDocument(active.getText());
+      // v2 bodies are already Markdown; legacy v1 bodies are HTML and need
+      // converting. The version field is the source of truth, not the extension.
+      const version = effectiveVersion(meta, extForPath(active.fileName), body);
+      const md = version >= 2 ? body : htmlToMarkdown(body);
       await vscode.env.clipboard.writeText(md);
       vscode.window.showInformationMessage('Copied as Markdown.');
     }),

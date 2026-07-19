@@ -1,8 +1,8 @@
 {
   "name": "hd-editor",
   "displayName": "HD Editor",
-  "description": "WYSIWYG editor for .hd documentation files (body-only HTML with optional YAML frontmatter).",
-  "version": "0.1.7",
+  "description": "WYSIWYG editor for .hd documentation files (Markdown-primary with optional YAML frontmatter; legacy HTML .hd and .hd2 still supported).",
+  "version": "0.1.8",
   "publisher": "sygnal",
   "license": "MIT",
   "engines": {

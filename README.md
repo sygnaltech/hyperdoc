@@ -77,7 +77,30 @@ Images live under `.hd/<id>/` next to the document, keyed by the document's stab
 
 ## Installation
 
-The extension is built and installed from source as a `.vsix` package.
+Hyperdoc isn't on the VS Code Marketplace — install it from the packaged `.vsix` on the [Releases page](https://github.com/sygnaltech/hyperdoc/releases/latest). It works in VS Code, Cursor, VS Codium, and other VS Code–based editors.
+
+### Install from a release
+
+1. Go to **[Releases](https://github.com/sygnaltech/hyperdoc/releases/latest)** and download the latest `hyperdoc-<version>.vsix`.
+2. Install it, either way:
+
+   **From the command line:**
+   ```bash
+   code --install-extension hyperdoc-0.1.12.vsix
+   ```
+
+   **From inside VS Code:** open the **Extensions** view (Ctrl+Shift+X) → click the **⋯** menu at the top → **Install from VSIX…** → pick the downloaded file.
+3. **Reload the window:** Ctrl+Shift+P → **"Developer: Reload Window"** (or restart VS Code). A VSIX install does not update windows that are already open.
+
+Once installed it applies to every window and every project — there's no per-project setup. Any `.hd`, `.hd2`, or `.md` file opens in the Hyperdoc editor.
+
+### Updating
+
+Download the newer `.vsix` from Releases and install it the same way (`--install-extension` replaces the old version in place), then reload the window.
+
+### Build from source
+
+To build your own `.vsix` from this repo:
 
 ```powershell
 # 1. Install dependencies (once)

@@ -88,6 +88,12 @@ Any paste that produces a code block or blockquote (in the HTML or Markdown path
 
 **Ctrl+Shift+P** → "**HD: Copy as Markdown**" copies the document's body as Markdown. Elements that round-trip cleanly are emitted as Markdown; everything else is emitted as raw HTML inside the Markdown so no content is lost. The per-element round-trip status is documented in [format-spec.hd](./format-spec.hd).
 
+### Copying from code blocks
+
+Hover a code block and a **copy button** appears in its top-right corner; clicking it copies the whole block to the clipboard.
+
+To copy a **single line** instead, hold **Ctrl** (or **Cmd** on macOS) and move the pointer over the block — the line under the cursor is highlighted one at a time. Click the highlighted line to copy just that line. Release the modifier to return to whole-block copy.
+
 ## Document info
 
 The **ⓘ** button at the right of the toolbar opens a read-only diagnostics panel for the current document. It reports:

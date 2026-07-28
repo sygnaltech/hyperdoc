@@ -50,6 +50,8 @@ async function handleImageFile(file: File): Promise<void> {
 
 function createEditor(initialBody: string) {
   const isBlank = isBlankBody(initialBody);
+  // Set up first so its ProseMirror DOM-event handlers can be wired below.
+  const codeCopy = setupCodeCopy(editorEl);
   editor = new Editor({
     element: editorEl,
     autofocus: isBlank ? 'end' : false,
@@ -94,7 +96,13 @@ function createEditor(initialBody: string) {
       bridge.sendChange(docMeta, html);
     },
     editorProps: {
-      handlePaste: makePasteHandler(() => editor, handleImageFile)
+      handlePaste: makePasteHandler(() => editor, handleImageFile),
+      handleDOMEvents: {
+        // Ctrl/Cmd-click a code line to copy just that line. Handling it here
+        // (returning true) suppresses ProseMirror's own caret/selection logic.
+        mousedown: (_view, event) => codeCopy.handleMouseDown(event as MouseEvent),
+        click: (_view, event) => codeCopy.handleClick(event as MouseEvent)
+      }
     }
   });
 
@@ -102,7 +110,6 @@ function createEditor(initialBody: string) {
   setupTableUI(editor, editorEl);
   setupElementUI(editor);
   setupShortcuts(editor);
-  setupCodeCopy(editorEl);
   setupClickBelowToFocus(editor, editorEl, toolbarEl);
   trackToolbarHeight(toolbarEl);
 }

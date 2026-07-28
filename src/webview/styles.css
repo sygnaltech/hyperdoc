@@ -329,6 +329,33 @@ body {
   height: 16px;
 }
 
+.ProseMirror pre.hd-line-picking {
+  cursor: pointer;
+}
+
+/* Single-line highlight shown while Ctrl/Cmd is held over a code block.
+   A translucent tint + outline — the code underneath must stay readable, so
+   never use an opaque fill here. */
+.hd-code-line-highlight {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--vscode-focusBorder, #4488ff) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vscode-focusBorder, #4488ff) 60%, transparent);
+  transition: background 0.1s, box-shadow 0.1s;
+}
+
+.hd-code-line-highlight.copied {
+  background: color-mix(in srgb, var(--vscode-charts-green, #4ec9b0) 22%, transparent);
+  box-shadow: inset 0 0 0 1px var(--vscode-charts-green, #4ec9b0);
+}
+
+.hd-code-line-highlight.failed {
+  background: color-mix(in srgb, var(--vscode-inputValidation-errorBorder, #f14c4c) 22%, transparent);
+  box-shadow: inset 0 0 0 1px var(--vscode-inputValidation-errorBorder, #f14c4c);
+}
+
 /* ---------- Link dialog ------------------------------------------------ */
 
 .hd-link-backdrop {

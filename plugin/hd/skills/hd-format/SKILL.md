@@ -7,7 +7,9 @@ description: Read, write, and edit .hd documentation files — Markdown-primary 
 
 The `.hd` format is **Markdown-primary** documentation: the body is GitHub-Flavored Markdown, dropping down to **raw-HTML islands** only for the things Markdown can't express losslessly. Use this skill whenever you're reading, writing, or editing files with the `.hd` extension, or producing content that will be saved as `.hd`.
 
-> **Two on-disk versions exist.** Version **2** (the current default, described here) stores the body as Markdown + HTML islands. Version **1** is the older body-only-HTML format. The `version:` frontmatter field — not the file extension — says which one a file is. See [Reading and migrating version 1](#reading-and-migrating-version-1) before editing an older file. The `.hd2` extension is a deprecated alias for a version-2 `.hd` file; it still opens but should not be used for new content.
+> **Two on-disk versions exist.** Version **2** (the current default, described here) stores the body as Markdown + HTML islands. Version **1** is the older body-only-HTML format. The `version:` frontmatter field — not the file extension — says which one a file is. A file is treated as legacy v1 **only when it explicitly declares `version: 1`**; anything else (including a file with no `version:` field) opens as v2. See [Reading and migrating version 1](#reading-and-migrating-version-1) before editing an older file. The `.hd2` extension is a deprecated alias for a version-2 `.hd` file; it still opens but should not be used for new content.
+
+> **Creating a new `.hd`? Use the script, never hand-write the frontmatter.** Run `node plugin/hd/scripts/new-doc.mjs <path.hd> [--title "…"] [--id]`. It stamps `version: 2`, the title, and the date for you — and mints an `id` with `--id` when the doc will hold media. This is the one reliable way to guarantee the version field is present; a hand-authored doc that omits it is the usual cause of a "why is this version 1?" surprise.
 
 ## File structure
 
@@ -34,7 +36,7 @@ Welcome. This is **Markdown**, with an HTML island only where needed:
 </figure>
 ```
 
-> **Always write `version: 2`** in the frontmatter of a document you author or convert. A `.hd` file whose body is non-empty and has **no** `version` is read as legacy version-1 HTML — so a Markdown body without `version: 2` will be misinterpreted as HTML and render as literal text.
+> **Always write `version: 2`** in the frontmatter of a document you author or convert (the `new-doc.mjs` script does this for you). Only an explicit `version: 1` is read as legacy HTML, so a missing field now defaults to v2 — but write `version: 2` anyway, both for clarity and so the doc survives tools that key off the field.
 
 ## Recommended frontmatter fields
 
@@ -119,10 +121,11 @@ reference/media.md covers all of the above in full, plus **id generation** (use 
 
 ## Reading and migrating version 1
 
-Older `.hd` files (and any file with `version: 1`) store the body as **body-only HTML** rather than Markdown. They still open in the editor unchanged.
+A file with an explicit `version: 1` stores the body as **body-only HTML** rather than Markdown. It still opens in the editor unchanged.
 
+- **v1 is opt-in, not the fallback.** The editor treats a file as legacy HTML **only** when it declares `version: 1`. A file with no `version:` field opens as v2/Markdown. So a genuine legacy HTML file that was never stamped must carry `version: 1` to keep rendering as HTML — `node plugin/hd/scripts/stamp-legacy-versions.mjs [dir] --write` finds un-versioned HTML-bodied files and stamps them for you (dry-run without `--write`).
 - **The editor migrates on first edit.** Opening a v1 file leaves it byte-for-byte identical; the first save from the editor re-serializes the body to v2 Markdown and stamps `version: 2`. Opening without editing never rewrites it.
-- **When hand-editing a v1 file**, either (a) leave it as v1 HTML and keep `version: 1` (or no version), or (b) convert the whole body to Markdown + islands and set `version: 2`. Do not mix a Markdown body with a v1/absent version — it will be read as HTML.
+- **When hand-editing a v1 file**, either (a) keep the explicit `version: 1` and leave the body as HTML, or (b) convert the whole body to Markdown + islands and set `version: 2`. Do not keep `version: 1` on a body you've rewritten as Markdown — it will still be read as HTML.
 - **The `.hd2` extension** is a deprecated alias: a `.hd2` file is just a version-2 `.hd`. It still opens, but author new content as `.hd` with `version: 2`.
 
 ## Authoring guidance

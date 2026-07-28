@@ -26,20 +26,27 @@ export const LATEST_FORMAT_VERSION = HD_V2;
 /**
  * Decide how a document's body is stored on disk right now.
  *
- * The declared `version:` wins. When a document doesn't declare one, fall back
- * to: the `.hd2` extension (always meant v2); an empty/new `.hd` body (v2, the
- * default); or a non-empty `.hd` body, which is treated as legacy v1 HTML so
- * existing content is never misparsed as Markdown. Either way, the first save
- * rewrites the body as v2.
+ * Version 2 is THE format; version 1 is legacy-only. So the rule is: a document
+ * is v1 **only when it explicitly declares `version: 1`**. Everything else —
+ * any other declared version, the `.hd2` alias, and crucially a `.hd` with NO
+ * `version:` field (empty or not) — is treated as current v2/Markdown.
+ *
+ * This is deliberately the opposite of "guess v1 for un-versioned non-empty
+ * bodies": a new doc authored without the field must open as v2, not be
+ * misread as HTML and rendered as literal text. The only cost is that a
+ * genuinely-legacy v1 HTML file that was never stamped will now open through
+ * the Markdown path — raw HTML passes through GFM largely intact, and the
+ * first edit migrates it to real v2. Stamp such files with an explicit
+ * `version: 1` (see scripts/stamp-legacy-versions.mjs) if you need them to keep
+ * rendering as body-only HTML.
+ *
+ * `ext`/`body` are retained for signature stability and are no longer needed
+ * for the decision.
  */
 export function effectiveVersion(
   meta: Record<string, unknown> | null | undefined,
-  ext: HdExt,
-  body: string
+  _ext: HdExt,
+  _body: string
 ): typeof HD_V1 | typeof HD_V2 {
-  const declared = Number((meta ?? {}).version);
-  if (declared === HD_V1) return HD_V1;
-  if (declared >= HD_V2) return HD_V2;
-  if (ext === 'hd2') return HD_V2;
-  return body.trim() === '' ? HD_V2 : HD_V1;
+  return Number((meta ?? {}).version) === HD_V1 ? HD_V1 : HD_V2;
 }

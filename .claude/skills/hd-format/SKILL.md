@@ -9,7 +9,7 @@ The `.hd` format is **Markdown-primary** documentation: the body is GitHub-Flavo
 
 > **Two on-disk versions exist.** Version **2** (the current default, described here) stores the body as Markdown + HTML islands. Version **1** is the older body-only-HTML format. The `version:` frontmatter field — not the file extension — says which one a file is. A file is treated as legacy v1 **only when it explicitly declares `version: 1`**; anything else (including a file with no `version:` field) opens as v2. See [Reading and migrating version 1](#reading-and-migrating-version-1) before editing an older file. The `.hd2` extension is a deprecated alias for a version-2 `.hd` file; it still opens but should not be used for new content.
 
-> **Creating a new `.hd`? Use the script, never hand-write the frontmatter.** Run `node plugin/hd/scripts/new-doc.mjs <path.hd> [--title "…"] [--id]`. It stamps `version: 2`, the title, and the date for you — and mints an `id` with `--id` when the doc will hold media. This is the one reliable way to guarantee the version field is present; a hand-authored doc that omits it is the usual cause of a "why is this version 1?" surprise.
+> **Creating a new `.hd`? Use the script, never hand-write the frontmatter.** Run `node plugin/hd/scripts/new-doc.mjs <path.hd> [--title "…"]`. It stamps `version: 2`, the title, the date, **and an `id`** for you. Two reasons this matters: it's the one reliable way to guarantee the `version` field is present (a hand-authored doc that omits it is the usual cause of a "why is this version 1?" surprise), and it stamps the `id` up front so the doc doesn't get **silently rewritten the first time it's opened** — the editor mints a missing `id` on open and saves the file, which reflows the frontmatter and makes the just-created file reappear in your work tree. Pass `--no-id` only for a throwaway you'll never open in the editor.
 
 ## File structure
 
@@ -40,7 +40,7 @@ Welcome. This is **Markdown**, with an HTML island only where needed:
 
 ## Recommended frontmatter fields
 
-- `id` — **required when the doc has media** (images, etc.); optional otherwise. 22-character base62 identifier. The editor auto-generates one on first open if absent, but if you are authoring a doc *with* images you must assign it yourself before placing the images — see [Media](#media). Stable across renames/moves. Never change an existing id; clearing the value (leaving the key) forces the editor to regenerate.
+- `id` — 22-character base62 identifier. **Include it on every doc** (the `new-doc.mjs` script does this by default). The editor auto-generates one on first open if it's absent — but that first open then rewrites the file (reflowing the frontmatter and dirtying your work tree), so stamping it at creation avoids the surprise. It is also **required** before placing media: images resolve to `.hd/<id>/` and there's nothing to key the folder on without it — see [Media](#media). Stable across renames/moves. Never change an existing id; clearing the value (leaving the key) forces the editor to regenerate.
 - `version` — HD format version. **Current version: `2`** (Markdown-primary). Always set it to `2` on new or converted docs. `1` marks a legacy body-only-HTML file.
 - `title`
 - `date`

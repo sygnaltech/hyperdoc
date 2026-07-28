@@ -5,16 +5,20 @@
  * `version: 2` in the frontmatter so the doc can never be misread as legacy v1.
  * Never hand-author the frontmatter — always go through this script.
  *
- *   node new-doc.mjs <path.hd> [--title "Title"] [--id] [--force]
+ *   node new-doc.mjs <path.hd> [--title "Title"] [--no-id] [--force]
  *
  *   node new-doc.mjs docs/guide.hd
  *   node new-doc.mjs docs/guide.hd --title "Getting Started"
- *   node new-doc.mjs docs/hero.hd --title "Hero" --id   # also mints an id
+ *   node new-doc.mjs docs/scratch.hd --no-id   # skip the id (rarely wanted)
  *
  * Flags:
  *   --title "…"  Title frontmatter + H1 stub. Defaults to the file's basename.
- *   --id         Generate a 22-char base62 id (required only when the doc will
- *                hold media; omit otherwise). Matches new-id.mjs / the editor.
+ *   --no-id      Skip the id. By DEFAULT every doc is minted with a 22-char
+ *                base62 id, because the editor stamps one on first open anyway —
+ *                creating the doc with it up front avoids a spurious rewrite (and
+ *                the frontmatter reflow that comes with it) the first time the
+ *                doc is opened. Only skip it for a throwaway you'll never open in
+ *                the editor. (`--id` is still accepted as a no-op.)
  *   --force      Overwrite an existing file. Refuses by default.
  *
  * Prints the path it wrote.
@@ -42,12 +46,13 @@ function generateId() {
 const argv = process.argv.slice(2)
 let target = null
 let title = null
-let wantId = false
+let wantId = true
 let force = false
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i]
   if (a === '--title') title = argv[++i] ?? null
   else if (a === '--id') wantId = true
+  else if (a === '--no-id') wantId = false
   else if (a === '--force') force = true
   else if (!target) target = a
   else {
@@ -57,7 +62,7 @@ for (let i = 0; i < argv.length; i++) {
 }
 
 if (!target) {
-  console.error('Usage: node new-doc.mjs <path.hd> [--title "…"] [--id] [--force]')
+  console.error('Usage: node new-doc.mjs <path.hd> [--title "…"] [--no-id] [--force]')
   process.exit(2)
 }
 

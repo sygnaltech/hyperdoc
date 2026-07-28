@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { parseDocument } from '../format/parser';
 import { serializeDocument } from '../format/serializer';
+import { stampFrontmatterKeys } from '../format/frontmatter';
 import { effectiveVersion, HD_V2 } from '../format/version';
 import { extForUri } from '../format/flavor';
 import { hd2BodyToEditorHtml, editorHtmlToHd2Body } from '../conversion/hd2';
@@ -89,8 +90,13 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       const version = effectiveVersion(m, ext, body);
 
       let needsPersist = false;
+      // Keys the editor stamps on the user's behalf. Tracked separately so the
+      // persist can insert exactly these lines textually and leave every other
+      // frontmatter field byte-for-byte unchanged.
+      const stamp: Record<string, string | number> = {};
       if (reconciled.kind === 'regenerate') {
         m.id = generateId();
+        stamp.id = m.id as string;
         needsPersist = true;
       }
       // 'moved' is a no-op under the flat asset layout — the folder is keyed
@@ -103,12 +109,13 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       // first real edit (see the save handler below).
       if ((m.version === undefined || m.version === null) && needsPersist) {
         m.version = version;
+        stamp.version = version;
       }
 
       if (needsPersist) {
         writeGuard = true;
         try {
-          await this.persist(document, m, body);
+          await this.persist(document, m, body, stamp);
           // The id/version injection above is an editor-initiated change the
           // user never made. Leaving it as an unsaved edit is the root of two
           // problems: (1) the doc shows a mystery "dirty" state the user can't
@@ -396,9 +403,18 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
   private async persist(
     document: vscode.TextDocument,
     meta: Record<string, unknown>,
-    body: string
+    body: string,
+    stamp?: Record<string, string | number>
   ): Promise<void> {
-    const next = serializeDocument(meta, body);
+    // When the only change is an editor-initiated stamp (a minted id, a
+    // recorded version), insert those keys textually instead of re-dumping the
+    // whole frontmatter — a full round-trip would reflow untouched fields
+    // (dates → ISO, flow lists → block lists, folded descriptions) and show up
+    // as spurious work-tree churn. Falls back to full serialization when the
+    // doc has no frontmatter fence to append to.
+    const next =
+      (stamp && stampFrontmatterKeys(document.getText(), stamp)) ||
+      serializeDocument(meta, body);
     if (next === document.getText()) return;
     const edit = new vscode.WorkspaceEdit();
     const fullRange = new vscode.Range(

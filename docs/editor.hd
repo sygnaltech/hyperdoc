@@ -125,3 +125,5 @@ Documents carry a `version` field in their frontmatter. The current version is `
 ## Sync with disk
 
 When the editor injects an `id` or `version` on open, it **saves that change straight to disk** rather than leaving it as an unsaved edit. This keeps the file and the editor in sync and avoids a confusing "unsaved changes" state you never created. It also means that if an agent or other tool rewrites the `.hd` file on disk while it's open and you have no pending edits, the editor reloads to match — a document left dirty by the injection would otherwise block that automatic reload.
+
+The injection is a **minimal, surgical edit**: the new `id`/`version` line is inserted textually and every other frontmatter field is left byte-for-byte untouched. It does not re-serialize the YAML, so bare dates, flow-style lists (`[a, b]`), and long folded strings are preserved exactly as you wrote them — the only change in the resulting diff is the line that was added.

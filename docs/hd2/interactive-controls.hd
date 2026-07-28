@@ -1,109 +1,112 @@
 ---
 title: Interactive Controls (Checkboxes & Radios)
-date: 2026-07-13T00:00:00.000Z
-description: How HD2 supports clickable checkboxes and radio buttons — the markdown syntax, the saved state, and the agent-review workflow.
+date: '2026-07-13T00:00:00.000Z'
+description: >-
+  How HD2 supports clickable checkboxes and radio buttons — the markdown syntax, the saved state, and the agent-review
+  workflow.
 id: 18DqiVPldk0H1ozQmuoaL3
-version: 1
+version: 2
 ---
 
-<h1>Interactive Controls (Checkboxes &amp; Radios)</h1>
+# Interactive Controls (Checkboxes & Radios)
 
-<p>HD2 supports <strong>clickable checkboxes and radio buttons</strong>. You (or an agent) write them in Markdown; a reader toggles them in the HD editor; the selected state is saved back into the document so an agent can read the choices later. This is built for review-and-approve workflows — an agent proposes changes, a human approves a subset, the agent applies exactly what was approved.</p>
+HD2 supports **clickable checkboxes and radio buttons**. You (or an agent) write them in Markdown; a reader toggles them in the HD editor; the selected state is saved back into the document so an agent can read the choices later. This is built for review-and-approve workflows — an agent proposes changes, a human approves a subset, the agent applies exactly what was approved.
 
-<aside>
-  <p><strong>HD2 only.</strong> Interactive controls are a capability of the experimental <code>.hd2</code> flavor. They are not available in <code>.hd</code> documents.</p>
-</aside>
+**HD2 only.** Interactive controls are a capability of the experimental `.hd2` flavor. They are not available in `.hd` documents.
 
-<h2>Why not real form controls?</h2>
+## Why not real form controls?
 
-<p>HD forbids form elements (<code>input</code>, <code>button</code>, <code>select</code>, …) by design. So HD2 does <em>not</em> store a checkbox control — it stores the <strong>state</strong> in data attributes and renders an interactive control only inside the editor. The saved markup is inert, allow-listed HTML, which is also easier for an agent to read than a disabled form input.</p>
+HD forbids form elements (`input`, `button`, `select`, …) by design. So HD2 does *not* store a checkbox control — it stores the **state** in data attributes and renders an interactive control only inside the editor. The saved markup is inert, allow-listed HTML, which is also easier for an agent to read than a disabled form input.
 
-<h2>Checkboxes</h2>
+## Checkboxes
 
-<p>Checkboxes use the standard <strong>GFM task list</strong> syntax. Put a bracket marker at the start of a list item:</p>
+Checkboxes use the standard **GFM task list** syntax. Put a bracket marker at the start of a list item:
 
-<pre><code class="language-markdown">- [x] Apply the database migration
+```markdown
+- [x] Apply the database migration
 - [ ] Update the config file
-- [ ] Restart the worker</code></pre>
+- [ ] Restart the worker
+```
 
-<p><code>[x]</code> is checked; <code>[ ]</code> is unchecked. In the editor each item shows a real checkbox you can click. Checkboxes are independent — any number can be checked at once.</p>
+`[x]` is checked; `[ ]` is unchecked. In the editor each item shows a real checkbox you can click. Checkboxes are independent — any number can be checked at once.
 
-<h2>Radio buttons</h2>
+## Radio buttons
 
-<p>Radios use an HD2 convention that parallels checkboxes — <strong>parentheses instead of brackets</strong> at the start of a list item:</p>
+Radios use an HD2 convention that parallels checkboxes — **parentheses instead of brackets** at the start of a list item:
 
-<pre><code class="language-markdown">- ( ) Roll back fully
+```markdown
+- ( ) Roll back fully
 - (x) Roll back partially
-- ( ) Leave in place</code></pre>
+- ( ) Leave in place
+```
 
-<p><code>(x)</code> is the selected option; <code>( )</code> is unselected. Radios behave as a single-select group with two important rules:</p>
+`(x)` is the selected option; `( )` is unselected. Radios behave as a single-select group with two important rules:
 
-<ul>
-  <li><strong>Consecutive radios are one group.</strong> They are mutually exclusive — selecting one clears the others. A blank line (or any content) between two radios starts a separate group.</li>
-  <li><strong>Selecting is reversible.</strong> Clicking the already-selected radio <em>deselects</em> it, so a group can legitimately have nothing selected — useful when "no decision yet" is a meaningful state during review.</li>
+-   **Consecutive radios are one group.** They are mutually exclusive — selecting one clears the others. A blank line (or any content) between two radios starts a separate group.
+    
+-   **Selecting is reversible.** Clicking the already-selected radio *deselects* it, so a group can legitimately have nothing selected — useful when "no decision yet" is a meaningful state during review.
+    
+
+### Naming a group (optional)
+
+A group can carry an optional name so an agent can reference it unambiguously (e.g. "the answer to the rollback question"). A named group is stored as a small HTML block rather than paren-markers, because the name has nowhere to live in the `( )` syntax:
+
+```html
+<ul data-type="radiogroup" data-group="rollback-strategy">
+  <li data-type="radio" data-checked="true">Roll back fully</li>
+  <li data-type="radio" data-checked="false">Roll back partially</li>
 </ul>
+```
 
-<h3>Naming a group (optional)</h3>
+Unnamed groups stay as clean `- ( )` Markdown; add a name only when you need one.
 
-<p>A group can carry an optional name so an agent can reference it unambiguously (e.g. "the answer to the rollback question"). A named group is stored as a small HTML block rather than paren-markers, because the name has nowhere to live in the <code>( )</code> syntax:</p>
+## How state is stored
 
-<pre><code class="language-html">&lt;ul data-type="radiogroup" data-group="rollback-strategy"&gt;
-  &lt;li data-type="radio" data-checked="true"&gt;Roll back fully&lt;/li&gt;
-  &lt;li data-type="radio" data-checked="false"&gt;Roll back partially&lt;/li&gt;
-&lt;/ul&gt;</code></pre>
+Whatever is selected when the document is saved is written into the file. In the raw `.hd2` source that is simply the marker itself — `[x]`, `[ ]`, `(x)`, `( )`. Internally, and in a named radio group, the state is the `data-checked` attribute:
 
-<p>Unnamed groups stay as clean <code>- ( )</code> Markdown; add a name only when you need one.</p>
+| Control | Unset in source | Set in source | Editor |
+| --- | --- | --- | --- |
+| Checkbox | `- [ ]` | `- [x]` | Clickable checkbox; any number checked. |
+| Radio | `- ( )` | `- (x)` | Clickable circle; one-per-group, deselectable. |
 
-<h2>How state is stored</h2>
+Because the state is part of the saved content, the review loop is closed: the agent reads the current markers, sees exactly what the human approved, and acts only on those.
 
-<p>Whatever is selected when the document is saved is written into the file. In the raw <code>.hd2</code> source that is simply the marker itself — <code>[x]</code>, <code>[ ]</code>, <code>(x)</code>, <code>( )</code>. Internally, and in a named radio group, the state is the <code>data-checked</code> attribute:</p>
+## The remediation workflow
 
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Control</th>
-      <th>Unset in source</th>
-      <th>Set in source</th>
-      <th>Editor</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td>Checkbox</td><td><code>- [ ]</code></td><td><code>- [x]</code></td><td>Clickable checkbox; any number checked.</td></tr>
-    <tr><td>Radio</td><td><code>- ( )</code></td><td><code>- (x)</code></td><td>Clickable circle; one-per-group, deselectable.</td></tr>
-  </tbody>
-</table>
+1.  **Agent proposes.** It generates a `.hd2` file listing recommended changes as checkboxes (approve any) and decisions as radio groups (pick one).
+    
+2.  **Human reviews.** Opening the file in the HD editor shows real, clickable controls. The reviewer checks the changes to apply and picks options where a single choice is needed.
+    
+3.  **State saves.** Each toggle is an edit, so the selections are written straight back into the `.hd2` file.
+    
+4.  **Agent applies.** It re-reads the file and applies exactly the checked items and selected options — nothing more.
+    
 
-<p>Because the state is part of the saved content, the review loop is closed: the agent reads the current markers, sees exactly what the human approved, and acts only on those.</p>
+## Grouping is by adjacency
 
-<h2>The remediation workflow</h2>
+A radio group is a **run of consecutive radio lines**. There is no explicit group syntax — adjacency defines the group:
 
-<ol>
-  <li><strong>Agent proposes.</strong> It generates a <code>.hd2</code> file listing recommended changes as checkboxes (approve any) and decisions as radio groups (pick one).</li>
-  <li><strong>Human reviews.</strong> Opening the file in the HD editor shows real, clickable controls. The reviewer checks the changes to apply and picks options where a single choice is needed.</li>
-  <li><strong>State saves.</strong> Each toggle is an edit, so the selections are written straight back into the <code>.hd2</code> file.</li>
-  <li><strong>Agent applies.</strong> It re-reads the file and applies exactly the checked items and selected options — nothing more.</li>
-</ol>
+-   Radio lines with nothing between them are **one** mutually-exclusive group.
+    
+-   A **blank line** — or any other content — between two radios starts a new group. This is how you split a set of options into separate questions.
+    
+-   At most one item in a group can be selected (zero is allowed). Toggling only ever affects the clicked item's own group — never a neighbouring one.
+    
 
-<h2>Grouping is by adjacency</h2>
+Use a [named group](#) (the `data-group` form above) only when you need to label a group for an agent to reference; otherwise adjacency is all you need.
 
-<p>A radio group is a <strong>run of consecutive radio lines</strong>. There is no explicit group syntax — adjacency defines the group:</p>
+## Authoring notes
 
-<ul>
-  <li>Radio lines with nothing between them are <strong>one</strong> mutually-exclusive group.</li>
-  <li>A <strong>blank line</strong> — or any other content — between two radios starts a new group. This is how you split a set of options into separate questions.</li>
-  <li>At most one item in a group can be selected (zero is allowed). Toggling only ever affects the clicked item's own group — never a neighbouring one.</li>
-</ul>
-
-<p>Use a <a target="_blank" rel="noopener" href="#">named group</a> (the <code>data-group</code> form above) only when you need to label a group for an agent to reference; otherwise adjacency is all you need.</p>
-
-<h2>Authoring notes</h2>
-
-<ul>
-  <li>Each control is a <strong>whole line</strong> — a list item whose marker is at the start: <code>- [ ]</code> or <code>- ( )</code>.</li>
-  <li><strong>In the editor</strong>, typing the marker at the start of a line creates the control: <code>[]&nbsp;</code> makes a checkbox, <code>()&nbsp;</code> makes a radio. A control is only ever created by typing its marker — <strong>Enter never auto-creates one</strong>.</li>
-  <li><strong>Enter</strong> behaves by position: on the last item of a group it ends the group and drops you to a normal new line; on an item that has items after it, it <strong>splits the group</strong> there (the following items become a separate group); on an empty item it removes it.</li>
-  <li>Typing a second control right after the first <strong>joins the same group</strong>. To start a separate group, leave a blank line before it.</li>
-  <li>Don't mix checkbox and radio markers in the same run; each run is one kind of control.</li>
-  <li>Checkbox syntax is standard GFM, so agents already know how to produce it. Radio syntax (<code>( )</code>) is HD2-specific — tell the agent the convention when you want single-select groups.</li>
-  <li>Controls survive a full round-trip: opening, toggling, and saving re-emits the same clean Markdown, changing only the marker state.</li>
-</ul>
+-   Each control is a **whole line** — a list item whose marker is at the start: `- [ ]` or `- ( )`.
+    
+-   **In the editor**, typing the marker at the start of a line creates the control: `[]`  makes a checkbox, `()`  makes a radio. A control is only ever created by typing its marker — **Enter never auto-creates one**.
+    
+-   **Enter** behaves by position: on the last item of a group it ends the group and drops you to a normal new line; on an item that has items after it, it **splits the group** there (the following items become a separate group); on an empty item it removes it.
+    
+-   Typing a second control right after the first **joins the same group**. To start a separate group, leave a blank line before it.
+    
+-   Don't mix checkbox and radio markers in the same run; each run is one kind of control.
+    
+-   Checkbox syntax is standard GFM, so agents already know how to produce it. Radio syntax (`( )`) is HD2-specific — tell the agent the convention when you want single-select groups.
+    
+-   Controls survive a full round-trip: opening, toggling, and saving re-emits the same clean Markdown, changing only the marker state.

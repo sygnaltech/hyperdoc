@@ -3,39 +3,119 @@ title: Editor Features
 date: '2026-06-13T00:00:00.000Z'
 description: The HD WYSIWYG editor's toolbar, table manipulation, paste behavior, and clipboard interop.
 id: 1LnQlEBfma2D4bx1wJidgK
-version: 1
+version: 2
 ---
 
-<h1>Editor Features</h1>
+# Editor Features
 
-<h2>Keyboard shortcuts</h2>
+## Keyboard shortcuts
 
-<p>All shortcuts use <strong>Ctrl</strong> on Windows/Linux and <strong>Cmd</strong> on macOS. They work whenever the editor has focus.</p>
+All shortcuts use **Ctrl** on Windows/Linux and **Cmd** on macOS. They work whenever the editor has focus.
 
-<table>
-  <thead>
-    <tr><th>Shortcut</th><th>Action</th></tr>
-  </thead>
-  <tbody>
-    <tr><td><strong>Ctrl+K</strong></td><td>Insert or edit link. If the cursor is inside an existing link, the dialog pre-fills with the current URL and the whole link is replaced on OK. If text is selected, that selection becomes the link text. The dialog supports full URLs, hand-typed relative paths, and a picker of other HD documents in the same publish group.</td></tr>
-    <tr><td><strong>Ctrl+B</strong></td><td>Bold (toggle).</td></tr>
-    <tr><td><strong>Ctrl+I</strong></td><td>Italic (toggle).</td></tr>
-    <tr><td><strong>Ctrl+U</strong></td><td>Underline (toggle).</td></tr>
-    <tr><td><strong>Ctrl+E</strong></td><td>Inline code (toggle).</td></tr>
-    <tr><td><strong>Ctrl+Shift+H</strong></td><td>Highlight (toggle) — wraps the selection in <code>&lt;mark&gt;</code>, rendered as a standard yellow highlight.</td></tr>
-    <tr><td><strong>Ctrl+Shift+X</strong></td><td>Strikethrough (toggle).</td></tr>
-    <tr><td><strong>Ctrl+Alt+1</strong> … <strong>Ctrl+Alt+6</strong></td><td>Set the current block to a heading of level 1–6.</td></tr>
-    <tr><td><strong>Ctrl+Alt+0</strong></td><td>Set the current block back to a paragraph.</td></tr>
-    <tr><td><strong>Ctrl+Shift+8</strong></td><td>Toggle bullet list.</td></tr>
-    <tr><td><strong>Ctrl+Shift+7</strong></td><td>Toggle numbered list.</td></tr>
-    <tr><td><strong>Ctrl+Shift+B</strong></td><td>Toggle blockquote.</td></tr>
-    <tr><td><strong>Ctrl+Shift+V</strong></td><td>Paste as plain text — clipboard formatting and Markdown are ignored; content is inserted as plain paragraphs (or, inside a code block, as verbatim text). Leading and trailing blank lines are trimmed.</td></tr>
-    <tr><td><strong>Ctrl+;</strong></td><td>Insert today's date at the cursor in <code>DD MMM YYYY</code> format (e.g. <code>04 Jul 2026</code>).</td></tr>
-    <tr><td><strong>Ctrl+Z</strong> / <strong>Ctrl+Shift+Z</strong></td><td>Undo / Redo.</td></tr>
-    <tr><td><strong>Ctrl+Shift+P</strong> → "HD: Copy as Markdown"</td><td>Copy the current document's body as Markdown.</td></tr>
-  </tbody>
-</table>
+| Shortcut | Action |
+| --- | --- |
+| **Ctrl+K** | Insert or edit link. If the cursor is inside an existing link, the dialog pre-fills with the current URL and the whole link is replaced on OK. If text is selected, that selection becomes the link text. The dialog supports full URLs, hand-typed relative paths, and a picker of other HD documents in the same publish group. |
+| **Ctrl+B** | Bold (toggle). |
+| **Ctrl+I** | Italic (toggle). |
+| **Ctrl+U** | Underline (toggle). |
+| **Ctrl+E** | Inline code (toggle). |
+| **Ctrl+Shift+H** | Highlight (toggle) — wraps the selection in `<mark>`, rendered as a standard yellow highlight. |
+| **Ctrl+Shift+X** | Strikethrough (toggle). |
+| **Ctrl+Alt+1** … **Ctrl+Alt+6** | Set the current block to a heading of level 1–6. |
+| **Ctrl+Alt+0** | Set the current block back to a paragraph. |
+| **Ctrl+Shift+8** | Toggle bullet list. |
+| **Ctrl+Shift+7** | Toggle numbered list. |
+| **Ctrl+Shift+B** | Toggle blockquote. |
+| **Ctrl+Shift+V** | Paste as plain text — clipboard formatting and Markdown are ignored; content is inserted as plain paragraphs (or, inside a code block, as verbatim text). Leading and trailing blank lines are trimmed. |
+| **Ctrl+;** | Insert today's date at the cursor in `DD MMM YYYY` format (e.g. `04 Jul 2026`). |
+| **Ctrl+Z** / **Ctrl+Shift+Z** | Undo / Redo. |
+| **Ctrl+Shift+P** → "HD: Copy as Markdown" | Copy the current document's body as Markdown. |
 
-<p>The toolbar exposes the same actions as visible buttons — the shortcuts are an accelerator, not a replacement. The toolbar stays fixed at the top of the editor pane as you scroll, so it's always reachable.</p>
+The toolbar exposes the same actions as visible buttons — the shortcuts are an accelerator, not a replacement. The toolbar stays fixed at the top of the editor pane as you scroll, so it's always reachable.
 
-<h2>Toolbar</h2><p>Headings (H1–H3 buttons; H4–H6 via Markdown shortcuts), bold, italic, underline, highlight, inline code, code block, link, bullet list, ordered list, blockquote, horizontal rule, insert table. At the right-hand end sits an <strong>ⓘ Document info</strong> button that opens the diagnostics panel described below.</p><h2>Tables</h2><p>HD tables support the full HTML capability set — <code>colspan</code>, <code>rowspan</code>, multi-paragraph cells, inline styles, header rows and columns. The editor provides three ways to manipulate them.</p><h3>Hover insert</h3><ul><li><p><strong>Columns</strong>: hover near the top of a table — within ~28 px above the top edge or anywhere in the header row — to see <strong>+</strong> buttons at every column boundary, including far left and far right. Click any one to insert a column at that boundary.</p></li><li><p><strong>Rows</strong>: hover near the left of a table to see <strong>+</strong> buttons at every row boundary, including above the first row and below the last. Click to insert a row.</p></li></ul><h3>Right-click menu</h3><p>Right-click any table cell for the full menu:</p><ul><li><p>Insert column before / after / delete column</p></li><li><p>Insert row above / below / delete row</p></li><li><p>Toggle header row / header column</p></li><li><p>Delete table</p></li></ul><h3>Resize columns</h3><p>Hover within a couple of pixels of a vertical column boundary — the cursor changes to a horizontal resize indicator. Drag to resize. The chosen widths are stored as inline <code>style</code>/<code>colwidth</code> attributes and round-trip with the document.</p><h2>Paste behavior</h2><p>The paste handler dispatches based on clipboard content type, in this order:</p><ol><li><p><strong>Image file</strong> — saved to the document's asset folder as <code>image-N.&lt;ext&gt;</code>; an <code>&lt;img&gt;</code> reference with the bare filename is inserted at the cursor.</p></li><li><p><strong>Inside a code block or blockquote</strong> — pasted content is always treated as plain text, regardless of clipboard format. No HTML or Markdown conversion happens, so you can paste code or quoted prose without it turning into rich formatting. Inside a code block newlines are preserved verbatim.</p></li><li><p><strong>Plain text that is HTML markup</strong> — when the clipboard's plain text is itself HTML (copied source, generated markup, or a code editor that only exposes syntax-highlighted HTML), it is rendered as HTML, sanitized to the allowed elements so the original structure is preserved as closely as possible. This is preferred over the clipboard's HTML flavor, which for such copies is only highlighting of the same source. The text must begin with a tag, so prose containing a stray <code>&lt;</code> is not misread as HTML. Pasting the same source into a code block instead keeps it raw (see above).</p></li><li><p><strong>HTML</strong> — clipboard HTML (from a browser, Notion, Linear, etc.) sanitized against the HD allow-list (disallowed elements are unwrapped, disallowed attributes stripped) and inserted. Office-style <code>StartFragment</code> / <code>EndFragment</code> wrappers are stripped first.</p></li><li><p><strong>Markdown-flavored plain text</strong> — detected by a conservative heuristic (needs at least two distinct Markdown markers across headings, lists, code fences, links, bold, tables); converted via <code>marked</code>, sanitized, inserted.</p></li><li><p><strong>Plain text</strong> — falls through to the editor's default plain-text handling. No code-block wrapping.</p></li></ol><p>Any paste that produces a code block or blockquote (in the HTML or Markdown paths) is normalized so the block has <strong>no leading or trailing blank lines</strong>. Use <strong>Ctrl+Shift+V</strong> to force plain-text paste anywhere.</p><h2>Clipboard out</h2><p><strong>Ctrl+Shift+P</strong> → "<strong>HD: Copy as Markdown</strong>" copies the document's body as Markdown. Elements that round-trip cleanly are emitted as Markdown; everything else is emitted as raw HTML inside the Markdown so no content is lost. The per-element round-trip status is documented in <a target="_blank" rel="noopener" href="./format-spec.hd">format-spec.hd</a>.</p><h2>Document info</h2><p>The <strong>ⓘ</strong> button at the right of the toolbar opens a read-only diagnostics panel for the current document. It reports:</p><ul><li><p><strong>Document</strong> — the file name and its path relative to the workspace root.</p></li><li><p><strong>Format</strong> — the on-disk version (2, Markdown-primary; or 1, legacy body-only HTML), the file extension (noting when <code>.hd2</code> is the deprecated alias), and the document <code>id</code>.</p></li><li><p><strong>Frontmatter</strong> — every other frontmatter field and its value.</p></li><li><p><strong>Assets</strong> — the document's <code>.hd/&lt;id&gt;/</code> asset folder (with a note when it's on the legacy mirrored layout), and the list of files it contains with their sizes. Click the folder path to reveal it in the OS file explorer, or click any asset to reveal that file. A document with no <code>id</code> has no asset folder, and the panel says so.</p></li></ul><p>Nothing in the panel changes the document — it's purely for diagnostics. Click outside it or press <strong>Esc</strong> to close.</p><h2>Document identity</h2><p>Every <code>.hd</code> file gets a 22-character base62 <code>id</code> in its frontmatter on first open. The id is stable across renames and moves and is what asset folders are keyed by.</p><ul><li><p>To force regeneration (e.g., when using a template), clear the <code>id:</code> value and reopen the file.</p></li><li><p>If you duplicate an <code>.hd</code> file in the explorer, the editor detects the duplicate id on next open and regenerates the new file's id automatically.</p></li></ul><h2>Format version</h2><p>Documents carry a <code>version</code> field in their frontmatter. The current version is <code>2</code> (Markdown-primary), and it is the source of truth for how the body is stored — not the file extension. New documents are created as v2, and every save writes <code>version: 2</code>, so a legacy v1 (body-only HTML) document is migrated to v2 the first time you edit it. Opening a v1 document without editing it leaves it untouched. A non-empty <code>.hd</code> with no version is read as legacy v1 HTML.</p><h2>Sync with disk</h2><p>When the editor injects an <code>id</code> or <code>version</code> on open, it <strong>saves that change straight to disk</strong> rather than leaving it as an unsaved edit. This keeps the file and the editor in sync and avoids a confusing "unsaved changes" state you never created. It also means that if an agent or other tool rewrites the <code>.hd</code> file on disk while it's open and you have no pending edits, the editor reloads to match — a document left dirty by the injection would otherwise block that automatic reload.</p>
+## Toolbar
+
+Headings (H1–H3 buttons; H4–H6 via Markdown shortcuts), bold, italic, underline, highlight, inline code, code block, link, bullet list, ordered list, blockquote, horizontal rule, insert table. At the right-hand end sits an **ⓘ Document info** button that opens the diagnostics panel described below.
+
+## Tables
+
+HD tables support the full HTML capability set — `colspan`, `rowspan`, multi-paragraph cells, inline styles, header rows and columns. The editor provides three ways to manipulate them.
+
+### Hover insert
+
+-   **Columns**: hover near the top of a table — within ~28 px above the top edge or anywhere in the header row — to see **+** buttons at every column boundary, including far left and far right. Click any one to insert a column at that boundary.
+    
+-   **Rows**: hover near the left of a table to see **+** buttons at every row boundary, including above the first row and below the last. Click to insert a row.
+    
+
+### Right-click menu
+
+Right-click any table cell for the full menu:
+
+-   Insert column before / after / delete column
+    
+-   Insert row above / below / delete row
+    
+-   Toggle header row / header column
+    
+-   Delete table
+    
+
+### Resize columns
+
+Hover within a couple of pixels of a vertical column boundary — the cursor changes to a horizontal resize indicator. Drag to resize. The chosen widths are stored as inline `style`/`colwidth` attributes and round-trip with the document.
+
+## Paste behavior
+
+The paste handler dispatches based on clipboard content type, in this order:
+
+1.  **Image file** — saved to the document's asset folder as `image-N.<ext>`; an `<img>` reference with the bare filename is inserted at the cursor.
+    
+2.  **Inside a code block or blockquote** — pasted content is always treated as plain text, regardless of clipboard format. No HTML or Markdown conversion happens, so you can paste code or quoted prose without it turning into rich formatting. Inside a code block newlines are preserved verbatim.
+    
+3.  **Plain text that is HTML markup** — when the clipboard's plain text is itself HTML (copied source, generated markup, or a code editor that only exposes syntax-highlighted HTML), it is rendered as HTML, sanitized to the allowed elements so the original structure is preserved as closely as possible. This is preferred over the clipboard's HTML flavor, which for such copies is only highlighting of the same source. The text must begin with a tag, so prose containing a stray `<` is not misread as HTML. Pasting the same source into a code block instead keeps it raw (see above).
+    
+4.  **HTML** — clipboard HTML (from a browser, Notion, Linear, etc.) sanitized against the HD allow-list (disallowed elements are unwrapped, disallowed attributes stripped) and inserted. Office-style `StartFragment` / `EndFragment` wrappers are stripped first.
+    
+5.  **Markdown-flavored plain text** — detected by a conservative heuristic (needs at least two distinct Markdown markers across headings, lists, code fences, links, bold, tables); converted via `marked`, sanitized, inserted.
+    
+6.  **Plain text** — falls through to the editor's default plain-text handling. No code-block wrapping.
+    
+
+Any paste that produces a code block or blockquote (in the HTML or Markdown paths) is normalized so the block has **no leading or trailing blank lines**. Use **Ctrl+Shift+V** to force plain-text paste anywhere.
+
+## Clipboard out
+
+**Ctrl+Shift+P** → "**HD: Copy as Markdown**" copies the document's body as Markdown. Elements that round-trip cleanly are emitted as Markdown; everything else is emitted as raw HTML inside the Markdown so no content is lost. The per-element round-trip status is documented in [format-spec.hd](./format-spec.hd).
+
+## Document info
+
+The **ⓘ** button at the right of the toolbar opens a read-only diagnostics panel for the current document. It reports:
+
+-   **Document** — the file name and its path relative to the workspace root.
+    
+-   **Format** — the on-disk version (2, Markdown-primary; or 1, legacy body-only HTML), the file extension (noting when `.hd2` is the deprecated alias), and the document `id`.
+    
+-   **Frontmatter** — every other frontmatter field and its value.
+    
+-   **Assets** — the document's `.hd/<id>/` asset folder (with a note when it's on the legacy mirrored layout), and the list of files it contains with their sizes. Click the folder path to reveal it in the OS file explorer, or click any asset to reveal that file. A document with no `id` has no asset folder, and the panel says so.
+    
+
+Nothing in the panel changes the document — it's purely for diagnostics. Click outside it or press **Esc** to close.
+
+## Document identity
+
+Every `.hd` file gets a 22-character base62 `id` in its frontmatter on first open. The id is stable across renames and moves and is what asset folders are keyed by.
+
+-   To force regeneration (e.g., when using a template), clear the `id:` value and reopen the file.
+    
+-   If you duplicate an `.hd` file in the explorer, the editor detects the duplicate id on next open and regenerates the new file's id automatically.
+    
+
+## Format version
+
+Documents carry a `version` field in their frontmatter. The current version is `2` (Markdown-primary), and it is the source of truth for how the body is stored — not the file extension. New documents are created as v2, and every save writes `version: 2`, so a legacy v1 (body-only HTML) document is migrated to v2 the first time you edit it. Opening a v1 document without editing it leaves it untouched. A non-empty `.hd` with no version is read as legacy v1 HTML.
+
+## Sync with disk
+
+When the editor injects an `id` or `version` on open, it **saves that change straight to disk** rather than leaving it as an unsaved edit. This keeps the file and the editor in sync and avoids a confusing "unsaved changes" state you never created. It also means that if an agent or other tool rewrites the `.hd` file on disk while it's open and you have no pending edits, the editor reloads to match — a document left dirty by the injection would otherwise block that automatic reload.

@@ -5,10 +5,34 @@ description: >-
   How to publish .hd documentation to external platforms like Nextra, Docusaurus, and GitBook using the hd Claude plugin
   and the /hd:sync slash command.
 id: 4HLiE33aIsNkruAxLekiDd
-version: 1
+version: 2
 ---
 
-<h1>Sync to External Platforms</h1><p>HD is the source format. To deliver documentation to readers you publish it to an external platform — Nextra, Docusaurus, GitBook, and so on. The <code>hd</code> Claude plugin handles this with a single slash command, <code>/hd:sync</code>, driven by a small per-directory config file.</p><h2>The model</h2><ul><li><p><strong>One source directory</strong> — the folder of <code>.hd</code> files you want to publish.</p></li><li><p><strong>One config file</strong> — <code>hd-sync.json</code>, placed inside that directory. It defines what counts as part of the export and where it goes.</p></li><li><p><strong>One or more destinations</strong> — each destination is a publishing target with its own platform type (e.g., Nextra 4) and its own output location. A single source can publish to many destinations at once.</p></li><li><p><strong>The slash command</strong> — <code>/hd:sync</code> discovers configs in the codebase, lets you pick a destination, and runs the conversion.</p></li></ul><p>Sync is one-way: HD → target. Files in the target are generated artifacts and will be overwritten on the next run.</p><h2>Setting up a directory to sync</h2><h3>1. Create <code>hd-sync.json</code> in the source directory</h3><p>Place the file alongside the <code>.hd</code> files it controls. The config holds an array of destinations:</p><pre><code class="language-json">{
+# Sync to External Platforms
+
+HD is the source format. To deliver documentation to readers you publish it to an external platform — Nextra, Docusaurus, GitBook, and so on. The `hd` Claude plugin handles this with a single slash command, `/hd:sync`, driven by a small per-directory config file.
+
+## The model
+
+-   **One source directory** — the folder of `.hd` files you want to publish.
+    
+-   **One config file** — `hd-sync.json`, placed inside that directory. It defines what counts as part of the export and where it goes.
+    
+-   **One or more destinations** — each destination is a publishing target with its own platform type (e.g., Nextra 4) and its own output location. A single source can publish to many destinations at once.
+    
+-   **The slash command** — `/hd:sync` discovers configs in the codebase, lets you pick a destination, and runs the conversion.
+    
+
+Sync is one-way: HD → target. Files in the target are generated artifacts and will be overwritten on the next run.
+
+## Setting up a directory to sync
+
+### 1\. Create `hd-sync.json` in the source directory
+
+Place the file alongside the `.hd` files it controls. The config holds an array of destinations:
+
+```json
+{
   "destinations": [
     {
       "name": "nextra 4",
@@ -26,15 +50,98 @@ version: 1
       }
     }
   ]
-}</code></pre><h3>2. Common destination fields</h3><table style="min-width: 75px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Field</p></th><th colspan="1" rowspan="1"><p>Required</p></th><th colspan="1" rowspan="1"><p>Notes</p></th></tr><tr><td colspan="1" rowspan="1"><p><code>name</code></p></td><td colspan="1" rowspan="1"><p>yes</p></td><td colspan="1" rowspan="1"><p>Unique label within this config. Shown in the destination picker.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>type</code></p></td><td colspan="1" rowspan="1"><p>yes</p></td><td colspan="1" rowspan="1"><p>Converter key. Currently supported: <code>nextra4</code>.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>path</code></p></td><td colspan="1" rowspan="1"><p>yes</p></td><td colspan="1" rowspan="1"><p>Path to the target project root. Resolved relative to the config file.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>description</code></p></td><td colspan="1" rowspan="1"><p>no</p></td><td colspan="1" rowspan="1"><p>One-line description shown in the destination picker.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>routePrefix</code></p></td><td colspan="1" rowspan="1"><p>no</p></td><td colspan="1" rowspan="1"><p>String prepended to internal link URLs and to the asset folder path. Required when multiple HD projects publish into the same target repo. See <a target="_blank" rel="noopener" href="#multi-project">Sharing a target repo</a>.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>deleteOrphans</code></p></td><td colspan="1" rowspan="1"><p>no</p></td><td colspan="1" rowspan="1"><p><code>true</code> | <code>false</code> | <code>"warn"</code> (default <code>"warn"</code>). Controls whether stale files in the target are removed, warned about, or ignored. See <a target="_blank" rel="noopener" href="#orphans">Orphan handling</a>.</p></td></tr></tbody></table><p>Additional fields are owned by each destination type. The <code>nextra4</code> type accepts <code>contentDir</code>, <code>publicDir</code>, <code>assetMap</code>, and <code>meta</code> — see the <code>hd-to-mdx</code> skill for the full reference.</p><h3>3. Multiple destinations</h3><p>To publish the same source to several platforms, add more entries to the <code>destinations</code> array:</p><pre><code class="language-json">{
+}
+```
+
+### 2\. Common destination fields
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `name` | yes | Unique label within this config. Shown in the destination picker. |
+| `type` | yes | Converter key. Currently supported: `nextra4`. |
+| `path` | yes | Path to the target project root. Resolved relative to the config file. |
+| `description` | no | One-line description shown in the destination picker. |
+| `routePrefix` | no | String prepended to internal link URLs and to the asset folder path. Required when multiple HD projects publish into the same target repo. See [Sharing a target repo](#multi-project). |
+| `deleteOrphans` | no | `true` \| `false` \| `"warn"` (default `"warn"`). Controls whether stale files in the target are removed, warned about, or ignored. See [Orphan handling](#orphans). |
+
+Additional fields are owned by each destination type. The `nextra4` type accepts `contentDir`, `publicDir`, `assetMap`, and `meta` — see the `hd-to-mdx` skill for the full reference.
+
+### 3\. Multiple destinations
+
+To publish the same source to several platforms, add more entries to the `destinations` array:
+
+```json
+{
   "destinations": [
     { "name": "nextra 4", "type": "nextra4", "path": "../../Docs/hd-nextra", "...": "..." },
     { "name": "docusaurus", "type": "docusaurus", "path": "../../Docs/hd-docusaurus", "...": "..." },
     { "name": "gitbook", "type": "gitbook", "path": "../../Docs/hd-gitbook", "...": "..." }
   ]
-}</code></pre><p>Each destination is independent. Running the sync against one does not affect the others.</p><h2>Running a sync</h2><h3>The slash command</h3><p>From any working directory at or above the source directory, run:</p><pre><code>/hd:sync</code></pre><p>The command walks the working directory looking for <code>hd-sync.json</code> files (up to four levels deep, skipping <code>node_modules</code>, <code>dist</code>, <code>.git</code>, and similar). What happens next depends on what it finds:</p><table style="min-width: 50px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Discovery result</p></th><th colspan="1" rowspan="1"><p>Behavior</p></th></tr><tr><td colspan="1" rowspan="1"><p>No configs</p></td><td colspan="1" rowspan="1"><p>Reports that none were found and exits.</p></td></tr><tr><td colspan="1" rowspan="1"><p>One config, one destination</p></td><td colspan="1" rowspan="1"><p>Runs without prompting.</p></td></tr><tr><td colspan="1" rowspan="1"><p>One config, multiple destinations</p></td><td colspan="1" rowspan="1"><p>Asks which destination.</p></td></tr><tr><td colspan="1" rowspan="1"><p>Multiple configs</p></td><td colspan="1" rowspan="1"><p>Asks which config, then which destination.</p></td></tr></tbody></table><h3>Direct CLI</h3><p>The plugin's underlying script is also runnable directly, which is useful for scripting or for CI:</p><pre><code>node plugin/hd/scripts/convert.mjs                                  # list discovered configs
+}
+```
+
+Each destination is independent. Running the sync against one does not affect the others.
+
+## Running a sync
+
+### The slash command
+
+From any working directory at or above the source directory, run:
+
+```
+/hd:sync
+```
+
+The command walks the working directory looking for `hd-sync.json` files (up to four levels deep, skipping `node_modules`, `dist`, `.git`, and similar). What happens next depends on what it finds:
+
+| Discovery result | Behavior |
+| --- | --- |
+| No configs | Reports that none were found and exits. |
+| One config, one destination | Runs without prompting. |
+| One config, multiple destinations | Asks which destination. |
+| Multiple configs | Asks which config, then which destination. |
+
+### Direct CLI
+
+The plugin's underlying script is also runnable directly, which is useful for scripting or for CI:
+
+```
+node plugin/hd/scripts/convert.mjs                                  # list discovered configs
 node plugin/hd/scripts/convert.mjs --list                           # same, JSON
-node plugin/hd/scripts/convert.mjs --config &lt;path&gt; --dest "&lt;name&gt;"  # run a sync</code></pre><p>When using <code>--config</code> without <code>--dest</code>, the script will run the sync automatically only if the config has exactly one destination; otherwise it lists what's available and exits.</p><h2>Orphan handling</h2><p>An <em>orphan</em> is a file in the target with no corresponding source on this sync — usually because the HD file was renamed or deleted but the previous output is still sitting in the target.</p><p>The <code>deleteOrphans</code> field controls what the sync does with them:</p><table style="min-width: 50px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Value</p></th><th colspan="1" rowspan="1"><p>Behavior</p></th></tr><tr><td colspan="1" rowspan="1"><p><code>"warn"</code> (default)</p></td><td colspan="1" rowspan="1"><p>Lists orphans in the sync output as warnings. Leaves them in place.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>true</code></p></td><td colspan="1" rowspan="1"><p>Deletes orphan <code>.mdx</code> files from <code>contentDir</code>. If <code>routePrefix</code> is set, also deletes orphan asset folders from <code>publicDir/assets/&lt;routePrefix&gt;/</code>.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>false</code></p></td><td colspan="1" rowspan="1"><p>Silent — no warning, no deletion.</p></td></tr></tbody></table><p><strong>Safety property:</strong> deletion is always scoped to this project's own folders. The <code>.mdx</code> sweep only reads <code>contentDir</code>, which each project owns. The asset sweep only reads <code>publicDir/assets/&lt;routePrefix&gt;/</code>, which is unique per project. A sync cannot see, let alone delete, files belonging to another project — even when they share the same target repo.</p><p>If <code>deleteOrphans: true</code> is set without <code>routePrefix</code>, asset cleanup is skipped (with a warning explaining why), because <code>publicDir/assets/</code> would be a shared namespace. <code>.mdx</code> deletion still runs because <code>contentDir</code> is project-scoped either way.</p><h2>Sharing a target repo across projects</h2><p>Multiple HD source directories can publish into the same Nextra target repo — for example, a product documentation site that aggregates docs from several internal codebases. To stay isolated, each project must:</p><ol><li><p>Use its own <code>contentDir</code> sub-folder (e.g., <code>src/content/projA</code>, <code>src/content/projB</code>).</p></li><li><p>Set <code>routePrefix</code> to match the sub-folder (e.g., <code>"projA"</code>).</p></li></ol><p>With both set, link and asset URLs are rewritten with the prefix, asset files are written to a per-project sub-folder under <code>publicDir/assets/&lt;routePrefix&gt;/</code>, and orphan deletion is bounded to that sub-folder. Two configs with different prefixes are physically incapable of touching each other's output.</p><pre><code class="language-json">{
+node plugin/hd/scripts/convert.mjs --config <path> --dest "<name>"  # run a sync
+```
+
+When using `--config` without `--dest`, the script will run the sync automatically only if the config has exactly one destination; otherwise it lists what's available and exits.
+
+## Orphan handling
+
+An *orphan* is a file in the target with no corresponding source on this sync — usually because the HD file was renamed or deleted but the previous output is still sitting in the target.
+
+The `deleteOrphans` field controls what the sync does with them:
+
+| Value | Behavior |
+| --- | --- |
+| `"warn"` (default) | Lists orphans in the sync output as warnings. Leaves them in place. |
+| `true` | Deletes orphan `.mdx` files from `contentDir`. If `routePrefix` is set, also deletes orphan asset folders from `publicDir/assets/<routePrefix>/`. |
+| `false` | Silent — no warning, no deletion. |
+
+**Safety property:** deletion is always scoped to this project's own folders. The `.mdx` sweep only reads `contentDir`, which each project owns. The asset sweep only reads `publicDir/assets/<routePrefix>/`, which is unique per project. A sync cannot see, let alone delete, files belonging to another project — even when they share the same target repo.
+
+If `deleteOrphans: true` is set without `routePrefix`, asset cleanup is skipped (with a warning explaining why), because `publicDir/assets/` would be a shared namespace. `.mdx` deletion still runs because `contentDir` is project-scoped either way.
+
+## Sharing a target repo across projects
+
+Multiple HD source directories can publish into the same Nextra target repo — for example, a product documentation site that aggregates docs from several internal codebases. To stay isolated, each project must:
+
+1.  Use its own `contentDir` sub-folder (e.g., `src/content/projA`, `src/content/projB`).
+    
+2.  Set `routePrefix` to match the sub-folder (e.g., `"projA"`).
+    
+
+With both set, link and asset URLs are rewritten with the prefix, asset files are written to a per-project sub-folder under `publicDir/assets/<routePrefix>/`, and orphan deletion is bounded to that sub-folder. Two configs with different prefixes are physically incapable of touching each other's output.
+
+```json
+{
   "destinations": [
     {
       "name": "nextra 4",
@@ -45,4 +152,50 @@ node plugin/hd/scripts/convert.mjs --config &lt;path&gt; --dest "&lt;name&gt;"  
       "deleteOrphans": true
     }
   ]
-}</code></pre><p>Without <code>routePrefix</code>, internal <code>.hd</code> links rewrite to <code>/foo</code> (the repo root), which is correct only when the project's <code>contentDir</code> is <code>src/content</code> itself. If <code>contentDir</code> is a sub-folder and <code>routePrefix</code> is missing, internal links between docs in the same project will 404.</p><h2>What the sync does and doesn't do</h2><h3>Does</h3><ul><li><p>Converts every <code>.hd</code> file in the source directory to the destination format.</p></li><li><p>Rewrites internal <code>.hd</code> links to the platform's route style (with <code>routePrefix</code> applied if set).</p></li><li><p>Copies assets per <code>assetMap</code> and per-doc asset folders.</p></li><li><p>Generates the platform's sidebar or manifest file from the config (e.g., <code>_meta.js</code> for Nextra).</p></li><li><p>Optionally deletes orphan output when <code>deleteOrphans: true</code> is set (see <a target="_blank" rel="noopener" href="#orphans">Orphan handling</a>).</p></li><li><p>Reports counts and warnings.</p></li></ul><h3>Doesn't</h3><ul><li><p><strong>Doesn't sync in reverse.</strong> Hand-edits in the target will not survive the next sync. If you need platform-specific customization, do it in the source HD file or upstream into the converter.</p></li><li><p><strong>Doesn't delete files in the target unless asked.</strong> The default <code>deleteOrphans: "warn"</code> only flags orphans. Set <code>true</code> to actually remove them.</p></li><li><p><strong>Doesn't look outside the source directory.</strong> Links in <code>.hd</code> files to files outside the source dir (for example, <code>../README.md</code> or another HD file at the project root) are flagged as warnings and left unchanged. They will resolve as broken links in the published site.</p></li></ul><h2>Warnings you may see</h2><table style="min-width: 75px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Warning</p></th><th colspan="1" rowspan="1"><p>What it means</p></th><th colspan="1" rowspan="1"><p>Fix</p></th></tr><tr><td colspan="1" rowspan="1"><p><code>external .hd reference (outside source dir)</code></p></td><td colspan="1" rowspan="1"><p>A link to a <code>.hd</code> file above the source directory.</p></td><td colspan="1" rowspan="1"><p>Move the file into the source dir, drop the link, or rewrite to an absolute URL.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>external repo link not rewritten</code></p></td><td colspan="1" rowspan="1"><p>A link to a non-<code>.hd</code> file above the source directory (e.g., a <code>.md</code> at the project root).</p></td><td colspan="1" rowspan="1"><p>Same options as above.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>asset source missing</code></p></td><td colspan="1" rowspan="1"><p>An <code>assetMap</code> entry pointed at a directory that doesn't exist.</p></td><td colspan="1" rowspan="1"><p>Fix the path in <code>hd-sync.json</code> or remove the entry.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>orphan in target (no HD source)</code></p></td><td colspan="1" rowspan="1"><p>A <code>.mdx</code> in the target's content directory has no corresponding <code>.hd</code> source.</p></td><td colspan="1" rowspan="1"><p>Delete manually, or set <code>deleteOrphans: true</code> on the destination to automate it.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>orphan asset folder (no HD source)</code></p></td><td colspan="1" rowspan="1"><p>An asset folder under <code>publicDir/assets/&lt;routePrefix&gt;/</code> has no corresponding <code>.hd</code> source. Only emitted when <code>routePrefix</code> is set.</p></td><td colspan="1" rowspan="1"><p>Delete manually, or set <code>deleteOrphans: true</code>.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>asset orphan cleanup skipped: no routePrefix set</code></p></td><td colspan="1" rowspan="1"><p>You set <code>deleteOrphans: true</code> but no <code>routePrefix</code>. Asset deletion was skipped to avoid accidentally deleting another project's files under a shared <code>publicDir/assets/</code>.</p></td><td colspan="1" rowspan="1"><p>Add <code>routePrefix</code>, or accept that assets won't be auto-cleaned.</p></td></tr></tbody></table><h2>After a sync</h2><p>The sync produces source files for the external platform; it does not build the site itself. Run the platform's build to verify the output compiles and the pages render. For Nextra 4 that's <code>npm run build</code> in the target project — prerender is the only catch-all for MDX/JSX errors the converter can't predict.</p><p></p>
+}
+```
+
+Without `routePrefix`, internal `.hd` links rewrite to `/foo` (the repo root), which is correct only when the project's `contentDir` is `src/content` itself. If `contentDir` is a sub-folder and `routePrefix` is missing, internal links between docs in the same project will 404.
+
+## What the sync does and doesn't do
+
+### Does
+
+-   Converts every `.hd` file in the source directory to the destination format.
+    
+-   Rewrites internal `.hd` links to the platform's route style (with `routePrefix` applied if set).
+    
+-   Copies assets per `assetMap` and per-doc asset folders.
+    
+-   Generates the platform's sidebar or manifest file from the config (e.g., `_meta.js` for Nextra).
+    
+-   Optionally deletes orphan output when `deleteOrphans: true` is set (see [Orphan handling](#orphans)).
+    
+-   Reports counts and warnings.
+    
+
+### Doesn't
+
+-   **Doesn't sync in reverse.** Hand-edits in the target will not survive the next sync. If you need platform-specific customization, do it in the source HD file or upstream into the converter.
+    
+-   **Doesn't delete files in the target unless asked.** The default `deleteOrphans: "warn"` only flags orphans. Set `true` to actually remove them.
+    
+-   **Doesn't look outside the source directory.** Links in `.hd` files to files outside the source dir (for example, `../README.md` or another HD file at the project root) are flagged as warnings and left unchanged. They will resolve as broken links in the published site.
+    
+
+## Warnings you may see
+
+| Warning | What it means | Fix |
+| --- | --- | --- |
+| `external .hd reference (outside source dir)` | A link to a `.hd` file above the source directory. | Move the file into the source dir, drop the link, or rewrite to an absolute URL. |
+| `external repo link not rewritten` | A link to a non-`.hd` file above the source directory (e.g., a `.md` at the project root). | Same options as above. |
+| `asset source missing` | An `assetMap` entry pointed at a directory that doesn't exist. | Fix the path in `hd-sync.json` or remove the entry. |
+| `orphan in target (no HD source)` | A `.mdx` in the target's content directory has no corresponding `.hd` source. | Delete manually, or set `deleteOrphans: true` on the destination to automate it. |
+| `orphan asset folder (no HD source)` | An asset folder under `publicDir/assets/<routePrefix>/` has no corresponding `.hd` source. Only emitted when `routePrefix` is set. | Delete manually, or set `deleteOrphans: true`. |
+| `asset orphan cleanup skipped: no routePrefix set` | You set `deleteOrphans: true` but no `routePrefix`. Asset deletion was skipped to avoid accidentally deleting another project's files under a shared `publicDir/assets/`. | Add `routePrefix`, or accept that assets won't be auto-cleaned. |
+
+## After a sync
+
+The sync produces source files for the external platform; it does not build the site itself. Run the platform's build to verify the output compiles and the pages render. For Nextra 4 that's `npm run build` in the target project — prerender is the only catch-all for MDX/JSX errors the converter can't predict.
+
+<p></p>

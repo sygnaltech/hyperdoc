@@ -1,90 +1,42 @@
 ---
 title: HD2 Capabilities
-date: 2026-07-13T00:00:00.000Z
+date: '2026-07-13T00:00:00.000Z'
 description: Element-by-element map of what HD2 stores as Markdown versus what it stores as a raw HTML island.
 id: 4qQx4Ek3nRugjcrie1UgRQ
-version: 1
+version: 2
 ---
 
-<h1>HD2 Capabilities</h1>
+# HD2 Capabilities
 
-<p>HD2 can author <strong>everything HD can</strong> — the editing surface is the same. What differs is how each element is written to disk. This page is the authoritative map of that decision: for every supported element, is it stored as <strong>Markdown</strong> or as a verbatim <strong>HTML island</strong>?</p>
+HD2 can author **everything HD can** — the editing surface is the same. What differs is how each element is written to disk. This page is the authoritative map of that decision: for every supported element, is it stored as **Markdown** or as a verbatim **HTML island**?
 
-<h2>Legend</h2>
+## Legend
 
-<ul>
-  <li><strong>Markdown</strong> — stored using native Markdown syntax; reads and diffs like Markdown.</li>
-  <li><strong>HTML island</strong> — stored as verbatim HTML inside the Markdown file, because Markdown can't express it losslessly.</li>
-  <li><strong>Conditional</strong> — stored as Markdown in the simple case, and as an HTML island when it exceeds what Markdown can represent (the boundary is stated in the Notes).</li>
-</ul>
+-   **Markdown** — stored using native Markdown syntax; reads and diffs like Markdown.
+    
+-   **HTML island** — stored as verbatim HTML inside the Markdown file, because Markdown can't express it losslessly.
+    
+-   **Conditional** — stored as Markdown in the simple case, and as an HTML island when it exceeds what Markdown can represent (the boundary is stated in the Notes).
+    
 
-<h2>Element map</h2>
+## Element map
 
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Element</th>
-      <th>Stored as</th>
-      <th>Notes</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td colspan="3"><strong>Text and inline</strong></td></tr>
-    <tr><td><code>h1</code>–<code>h6</code></td><td>Markdown</td><td>ATX headings (<code>#</code>…<code>######</code>).</td></tr>
-    <tr><td><code>p</code></td><td>Markdown</td><td>Plain paragraph.</td></tr>
-    <tr><td><code>strong</code>, <code>b</code></td><td>Markdown</td><td><code>**…**</code>. The strong/b distinction is not preserved.</td></tr>
-    <tr><td><code>em</code>, <code>i</code></td><td>Markdown</td><td><code>*…*</code>. The em/i distinction is not preserved.</td></tr>
-    <tr><td><code>s</code>, <code>del</code></td><td>Markdown</td><td><code>~~…~~</code> (GFM). Lossless in HD2 — an upgrade over HD, where strikethrough is raw HTML.</td></tr>
-    <tr><td><code>code</code> (inline)</td><td>Markdown</td><td>Backticks.</td></tr>
-    <tr><td><code>a</code></td><td>Markdown</td><td><code>[text](href)</code>. <code>target</code>, <code>rel</code>, and <code>download</code> are dropped.</td></tr>
-    <tr><td><code>u</code></td><td>HTML island</td><td>Markdown has no underline syntax.</td></tr>
-    <tr><td><code>mark</code></td><td>HTML island</td><td>No Markdown highlight syntax.</td></tr>
-    <tr><td><code>sub</code>, <code>sup</code></td><td>HTML island</td><td>No standard Markdown.</td></tr>
-    <tr><td><code>kbd</code>, <code>samp</code>, <code>var</code>, <code>abbr</code>, <code>cite</code>, <code>q</code>, <code>small</code></td><td>HTML island</td><td>No Markdown equivalents.</td></tr>
-    <tr><td><code>span</code></td><td>HTML island</td><td>Carries attributes/styling Markdown can't hold.</td></tr>
-    <tr><td><code>br</code></td><td>Markdown</td><td>Hard line break.</td></tr>
+<table style="min-width: 75px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Element</p></th><th colspan="1" rowspan="1"><p>Stored as</p></th><th colspan="1" rowspan="1"><p>Notes</p></th></tr><tr><td colspan="3" rowspan="1"><p><strong>Text and inline</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p><code>h1</code>–<code>h6</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>ATX headings (<code>#</code>…<code>######</code>).</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>p</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>Plain paragraph.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>strong</code>, <code>b</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p><code>**…**</code>. The strong/b distinction is not preserved.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>em</code>, <code>i</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p><code>*…*</code>. The em/i distinction is not preserved.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>s</code>, <code>del</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p><code>~~…~~</code> (GFM). Lossless in HD2 — an upgrade over HD, where strikethrough is raw HTML.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>code</code> (inline)</p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>Backticks.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>a</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p><code>[text](href)</code>. <code>target</code>, <code>rel</code>, and <code>download</code> are dropped.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>u</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>Markdown has no underline syntax.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>mark</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>No Markdown highlight syntax.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>sub</code>, <code>sup</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>No standard Markdown.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>kbd</code>, <code>samp</code>, <code>var</code>, <code>abbr</code>, <code>cite</code>, <code>q</code>, <code>small</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>No Markdown equivalents.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>span</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>Carries attributes/styling Markdown can't hold.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>br</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>Hard line break.</p></td></tr><tr><td colspan="3" rowspan="1"><p><strong>Blocks</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p><code>blockquote</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p><code>&gt;</code>-prefixed lines.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>pre</code> + <code>code</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>Fenced code block. <code>class="language-…"</code> becomes the info string.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>ul</code>, <code>ol</code>, <code>li</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>Bulleted / numbered lists. <code>ol start</code> is preserved (GFM).</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>hr</code></p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p><code>---</code>.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>dl</code>, <code>dt</code>, <code>dd</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>No standard Markdown for definition lists.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>details</code>, <code>summary</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>No standard Markdown for disclosure widgets.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>div</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>Generic container; carries attributes/styling.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>section</code>, <code>article</code>, <code>aside</code>, <code>header</code>, <code>footer</code>, <code>nav</code>, <code>main</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>Sectioning wrappers. The <strong>entire subtree</strong> is stored as HTML (see below).</p></td></tr><tr><td colspan="3" rowspan="1"><p><strong>Media</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p><code>img</code></p></td><td colspan="1" rowspan="1"><p>Conditional</p></td><td colspan="1" rowspan="1"><p>Markdown <code>![alt](src)</code> when bare. Becomes an HTML island when it carries <code>width</code>, <code>height</code>, <code>style</code>, or <code>class</code>, so styling survives.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>figure</code>, <code>figcaption</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>Markdown has no figure/caption construct.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>svg</code></p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>Inline SVG passes through unchanged.</p></td></tr><tr><td colspan="3" rowspan="1"><p><strong>Tables</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p><code>table</code> (simple)</p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>GFM table when rectangular, with a header row, single-span cells, and inline-only cell content.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>table</code> (complex)</p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>Any <code>colspan</code>/<code>rowspan</code>, block/multi-paragraph cell content, non-rectangular shape, or missing header row keeps the whole table as HTML.</p></td></tr><tr><td colspan="1" rowspan="1"><p><code>thead</code>, <code>tbody</code>, <code>tfoot</code>, <code>tr</code>, <code>th</code>, <code>td</code>, <code>caption</code>, <code>colgroup</code>, <code>col</code></p></td><td colspan="1" rowspan="1"><p>Conditional</p></td><td colspan="1" rowspan="1"><p>Follow the parent table's ruling — Markdown when the table is GFM-expressible, HTML otherwise.</p></td></tr><tr><td colspan="3" rowspan="1"><p><strong>Interactive controls (HD2-only)</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>Checkbox / task list</p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>GFM <code>- [x]</code> / <code>- [ ]</code>. Stored as <code>&lt;li data-type="task" data-checked&gt;</code>; interactive in the editor. See <a target="_blank" rel="noopener" href="interactive-controls.hd">Interactive Controls</a>.</p></td></tr><tr><td colspan="1" rowspan="1"><p>Radio group (unnamed)</p></td><td colspan="1" rowspan="1"><p>Markdown</p></td><td colspan="1" rowspan="1"><p>HD2 syntax <code>- (x)</code> / <code>- ( )</code>. One list = one single-select, deselectable group.</p></td></tr><tr><td colspan="1" rowspan="1"><p>Radio group (named)</p></td><td colspan="1" rowspan="1"><p>HTML island</p></td><td colspan="1" rowspan="1"><p>A <code>data-group</code> name can't live in the paren markers, so a named group is kept as an HTML block.</p></td></tr></tbody></table>
 
-    <tr><td colspan="3"><strong>Blocks</strong></td></tr>
-    <tr><td><code>blockquote</code></td><td>Markdown</td><td><code>&gt;</code>-prefixed lines.</td></tr>
-    <tr><td><code>pre</code> + <code>code</code></td><td>Markdown</td><td>Fenced code block. <code>class="language-…"</code> becomes the info string.</td></tr>
-    <tr><td><code>ul</code>, <code>ol</code>, <code>li</code></td><td>Markdown</td><td>Bulleted / numbered lists. <code>ol start</code> is preserved (GFM).</td></tr>
-    <tr><td><code>hr</code></td><td>Markdown</td><td><code>---</code>.</td></tr>
-    <tr><td><code>dl</code>, <code>dt</code>, <code>dd</code></td><td>HTML island</td><td>No standard Markdown for definition lists.</td></tr>
-    <tr><td><code>details</code>, <code>summary</code></td><td>HTML island</td><td>No standard Markdown for disclosure widgets.</td></tr>
-    <tr><td><code>div</code></td><td>HTML island</td><td>Generic container; carries attributes/styling.</td></tr>
-    <tr><td><code>section</code>, <code>article</code>, <code>aside</code>, <code>header</code>, <code>footer</code>, <code>nav</code>, <code>main</code></td><td>HTML island</td><td>Sectioning wrappers. The <strong>entire subtree</strong> is stored as HTML (see below).</td></tr>
+## Cell alignment in Markdown tables
 
-    <tr><td colspan="3"><strong>Media</strong></td></tr>
-    <tr><td><code>img</code></td><td>Conditional</td><td>Markdown <code>![alt](src)</code> when bare. Becomes an HTML island when it carries <code>width</code>, <code>height</code>, <code>style</code>, or <code>class</code>, so styling survives.</td></tr>
-    <tr><td><code>figure</code>, <code>figcaption</code></td><td>HTML island</td><td>Markdown has no figure/caption construct.</td></tr>
-    <tr><td><code>svg</code></td><td>HTML island</td><td>Inline SVG passes through unchanged.</td></tr>
+When a simple table is stored as GFM, per-column alignment is preserved through the delimiter row. A header cell whose `align` attribute or `text-align` style is `left`, `center`, or `right` produces `:---`, `:---:`, or `---:` respectively. Other cell attributes (`scope`, `headers`, `class`) are not expressible in GFM and are dropped; if you need them preserved, the table must be a complex (HTML-island) table.
 
-    <tr><td colspan="3"><strong>Tables</strong></td></tr>
-    <tr><td><code>table</code> (simple)</td><td>Markdown</td><td>GFM table when rectangular, with a header row, single-span cells, and inline-only cell content.</td></tr>
-    <tr><td><code>table</code> (complex)</td><td>HTML island</td><td>Any <code>colspan</code>/<code>rowspan</code>, block/multi-paragraph cell content, non-rectangular shape, or missing header row keeps the whole table as HTML.</td></tr>
-    <tr><td><code>thead</code>, <code>tbody</code>, <code>tfoot</code>, <code>tr</code>, <code>th</code>, <code>td</code>, <code>caption</code>, <code>colgroup</code>, <code>col</code></td><td>Conditional</td><td>Follow the parent table's ruling — Markdown when the table is GFM-expressible, HTML otherwise.</td></tr>
+## Two behaviors to keep in mind
 
-    <tr><td colspan="3"><strong>Interactive controls (HD2-only)</strong></td></tr>
-    <tr><td>Checkbox / task list</td><td>Markdown</td><td>GFM <code>- [x]</code> / <code>- [ ]</code>. Stored as <code>&lt;li data-type="task" data-checked&gt;</code>; interactive in the editor. See <a target="_blank" rel="noopener" href="interactive-controls.hd">Interactive Controls</a>.</td></tr>
-    <tr><td>Radio group (unnamed)</td><td>Markdown</td><td>HD2 syntax <code>- (x)</code> / <code>- ( )</code>. One list = one single-select, deselectable group.</td></tr>
-    <tr><td>Radio group (named)</td><td>HTML island</td><td>A <code>data-group</code> name can't live in the paren markers, so a named group is kept as an HTML block.</td></tr>
-  </tbody>
-</table>
+### Block wrappers are self-contained HTML
 
-<h2>Cell alignment in Markdown tables</h2>
+When a sectioning element such as `<section>` becomes an HTML island, its entire contents are stored as HTML rather than as Markdown nested inside the wrapper. Keep prose you want stored as Markdown outside of these wrappers.
 
-<p>When a simple table is stored as GFM, per-column alignment is preserved through the delimiter row. A header cell whose <code>align</code> attribute or <code>text-align</code> style is <code>left</code>, <code>center</code>, or <code>right</code> produces <code>:---</code>, <code>:---:</code>, or <code>---:</code> respectively. Other cell attributes (<code>scope</code>, <code>headers</code>, <code>class</code>) are not expressible in GFM and are dropped; if you need them preserved, the table must be a complex (HTML-island) table.</p>
+### Attributes on Markdown-native elements
 
-<h2>Two behaviors to keep in mind</h2>
+Markdown syntax has nowhere to hold `id`, `class`, `style`, or `data-*`. When one of those attributes matters on an otherwise Markdown-native element, promote the element to a form that stays an HTML island — for example a styled `<img>` (which HD2 already keeps as HTML) or wrapping the content in a `<div>`/`<span>`. On a plain heading, paragraph, or list, such attributes are not currently retained through a round-trip.
 
-<h3>Block wrappers are self-contained HTML</h3>
+## Relationship to the HD spec
 
-<p>When a sectioning element such as <code>&lt;section&gt;</code> becomes an HTML island, its entire contents are stored as HTML rather than as Markdown nested inside the wrapper. Keep prose you want stored as Markdown outside of these wrappers.</p>
-
-<h3>Attributes on Markdown-native elements</h3>
-
-<p>Markdown syntax has nowhere to hold <code>id</code>, <code>class</code>, <code>style</code>, or <code>data-*</code>. When one of those attributes matters on an otherwise Markdown-native element, promote the element to a form that stays an HTML island — for example a styled <code>&lt;img&gt;</code> (which HD2 already keeps as HTML) or wrapping the content in a <code>&lt;div&gt;</code>/<code>&lt;span&gt;</code>. On a plain heading, paragraph, or list, such attributes are not currently retained through a round-trip.</p>
-
-<h2>Relationship to the HD spec</h2>
-
-<p>HD2's boundary is the natural extension of HD's Markdown round-trip table in the <a target="_blank" rel="noopener" href="../format-spec.hd">HD Format Specification</a>. In HD that table describes a one-way "Copy as Markdown"; in HD2 the same classification governs how the file is stored on every save. Elements HD marks as <em>Lossless</em> are stored as Markdown; those it marks <em>Raw HTML</em> become islands; the <em>Lossy</em> cases (tables, images) become the <strong>Conditional</strong> rules above.</p>
+HD2's boundary is the natural extension of HD's Markdown round-trip table in the [HD Format Specification](../format-spec.hd). In HD that table describes a one-way "Copy as Markdown"; in HD2 the same classification governs how the file is stored on every save. Elements HD marks as *Lossless* are stored as Markdown; those it marks *Raw HTML* become islands; the *Lossy* cases (tables, images) become the **Conditional** rules above.

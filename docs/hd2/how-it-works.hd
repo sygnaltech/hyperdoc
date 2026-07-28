@@ -1,65 +1,70 @@
 ---
 title: How HD2 Works
-date: 2026-07-13T00:00:00.000Z
+date: '2026-07-13T00:00:00.000Z'
 description: The Markdown-primary model behind HD2 — the conversion boundary, the load/save round-trip, and its caveats.
 id: 5t4sT2Ov13bUIQLmiJCphw
-version: 1
+version: 2
 ---
 
-<h1>How HD2 Works</h1>
+# How HD2 Works
 
-<p>HD2 changes exactly one thing about HD: <strong>what lives on disk</strong>. HD writes body-only HTML. HD2 writes Markdown, dropping down to raw HTML only for the parts Markdown can't express. The editor, and everything you do inside it, is identical.</p>
+HD2 changes exactly one thing about HD: **what lives on disk**. HD writes body-only HTML. HD2 writes Markdown, dropping down to raw HTML only for the parts Markdown can't express. The editor, and everything you do inside it, is identical.
 
-<h2>The conversion boundary</h2>
+## The conversion boundary
 
-<p>The WYSIWYG editor is built on TipTap, whose internal document model is HTML. That never changes. For HD2, a thin conversion layer sits between the editor and the file:</p>
+The WYSIWYG editor is built on TipTap, whose internal document model is HTML. That never changes. For HD2, a thin conversion layer sits between the editor and the file:
 
-<pre><code class="language-text">  file on disk (Markdown + HTML islands)
+```text
+  file on disk (Markdown + HTML islands)
         │  load: Markdown → HTML
         ▼
   editor (HTML / TipTap)
         │  save: HTML → Markdown + HTML islands
         ▼
-  file on disk (Markdown + HTML islands)</code></pre>
+  file on disk (Markdown + HTML islands)
+```
 
-<p>On <strong>load</strong>, the Markdown body is converted to HTML and handed to the editor. On <strong>save</strong>, the editor's HTML is converted back to Markdown, emitting a raw-HTML island for any element Markdown can't represent losslessly. Whether the load conversion runs is decided by the document's <code>version</code>, not its file extension: a legacy version-1 body is already HTML and is read verbatim, while a version-2 body is Markdown and is converted. <strong>Every save writes version 2</strong>, so a v1 document is migrated to Markdown the first time it is edited.</p>
+On **load**, the Markdown body is converted to HTML and handed to the editor. On **save**, the editor's HTML is converted back to Markdown, emitting a raw-HTML island for any element Markdown can't represent losslessly. Whether the load conversion runs is decided by the document's `version`, not its file extension: a legacy version-1 body is already HTML and is read verbatim, while a version-2 body is Markdown and is converted. **Every save writes version 2**, so a v1 document is migrated to Markdown the first time it is edited.
 
-<p>The consequence worth remembering: <strong>the editor and the paste pipeline are flavor-agnostic.</strong> They only ever see HTML. All HD2-specific behavior is the load/save conversion, and nothing else.</p>
+The consequence worth remembering: **the editor and the paste pipeline are flavor-agnostic.** They only ever see HTML. All HD2-specific behavior is the load/save conversion, and nothing else.
 
-<h2>Where the boundary is drawn</h2>
+## Where the boundary is drawn
 
-<p>The guiding rule is simple: <em>emit Markdown when Markdown is lossless; otherwise emit a verbatim HTML island.</em> Concretely:</p>
+The guiding rule is simple: *emit Markdown when Markdown is lossless; otherwise emit a verbatim HTML island.* Concretely:
 
-<ul>
-  <li>Headings, paragraphs, bold/italic, inline code, links, blockquotes, lists, horizontal rules, fenced code blocks, and <strong>strikethrough</strong> are stored as Markdown.</li>
-  <li><strong>Simple tables</strong> — rectangular, with a header row and single-span, inline-only cells — are stored as GFM Markdown tables.</li>
-  <li><strong>Complex tables</strong> — any <code>colspan</code>/<code>rowspan</code>, multi-paragraph or block cell content, or a missing header row — are stored as a raw HTML island, so no structure is lost.</li>
-  <li><strong>Plain images</strong> become Markdown; images carrying <code>width</code>, <code>height</code>, <code>style</code>, or <code>class</code> stay HTML so that styling survives.</li>
-  <li>Everything with no clean Markdown equivalent — <code>section</code>/<code>article</code>/<code>aside</code> and other sectioning wrappers, <code>figure</code>, <code>mark</code>, <code>sub</code>/<code>sup</code>, <code>u</code>, definition lists, <code>details</code>, inline SVG, styled <code>div</code>/<code>span</code> — is stored as an HTML island.</li>
-</ul>
+-   Headings, paragraphs, bold/italic, inline code, links, blockquotes, lists, horizontal rules, fenced code blocks, and **strikethrough** are stored as Markdown.
+    
+-   **Simple tables** — rectangular, with a header row and single-span, inline-only cells — are stored as GFM Markdown tables.
+    
+-   **Complex tables** — any `colspan`/`rowspan`, multi-paragraph or block cell content, or a missing header row — are stored as a raw HTML island, so no structure is lost.
+    
+-   **Plain images** become Markdown; images carrying `width`, `height`, `style`, or `class` stay HTML so that styling survives.
+    
+-   Everything with no clean Markdown equivalent — `section`/`article`/`aside` and other sectioning wrappers, `figure`, `mark`, `sub`/`sup`, `u`, definition lists, `details`, inline SVG, styled `div`/`span` — is stored as an HTML island.
+    
 
-<p>The full element-by-element map lives in <a target="_blank" rel="noopener" href="capabilities.hd">HD2 Capabilities</a>.</p>
+The full element-by-element map lives in [HD2 Capabilities](capabilities.hd).
 
-<h2>Round-trip behavior and its caveats</h2>
+## Round-trip behavior and its caveats
 
-<p>Because the editor's model is HTML and the file is Markdown, saving is a re-serialization, not a text edit. Two consequences follow.</p>
+Because the editor's model is HTML and the file is Markdown, saving is a re-serialization, not a text edit. Two consequences follow.
 
-<h3>1. First-save reformatting</h3>
+### 1\. First-save reformatting
 
-<p>The serializer emits a single canonical Markdown style (ATX headings, <code>-</code> bullets, <code>*</code> emphasis, fenced code). Markdown is many-to-one — <code>*</code> and <code>_</code>, <code>-</code> and <code>*</code> bullets, and setext versus ATX headings all mean the same thing — so a hand-written or imported file that uses different spellings will be normalized to the canonical style the first time it is saved from the editor. That first save can produce a large diff; every save after it is stable. Opening a file <em>without editing it</em> never rewrites the body.</p>
+The serializer emits a single canonical Markdown style (ATX headings, `-` bullets, `*` emphasis, fenced code). Markdown is many-to-one — `*` and `_`, `-` and `*` bullets, and setext versus ATX headings all mean the same thing — so a hand-written or imported file that uses different spellings will be normalized to the canonical style the first time it is saved from the editor. That first save can produce a large diff; every save after it is stable. Opening a file *without editing it* never rewrites the body.
 
-<h3>2. Block wrappers carry their whole subtree as HTML</h3>
+### 2\. Block wrappers carry their whole subtree as HTML
 
-<p>When a block-level element becomes an HTML island — for example a <code>&lt;section&gt;</code> — its entire contents are stored as HTML, not as Markdown nested inside HTML. This is intentional: it keeps the island self-contained and unambiguous. If you want Markdown prose, keep it outside sectioning wrappers.</p>
+When a block-level element becomes an HTML island — for example a `<section>` — its entire contents are stored as HTML, not as Markdown nested inside HTML. This is intentional: it keeps the island self-contained and unambiguous. If you want Markdown prose, keep it outside sectioning wrappers.
 
-<h3>3. Blank lines are preserved as empty-paragraph islands</h3>
+### 3\. Blank lines are preserved as empty-paragraph islands
 
-<p>Markdown has no way to represent a deliberately empty line — a single blank line is just the separator between two paragraphs, and any extra blank lines are normally discarded. Because that whitespace is often intentional (spacing, or room to keep typing), HD2 preserves each empty paragraph as a tiny <code>&lt;p&gt;&lt;/p&gt;</code> HTML island. So the vertical spacing you add in the editor — including by clicking in the empty area below the content to place the cursor there — survives a save and reload unchanged. Normal paragraph separation stays clean Markdown; only <em>extra</em> empty lines become islands.</p>
+Markdown has no way to represent a deliberately empty line — a single blank line is just the separator between two paragraphs, and any extra blank lines are normally discarded. Because that whitespace is often intentional (spacing, or room to keep typing), HD2 preserves each empty paragraph as a tiny `<p></p>` HTML island. So the vertical spacing you add in the editor — including by clicking in the empty area below the content to place the cursor there — survives a save and reload unchanged. Normal paragraph separation stays clean Markdown; only *extra* empty lines become islands.
 
-<h2>Frontmatter and versioning</h2>
+## Frontmatter and versioning
 
-<p>Both versions use the identical frontmatter structure. The only value that differs is <code>version</code>: a v2 document declares <code>version: 2</code>, a legacy document <code>version: 1</code>. That field — not the file extension — is the source of truth for how the body is stored. A new document is created as v2, and every save writes <code>version: 2</code>, so a legacy file is stamped and migrated the first time it is edited. A <code>.hd</code> whose body is non-empty and carries no version is read as legacy v1 HTML, so a hand-authored Markdown body must declare <code>version: 2</code> explicitly.</p>
+Both versions use the identical frontmatter structure. The only value that differs is `version`: a v2 document declares `version: 2`, a legacy document `version: 1`. That field — not the file extension — is the source of truth for how the body is stored. A new document is created as v2, and every save writes `version: 2`, so a legacy file is stamped and migrated the first time it is edited. A `.hd` whose body is non-empty and carries no version is read as legacy v1 HTML, so a hand-authored Markdown body must declare `version: 2` explicitly.
 
-<h2>Assets are shared, deliberately</h2>
+## Assets are shared, deliberately
 
-<p>Version 2 does not introduce a new asset mechanism. It reuses the existing <code>.hd/&lt;id&gt;/</code> folders keyed by the document <code>id</code>. Because both versions resolve assets the same way, a document migrates from v1 to v2 without moving, renaming, or re-referencing a single asset — and a legacy <code>.hd2</code> file is identical on disk to a <code>.hd</code> carrying <code>version: 2</code>.</p>
+Version 2 does not introduce a new asset mechanism. It reuses the existing `.hd/<id>/` folders keyed by the document `id`. Because both versions resolve assets the same way, a document migrates from v1 to v2 without moving, renaming, or re-referencing a single asset — and a legacy `.hd2` file is identical on disk to a `.hd` carrying `version: 2`.

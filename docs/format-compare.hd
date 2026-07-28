@@ -1,107 +1,36 @@
 ---
 title: Format Comparison
-date: 2026-06-13T00:00:00.000Z
+date: '2026-06-13T00:00:00.000Z'
 description: Capability-by-capability comparison of HD against Markdown, HTML, and Nextra docs.
 id: 2YQ2Q6rfoVUYU6L2K9lPzv
-version: 1
+version: 2
 ---
 
-<h1>Format Comparison</h1>
+# Format Comparison
 
-<p>Capability-by-capability comparison of the <code>.hd</code> format against Markdown, raw HTML, and Nextra docs (MDX-based). The Nextra column is intentionally left blank for now and will be filled in as the comparison work progresses.</p>
+Capability-by-capability comparison of the `.hd` format against Markdown, raw HTML, and Nextra docs (MDX-based). The Nextra column is intentionally left blank for now and will be filled in as the comparison work progresses.
 
-<h2>Icon legend</h2>
+## Icon legend
 
-<ul>
-  <li>✅ — supported natively</li>
-  <li>⚠️ — partial, lossy, or escape-hatch (raw HTML inside Markdown, tool-dependent, etc.)</li>
-  <li>⛔ — not supported</li>
-  <li>— — not applicable to that format</li>
-</ul>
+-   ✅ — supported natively
+    
+-   ⚠️ — partial, lossy, or escape-hatch (raw HTML inside Markdown, tool-dependent, etc.)
+    
+-   ⛔ — not supported
+    
+-   — — not applicable to that format
+    
 
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Capability</th>
-      <th>.hd</th>
-      <th>Markdown</th>
-      <th>HTML</th>
-      <th>Nextra docs</th>
-    </tr>
-  </thead>
-  <tbody>
+<table style="min-width: 125px;"><colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Capability</p></th><th colspan="1" rowspan="1"><p>.hd</p></th><th colspan="1" rowspan="1"><p>Markdown</p></th><th colspan="1" rowspan="1"><p>HTML</p></th><th colspan="1" rowspan="1"><p>Nextra docs</p></th></tr><tr><td colspan="5" rowspan="1"><p><strong>Format basics</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>File extension</p></td><td colspan="1" rowspan="1"><p><code>.hd</code></p></td><td colspan="1" rowspan="1"><p><code>.md</code> / <code>.markdown</code></p></td><td colspan="1" rowspan="1"><p><code>.html</code> / <code>.htm</code></p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Plain-text source</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>YAML frontmatter</p></td><td colspan="1" rowspan="1"><p>✅ Yes (bare <code>---</code> fence)</p></td><td colspan="1" rowspan="1"><p>⚠️ Common but non-standard</p></td><td colspan="1" rowspan="1"><p>⛔ No (head metadata instead)</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Per-document UUID</p></td><td colspan="1" rowspan="1"><p>✅ Yes — base62, 22 chars</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Format version field</p></td><td colspan="1" rowspan="1"><p>✅ Yes — <code>version</code></p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p>⚠️ Implicit (HTML5 etc.)</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="5" rowspan="1"><p><strong>Inline content</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>Headings (H1–H6)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Bold / italic</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Strikethrough</p></td><td colspan="1" rowspan="1"><p>✅ Yes (<code>s</code>)</p></td><td colspan="1" rowspan="1"><p>✅ Yes (GFM)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Underline</p></td><td colspan="1" rowspan="1"><p>✅ Yes (<code>u</code>)</p></td><td colspan="1" rowspan="1"><p>⚠️ Raw HTML only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Inline code</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Sub / superscript / highlight</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⚠️ Raw HTML only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Keyboard / sample / variable spans</p></td><td colspan="1" rowspan="1"><p>✅ Yes (<code>kbd</code>, <code>samp</code>, <code>var</code>)</p></td><td colspan="1" rowspan="1"><p>⚠️ Raw HTML only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="5" rowspan="1"><p><strong>Block content</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>Paragraphs</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Blockquotes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Code blocks (fenced)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Code-block language hint</p></td><td colspan="1" rowspan="1"><p>✅ Yes — <code>class="language-…"</code></p></td><td colspan="1" rowspan="1"><p>✅ Yes — info string</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Unordered / ordered lists</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Definition lists (<code>dl</code>)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⚠️ Raw HTML only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Horizontal rule</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Collapsible sections (<code>details</code>)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⚠️ Raw HTML only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="5" rowspan="1"><p><strong>Media and diagrams</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>Images</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Inline SVG</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⚠️ Raw HTML only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Figure + caption</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⚠️ Raw HTML only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="5" rowspan="1"><p><strong>Tables</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>Simple tables</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes (GFM)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Header row / header column toggle</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⚠️ Header row only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p><code>colspan</code> / <code>rowspan</code></p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Multi-paragraph cells</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Inline-styled cells</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Resizable columns (in editor)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p>⚠️ Editor-dependent</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="5" rowspan="1"><p><strong>Styling and attributes</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>Inline <code>style</code> attribute</p></td><td colspan="1" rowspan="1"><p>✅ Yes (no <code>&lt;style&gt;</code> tag)</p></td><td colspan="1" rowspan="1"><p>⚠️ Raw HTML only</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p><code>class</code> / <code>id</code> / <code>data-*</code></p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⚠️ Some dialects (attribute syntax)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Custom components</p></td><td colspan="1" rowspan="1"><p>⛔ No (semantic HTML only)</p></td><td colspan="1" rowspan="1"><p>⛔ No (vanilla)</p></td><td colspan="1" rowspan="1"><p>✅ Web Components</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="5" rowspan="1"><p><strong>Editing experience</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>WYSIWYG editor</p></td><td colspan="1" rowspan="1"><p>✅ Yes (this VS Code extension)</p></td><td colspan="1" rowspan="1"><p>⚠️ Third-party (Typora, Obsidian, etc.)</p></td><td colspan="1" rowspan="1"><p>✅ Yes (contenteditable / various editors)</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Plain-text editable in any editor</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Paste from Markdown</p></td><td colspan="1" rowspan="1"><p>✅ Yes (auto-detect &amp; convert)</p></td><td colspan="1" rowspan="1"><p>— N/A</p></td><td colspan="1" rowspan="1"><p>⚠️ Editor-dependent</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Paste from HTML</p></td><td colspan="1" rowspan="1"><p>✅ Yes (sanitized against allow-list)</p></td><td colspan="1" rowspan="1"><p>⚠️ Tool-dependent</p></td><td colspan="1" rowspan="1"><p>— N/A</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Copy as Markdown</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>— N/A</p></td><td colspan="1" rowspan="1"><p>⚠️ Tool-dependent</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="5" rowspan="1"><p><strong>Rendering and interop</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>Renders in a browser as a single file</p></td><td colspan="1" rowspan="1"><p>⚠️ Wrapped by a server / editor</p></td><td colspan="1" rowspan="1"><p>⚠️ Needs a renderer</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Renders natively in GitHub web UI</p></td><td colspan="1" rowspan="1"><p>⛔ No (shows source)</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⛔ No (shows source)</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Paste into Notion / Slack / Linear</p></td><td colspan="1" rowspan="1"><p>⚠️ Via Copy as Markdown / HTML</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>✅ Yes (varies)</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="5" rowspan="1"><p><strong>Identity and assets</strong></p></td></tr><tr><td colspan="1" rowspan="1"><p>Stable doc ID independent of filename</p></td><td colspan="1" rowspan="1"><p>✅ Yes (base62)</p></td><td colspan="1" rowspan="1"><p>⛔ No (filename-based)</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Standardized asset folder convention</p></td><td colspan="1" rowspan="1"><p>✅ Yes — <code>.hd/&lt;mirrored-path&gt;/&lt;id&gt;/</code></p></td><td colspan="1" rowspan="1"><p>⚠️ Editor-dependent</p></td><td colspan="1" rowspan="1"><p>⛔ None standard</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Image paste auto-saves to folder</p></td><td colspan="1" rowspan="1"><p>✅ Yes</p></td><td colspan="1" rowspan="1"><p>⚠️ Editor-dependent</p></td><td colspan="1" rowspan="1"><p>⛔ No native</p></td><td colspan="1" rowspan="1"><p></p></td></tr><tr><td colspan="1" rowspan="1"><p>Rename-resilient asset references</p></td><td colspan="1" rowspan="1"><p>✅ Yes (folder follows id, not name)</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p>⛔ No</p></td><td colspan="1" rowspan="1"><p></p></td></tr></tbody></table>
 
-    <tr><td colspan="5"><strong>Format basics</strong></td></tr>
-    <tr><td>File extension</td><td><code>.hd</code></td><td><code>.md</code> / <code>.markdown</code></td><td><code>.html</code> / <code>.htm</code></td><td></td></tr>
-    <tr><td>Plain-text source</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>YAML frontmatter</td><td>✅ Yes (bare <code>---</code> fence)</td><td>⚠️ Common but non-standard</td><td>⛔ No (head metadata instead)</td><td></td></tr>
-    <tr><td>Per-document UUID</td><td>✅ Yes — base62, 22 chars</td><td>⛔ No</td><td>⛔ No</td><td></td></tr>
-    <tr><td>Format version field</td><td>✅ Yes — <code>version</code></td><td>⛔ No</td><td>⚠️ Implicit (HTML5 etc.)</td><td></td></tr>
+## Reading the matrix
 
-    <tr><td colspan="5"><strong>Inline content</strong></td></tr>
-    <tr><td>Headings (H1–H6)</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Bold / italic</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Strikethrough</td><td>✅ Yes (<code>s</code>)</td><td>✅ Yes (GFM)</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Underline</td><td>✅ Yes (<code>u</code>)</td><td>⚠️ Raw HTML only</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Inline code</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Sub / superscript / highlight</td><td>✅ Yes</td><td>⚠️ Raw HTML only</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Keyboard / sample / variable spans</td><td>✅ Yes (<code>kbd</code>, <code>samp</code>, <code>var</code>)</td><td>⚠️ Raw HTML only</td><td>✅ Yes</td><td></td></tr>
-
-    <tr><td colspan="5"><strong>Block content</strong></td></tr>
-    <tr><td>Paragraphs</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Blockquotes</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Code blocks (fenced)</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Code-block language hint</td><td>✅ Yes — <code>class="language-…"</code></td><td>✅ Yes — info string</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Unordered / ordered lists</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Definition lists (<code>dl</code>)</td><td>✅ Yes</td><td>⚠️ Raw HTML only</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Horizontal rule</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Collapsible sections (<code>details</code>)</td><td>✅ Yes</td><td>⚠️ Raw HTML only</td><td>✅ Yes</td><td></td></tr>
-
-    <tr><td colspan="5"><strong>Media and diagrams</strong></td></tr>
-    <tr><td>Images</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Inline SVG</td><td>✅ Yes</td><td>⚠️ Raw HTML only</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Figure + caption</td><td>✅ Yes</td><td>⚠️ Raw HTML only</td><td>✅ Yes</td><td></td></tr>
-
-    <tr><td colspan="5"><strong>Tables</strong></td></tr>
-    <tr><td>Simple tables</td><td>✅ Yes</td><td>✅ Yes (GFM)</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Header row / header column toggle</td><td>✅ Yes</td><td>⚠️ Header row only</td><td>✅ Yes</td><td></td></tr>
-    <tr><td><code>colspan</code> / <code>rowspan</code></td><td>✅ Yes</td><td>⛔ No</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Multi-paragraph cells</td><td>✅ Yes</td><td>⛔ No</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Inline-styled cells</td><td>✅ Yes</td><td>⛔ No</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Resizable columns (in editor)</td><td>✅ Yes</td><td>⛔ No</td><td>⚠️ Editor-dependent</td><td></td></tr>
-
-    <tr><td colspan="5"><strong>Styling and attributes</strong></td></tr>
-    <tr><td>Inline <code>style</code> attribute</td><td>✅ Yes (no <code>&lt;style&gt;</code> tag)</td><td>⚠️ Raw HTML only</td><td>✅ Yes</td><td></td></tr>
-    <tr><td><code>class</code> / <code>id</code> / <code>data-*</code></td><td>✅ Yes</td><td>⚠️ Some dialects (attribute syntax)</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Custom components</td><td>⛔ No (semantic HTML only)</td><td>⛔ No (vanilla)</td><td>✅ Web Components</td><td></td></tr>
-
-    <tr><td colspan="5"><strong>Editing experience</strong></td></tr>
-    <tr><td>WYSIWYG editor</td><td>✅ Yes (this VS Code extension)</td><td>⚠️ Third-party (Typora, Obsidian, etc.)</td><td>✅ Yes (contenteditable / various editors)</td><td></td></tr>
-    <tr><td>Plain-text editable in any editor</td><td>✅ Yes</td><td>✅ Yes</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Paste from Markdown</td><td>✅ Yes (auto-detect &amp; convert)</td><td>— N/A</td><td>⚠️ Editor-dependent</td><td></td></tr>
-    <tr><td>Paste from HTML</td><td>✅ Yes (sanitized against allow-list)</td><td>⚠️ Tool-dependent</td><td>— N/A</td><td></td></tr>
-    <tr><td>Copy as Markdown</td><td>✅ Yes</td><td>— N/A</td><td>⚠️ Tool-dependent</td><td></td></tr>
-
-    <tr><td colspan="5"><strong>Rendering and interop</strong></td></tr>
-    <tr><td>Renders in a browser as a single file</td><td>⚠️ Wrapped by a server / editor</td><td>⚠️ Needs a renderer</td><td>✅ Yes</td><td></td></tr>
-    <tr><td>Renders natively in GitHub web UI</td><td>⛔ No (shows source)</td><td>✅ Yes</td><td>⛔ No (shows source)</td><td></td></tr>
-    <tr><td>Paste into Notion / Slack / Linear</td><td>⚠️ Via Copy as Markdown / HTML</td><td>✅ Yes</td><td>✅ Yes (varies)</td><td></td></tr>
-
-    <tr><td colspan="5"><strong>Identity and assets</strong></td></tr>
-    <tr><td>Stable doc ID independent of filename</td><td>✅ Yes (base62)</td><td>⛔ No (filename-based)</td><td>⛔ No</td><td></td></tr>
-    <tr><td>Standardized asset folder convention</td><td>✅ Yes — <code>.hd/&lt;mirrored-path&gt;/&lt;id&gt;/</code></td><td>⚠️ Editor-dependent</td><td>⛔ None standard</td><td></td></tr>
-    <tr><td>Image paste auto-saves to folder</td><td>✅ Yes</td><td>⚠️ Editor-dependent</td><td>⛔ No native</td><td></td></tr>
-    <tr><td>Rename-resilient asset references</td><td>✅ Yes (folder follows id, not name)</td><td>⛔ No</td><td>⛔ No</td><td></td></tr>
-
-  </tbody>
-</table>
-
-<h2>Reading the matrix</h2>
-
-<ul>
-  <li><strong>✅ "Yes"</strong> means the format expresses the capability natively, without escape hatches.</li>
-  <li><strong>⚠️ "Raw HTML only"</strong> means the capability is reachable in Markdown only by embedding literal HTML inside the document.</li>
-  <li><strong>⚠️ "Editor-dependent"</strong> / <strong>"Tool-dependent"</strong> means the format itself doesn't define behavior; whether it works hinges on which editor or pipeline you use.</li>
-  <li><strong>⛔ "No"</strong> means the format has no way to express the capability at all.</li>
-  <li>The Nextra column is intentionally blank pending a focused capability sweep of the Nextra / MDX feature surface.</li>
-</ul>
+-   **✅ "Yes"** means the format expresses the capability natively, without escape hatches.
+    
+-   **⚠️ "Raw HTML only"** means the capability is reachable in Markdown only by embedding literal HTML inside the document.
+    
+-   **⚠️ "Editor-dependent"** / **"Tool-dependent"** means the format itself doesn't define behavior; whether it works hinges on which editor or pipeline you use.
+    
+-   **⛔ "No"** means the format has no way to express the capability at all.
+    
+-   The Nextra column is intentionally blank pending a focused capability sweep of the Nextra / MDX feature surface.

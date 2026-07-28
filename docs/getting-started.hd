@@ -1,57 +1,67 @@
 ---
 title: Getting Started
-date: 2026-06-13T00:00:00.000Z
+date: '2026-06-13T00:00:00.000Z'
 description: Install the HD VS Code extension and create your first document.
 id: 6Z8OLV4DdN6x8fJTZUrgW4
-version: 1
+version: 2
 ---
 
-<h1>Getting Started</h1>
+# Getting Started
 
-<h2>Install the extension</h2>
+## Install the extension
 
-<p>From the project root, in order:</p>
+From the project root, in order:
 
-<ol>
-  <li>Install dependencies once: <code>npm install</code></li>
-  <li>Build + package: <code>npm run package</code>. This cleans any old <code>hyperdoc-*.vsix</code>, builds the bundle, and writes a fresh <code>hyperdoc-&lt;version&gt;.vsix</code> — so only the current version's file is ever left in the root.</li>
-  <li>Install into your main VS Code — the <code>.vsix</code> filename carries the version from <code>package.json</code>, so let the shell fill it in rather than hardcoding it: <code>code --install-extension "hyperdoc-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force</code></li>
-  <li>Reload <strong>every already-open VS Code window</strong>: <strong>Ctrl+Shift+P</strong> → "Developer: Reload Window" (or restart VS Code). Installing a VSIX does not update windows that are already running — this is the most common reason a rebuild still shows the old editor.</li>
-</ol>
+1.  Install dependencies once: `npm install`
+    
+2.  Build + package: `npm run package`. This cleans any old `hyperdoc-*.vsix`, builds the bundle, and writes a fresh `hyperdoc-<version>.vsix` — so only the current version's file is ever left in the root.
+    
+3.  Install into your main VS Code — the `.vsix` filename carries the version from `package.json`, so let the shell fill it in rather than hardcoding it: `code --install-extension "hyperdoc-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force`
+    
+4.  Reload **every already-open VS Code window**: **Ctrl+Shift+P** → "Developer: Reload Window" (or restart VS Code). Installing a VSIX does not update windows that are already running — this is the most common reason a rebuild still shows the old editor.
+    
 
-<p>For ongoing iteration the build / package / install steps can be chained (PowerShell):</p>
+For ongoing iteration the build / package / install steps can be chained (PowerShell):
 
-<pre><code>npm run package; code --install-extension "hyperdoc-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force</code></pre>
+```
+npm run package; code --install-extension "hyperdoc-$((Get-Content package.json -Raw | ConvertFrom-Json).version).vsix" --force
+```
 
-<h2>Create your first .hd file</h2>
+## Create your first .hd file
 
-<p>Create any file with a <code>.hd</code> extension in a workspace. VS Code launches the HD WYSIWYG editor as the default editor for that file. On first open, the editor injects an <code>id</code> and a <code>version</code> into the frontmatter — you don't need to set them by hand.</p>
+Create any file with a `.hd` extension in a workspace. VS Code launches the HD WYSIWYG editor as the default editor for that file. On first open, the editor injects an `id` and a `version` into the frontmatter — you don't need to set them by hand.
 
-<p>If you want to seed your own frontmatter, start the file with a bare YAML fence:</p>
+If you want to seed your own frontmatter, start the file with a bare YAML fence:
 
-<pre><code>---
+```
+---
 title: My Document
 description: A short description.
 ---
 
-&lt;h1&gt;Hello, HD&lt;/h1&gt;
-&lt;p&gt;…&lt;/p&gt;</code></pre>
+<h1>Hello, HD</h1>
+<p>…</p>
+```
 
-<h2>Editor basics</h2>
+## Editor basics
 
-<ul>
-  <li><strong>Toolbar</strong> at the top: headings, bold/italic/underline, inline code, code block, links, lists, blockquote, horizontal rule, insert table. The toolbar stays fixed in place as you scroll, so it's always reachable.</li>
-  <li><strong>Keyboard shortcuts</strong>: <strong>Ctrl+B</strong>/<strong>I</strong>/<strong>U</strong> for bold/italic/underline, <strong>Ctrl+K</strong> for link (insert if text is selected, edit if cursor is inside an existing link), <strong>Ctrl+Alt+1</strong>…<strong>6</strong> for headings, <strong>Ctrl+E</strong> for inline code. Full table in <a href="editor.hd">Editor Features</a>.</li>
-  <li><strong>Tables</strong>: hover near the top to insert columns, near the left to insert rows. Right-click any cell for the full menu (delete column/row, toggle headers, delete table). Hover a column boundary to resize.</li>
-  <li><strong>Paste from Markdown</strong>: paste Markdown text — the editor detects it and converts automatically.</li>
-  <li><strong>Paste from HTML</strong>: paste HTML from Notion, Linear, or browsers — the editor sanitizes against the HD allow-list.</li>
-  <li><strong>Copy as Markdown</strong>: <strong>Ctrl+Shift+P</strong> → "HD: Copy as Markdown".</li>
-</ul>
+-   **Toolbar** at the top: headings, bold/italic/underline, inline code, code block, links, lists, blockquote, horizontal rule, insert table. The toolbar stays fixed in place as you scroll, so it's always reachable.
+    
+-   **Keyboard shortcuts**: **Ctrl+B**/**I**/**U** for bold/italic/underline, **Ctrl+K** for link (insert if text is selected, edit if cursor is inside an existing link), **Ctrl+Alt+1**…**6** for headings, **Ctrl+E** for inline code. Full table in [Editor Features](editor.hd).
+    
+-   **Tables**: hover near the top to insert columns, near the left to insert rows. Right-click any cell for the full menu (delete column/row, toggle headers, delete table). Hover a column boundary to resize.
+    
+-   **Paste from Markdown**: paste Markdown text — the editor detects it and converts automatically.
+    
+-   **Paste from HTML**: paste HTML from Notion, Linear, or browsers — the editor sanitizes against the HD allow-list.
+    
+-   **Copy as Markdown**: **Ctrl+Shift+P** → "HD: Copy as Markdown".
+    
 
-<h2>Where to go next</h2>
+## Where to go next
 
-<ul>
-  <li><a href="format-spec.hd">Format Specification</a> for the rules a valid <code>.hd</code> file follows.</li>
-  <li><a href="editor.hd">Editor Features</a> for the full set of editor behaviors.</li>
-  <li><a href="assets.hd">Assets</a> if you're working with images or other binaries.</li>
-</ul>
+-   [Format Specification](format-spec.hd) for the rules a valid `.hd` file follows.
+    
+-   [Editor Features](editor.hd) for the full set of editor behaviors.
+    
+-   [Assets](assets.hd) if you're working with images or other binaries.

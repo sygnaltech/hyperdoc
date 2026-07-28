@@ -73,14 +73,39 @@ Write everything Markdown can express as Markdown; use a raw-HTML island only fo
 | Simple tables | GFM pipe tables (see below) |
 | Task lists | `- [ ]` / `- [x]` (GFM) |
 | Radio groups (unnamed) | `- ( )` / `- (x)` (HD syntax) |
+| Callouts / admonitions | `> [!NOTE]` alert blockquotes (see below) |
 
 **Simple tables** qualify for GFM only when they are rectangular, have a header row, single-span cells, and inline-only cell content. Column alignment is preserved via the delimiter row (`:---`, `:---:`, `---:`).
+
+### Callouts (GitHub-style alerts)
+
+For a **callout / admonition** — a titled, coloured note box — use a **GitHub-style alert**: a blockquote whose first line is an alert marker alone on its line. **Do not reach for `<aside>` (or a `<div>`) to make a callout** — a sectioning-wrapper island renders as an *unstyled* block; the alert blockquote is the callout primitive the editor actually styles, and it stays clean native Markdown on disk.
+
+Exactly five types are recognised (case-insensitive); anything else renders as an ordinary blockquote:
+
+| Marker | Use it for |
+|---|---|
+| `> [!NOTE]` | Neutral, informational aside the reader should notice. |
+| `> [!TIP]` | Helpful advice or a shortcut. |
+| `> [!IMPORTANT]` | Key information the reader must not miss. |
+| `> [!WARNING]` | Something that needs attention to avoid a problem. |
+| `> [!CAUTION]` | Risk of a negative or destructive outcome. |
+
+The marker sits alone on the first line; the body follows on `>`-prefixed lines:
+
+```markdown
+> [!NOTE]
+> **HD2 only.** Interactive controls are a capability of the experimental
+> `.hd2` flavor. They are not available in plain `.hd` documents.
+```
+
+Callout styling is applied in the Markdown-source view; in the WYSIWYG editor the same content shows as a normal blockquote. Either way it round-trips losslessly as a blockquote, so it is always safe to author.
 
 ### Write as an HTML island
 
 Markdown has no lossless form for these, so write them as raw HTML inside the body:
 
-- **Sectioning wrappers** — `section`, `article`, `aside`, `header`, `footer`, `nav`, `main`. The **entire subtree** of a wrapper is stored as HTML; keep Markdown prose *outside* wrappers.
+- **Sectioning wrappers** — `section`, `article`, `aside`, `header`, `footer`, `nav`, `main`. The **entire subtree** of a wrapper is stored as HTML; keep Markdown prose *outside* wrappers. Use these for genuine document structure only — for a note/callout box reach for a [GitHub-style alert](#callouts-github-style-alerts) instead, since `aside` carries no callout styling.
 - **`div`** and **`span`** — generic containers that carry `class`/`style`/`id`/`data-*`.
 - **Figures** — `figure`, `figcaption`.
 - **Styled/sized images** — an `<img>` with `width`, `height`, `style`, or `class` (plain images use Markdown).

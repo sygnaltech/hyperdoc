@@ -34,7 +34,9 @@ export const Figure = Node.create({
       align: { default: null },
       width: { default: null },
       height: { default: null },
-      loading: { default: null }
+      loading: { default: null },
+      // See HdImage: transient stash of an in-place image's authored path.
+      dataHdSrc: { default: null }
     };
   },
 
@@ -54,6 +56,7 @@ export const Figure = Node.create({
             width: img.getAttribute('width'),
             height: img.getAttribute('height'),
             loading: img.getAttribute('loading'),
+            dataHdSrc: img.getAttribute('data-hd-src'),
             align: deriveFigureAlign(figure)
           };
         }
@@ -72,6 +75,7 @@ export const Figure = Node.create({
     if (a.width) imgAttrs.width = a.width;
     if (a.height) imgAttrs.height = a.height;
     if (a.loading) imgAttrs.loading = a.loading;
+    if (a.dataHdSrc != null) imgAttrs['data-hd-src'] = a.dataHdSrc;
 
     const figAttrs: Record<string, string> = {};
     if (align) figAttrs.style = figureAlignStyle(align);

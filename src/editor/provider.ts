@@ -138,6 +138,13 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
 
       const id = typeof m.id === 'string' ? m.id : undefined;
       const assetBaseUrl = await this.computeAssetBaseUrl(webview, document.uri, id);
+      // Base for in-place media referenced by a relative/dotted path (`./x.png`,
+      // `../assets/x.png`) — the doc's own folder, distinct from the managed
+      // `.hd/<id>/` asset base. The workspace is already a localResourceRoot, so
+      // asWebviewUri under this base loads without a CSP change.
+      const docBaseUrl = webview
+        .asWebviewUri(vscode.Uri.joinPath(document.uri, '..'))
+        .toString();
 
       // On disk a v2 body is Markdown (with HTML islands); the webview only
       // understands HTML, so convert on the way in. A legacy v1 body is already
@@ -150,6 +157,7 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
         meta: m,
         body: editorBody,
         assetBaseUrl,
+        docBaseUrl,
         // The editor always operates in v2 mode now — every save is v2, so its
         // v2-only capabilities (interactive checkboxes/radios) are always on.
         flavor: 'hd2'

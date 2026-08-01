@@ -2,7 +2,7 @@
   "name": "hyperdoc",
   "displayName": "Hyperdoc (HD) Editor",
   "description": "WYSIWYG editor for Hyperdoc (.hd) and Markdown (.md) files — edit rich text visually with a live source view. The .hd format is Markdown-primary with optional YAML frontmatter; legacy HTML .hd and .hd2 are still supported.",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "publisher": "Sygnal",
   "license": "MIT",
   "repository": {

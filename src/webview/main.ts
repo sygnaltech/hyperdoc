@@ -33,6 +33,7 @@ const toolbarEl = document.getElementById('toolbar')!;
 let editor: Editor | null = null;
 let docMeta: Record<string, unknown> = {};
 let assetBaseUrl = '';
+let docBaseUrl = '';
 let docFlavor: 'hd' | 'hd2' = 'hd';
 let suppressChange = false;
 
@@ -89,10 +90,10 @@ function createEditor(initialBody: string) {
         ? [HdTaskList, HdTaskItem.configure({ nested: false }), RadioGroup, RadioItem, ControlGrouping]
         : [])
     ],
-    content: rewriteImgSrcs(initialBody, assetBaseUrl, 'in'),
+    content: rewriteImgSrcs(initialBody, 'in'),
     onUpdate: ({ editor: ed }) => {
       if (suppressChange) return;
-      const html = rewriteImgSrcs(ed.getHTML(), assetBaseUrl, 'out');
+      const html = rewriteImgSrcs(ed.getHTML(), 'out');
       bridge.sendChange(docMeta, html);
     },
     editorProps: {
@@ -218,12 +219,13 @@ window.addEventListener('message', (event) => {
     case 'init': {
       docMeta = (msg.meta ?? {}) as Record<string, unknown>;
       assetBaseUrl = (msg.assetBaseUrl ?? '') as string;
+      docBaseUrl = (msg.docBaseUrl ?? '') as string;
       docFlavor = (msg.flavor === 'hd2' ? 'hd2' : 'hd');
       const body = (msg.body ?? '') as string;
       if (!editor) {
         createEditor(body);
       } else {
-        const incoming = rewriteImgSrcs(body, assetBaseUrl, 'in');
+        const incoming = rewriteImgSrcs(body, 'in');
         // A re-init can be triggered by a change the user didn't make in the
         // editor — most commonly VS Code normalizing the file on save (final
         // newline / trailing whitespace). setContent replaces the whole doc and
@@ -261,23 +263,92 @@ window.addEventListener('message', (event) => {
 });
 
 /**
- * On 'in' (host → webview): rewrite bare filenames to absolute webview URIs.
- * On 'out' (webview → host): strip the asset base URL back to bare filenames.
+ * Two image-source namespaces, distinguished by the *shape* of the authored src:
+ *
+ *  - **Managed** — a bare filename (`hero.png`, no path separator, no leading
+ *    dot). Lives in the doc's `.hd/<id>/` sidecar folder; the editor owns it
+ *    (paste target). Resolves against `assetBaseUrl`.
+ *  - **In-place** — a relative/dotted path (`./x.png`, `../assets/x.png`,
+ *    `sub/x.png`). References a file that already exists on disk next to the
+ *    doc, managed *outside* hd. Resolves against `docBaseUrl` (the doc's own
+ *    folder) and is never copied.
+ *
+ * URLs (`https://…`) and `data:` are left untouched in both directions.
+ *
+ * On 'in' (host → webview) a managed name is prefixed with the asset base; an
+ * in-place path is resolved to a loadable webview URI while its ORIGINAL
+ * authored path is stashed in `data-hd-src`. On 'out' (webview → host) the
+ * managed prefix is stripped back to a bare name, and an in-place image is
+ * restored verbatim from `data-hd-src` (which is dropped) — resolution is not
+ * reversible by string-stripping once the browser has normalized the URI, so
+ * the stash is the source of truth.
  */
-function rewriteImgSrcs(html: string, base: string, dir: 'in' | 'out'): string {
-  if (!base) return html;
-  return html.replace(/<img\b([^>]*?)\bsrc=("|')([^"']+)\2/gi, (full, attrs, q, src) => {
-    if (dir === 'in') {
-      if (/^[a-z]+:\/\//i.test(src) || src.startsWith('data:') || src.startsWith(base)) {
-        return full;
-      }
-      return `<img${attrs}src=${q}${base}/${src}${q}`;
-    } else {
-      if (src.startsWith(base)) {
-        const stripped = src.slice(base.length).replace(/^\//, '');
-        return `<img${attrs}src=${q}${stripped}${q}`;
-      }
-      return full;
-    }
+function rewriteImgSrcs(html: string, dir: 'in' | 'out'): string {
+  // Capture attributes without any self-closing slash so attribute injection
+  // can't land after it. `img` is a void element, so re-emitting as `<img …>`
+  // (no slash) is valid and re-parses identically.
+  return html.replace(/<img\b([^>]*?)\s*\/?>/gi, (full, attrs: string) => {
+    return dir === 'in' ? rewriteImgIn(full, attrs) : rewriteImgOut(full, attrs);
   });
+}
+
+function getAttr(attrs: string, name: string): string | null {
+  const m = attrs.match(new RegExp(`\\b${name}=("|')([^"']*)\\1`, 'i'));
+  return m ? m[2] : null;
+}
+
+/** A bare filename — no path separator and no leading dot — is hd-managed. */
+function isManagedName(src: string): boolean {
+  return !/[/\\]/.test(src) && !src.startsWith('.');
+}
+
+function rewriteImgIn(full: string, attrs: string): string {
+  const src = getAttr(attrs, 'src');
+  if (src == null) return full;
+  if (/^[a-z]+:\/\//i.test(src) || src.startsWith('data:')) return full;
+  if (assetBaseUrl && src.startsWith(assetBaseUrl)) return full;
+  if (docBaseUrl && src.startsWith(docBaseUrl)) return full;
+
+  if (isManagedName(src)) {
+    if (!assetBaseUrl) return full;
+    return `<img${setAttr(attrs, 'src', `${assetBaseUrl}/${src}`)}>`;
+  }
+
+  // In-place: resolve against the doc's folder for display, remember the
+  // authored path so 'out' can restore it exactly.
+  if (!docBaseUrl) return full;
+  let resolved: string;
+  try {
+    resolved = new URL(src, docBaseUrl.replace(/\/?$/, '/')).toString();
+  } catch {
+    return full;
+  }
+  const withSrc = setAttr(attrs, 'src', resolved);
+  return `<img${setAttr(withSrc, 'data-hd-src', src)}>`;
+}
+
+function rewriteImgOut(full: string, attrs: string): string {
+  const authored = getAttr(attrs, 'data-hd-src');
+  if (authored != null) {
+    // Restore the in-place path and drop the transient stash.
+    const restored = setAttr(attrs, 'src', authored);
+    return `<img${removeAttr(restored, 'data-hd-src')}>`;
+  }
+  const src = getAttr(attrs, 'src');
+  if (src != null && assetBaseUrl && src.startsWith(assetBaseUrl)) {
+    const bare = src.slice(assetBaseUrl.length).replace(/^\//, '');
+    return `<img${setAttr(attrs, 'src', bare)}>`;
+  }
+  return full;
+}
+
+/** Set or replace an attribute in a raw `<img>` attribute string. */
+function setAttr(attrs: string, name: string, value: string): string {
+  const re = new RegExp(`\\s*\\b${name}=("|')[^"']*\\1`, 'i');
+  const decl = ` ${name}="${value}"`;
+  return re.test(attrs) ? attrs.replace(re, decl) : attrs + decl;
+}
+
+function removeAttr(attrs: string, name: string): string {
+  return attrs.replace(new RegExp(`\\s*\\b${name}=("|')[^"']*\\1`, 'i'), '');
 }

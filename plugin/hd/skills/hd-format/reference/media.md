@@ -6,7 +6,17 @@ Detailed rules for `<img>`, image sizing/constraints, and `<figure>`/`<figcaptio
 
 ## 1. Asset folders and the document `id`
 
-**Images are not stored next to the `.hd` file and are not referenced with relative paths.** They live in a sidecar folder keyed by the document's `id`, at the workspace root:
+There are **two image-source namespaces**, and the **shape of the `src`** decides which one you get:
+
+| Authored `src` | Namespace | Resolves to | Who owns the file |
+|---|---|---|---|
+| `hero.png` (bare filename) | **managed** | `<workspace>/.hd/<id>/hero.png` | hd — the editor's paste/asset folder |
+| `./shot.png`, `../out/gen.png`, `media/x.png` (any path) | **in-place** | relative to the **doc's own folder** | you — a file that already exists on disk |
+| `https://…` | remote | as-is | the remote host |
+
+The rest of this section covers the **managed** namespace (the common case). For referencing media that already exists elsewhere in the repo without copying it, see [Referencing media in place](#referencing-media-in-place-unmanaged) below.
+
+**Managed images are not stored next to the `.hd` file and are not referenced with relative paths.** They live in a sidecar folder keyed by the document's `id`, at the workspace root:
 
 ```
 <workspace>/
@@ -20,7 +30,7 @@ Detailed rules for `<img>`, image sizing/constraints, and `<figure>`/`<figcaptio
 
 The id is the entire lookup key — no document-path mirroring. Rules:
 
-1. **The image reference must be a bare filename** — in either syntax. `<img src="hero.png">` and `![alt](hero.png)` both resolve to `<workspace>/.hd/<id>/hero.png`. **Never** use subfolders, dot-paths, or workspace-relative paths like `img/hero.png`, `./hero.png`, or `../assets/hero.png` — the editor will not find the file and the published output will be broken.
+1. **A managed image reference is a bare filename** — in either syntax. `<img src="hero.png">` and `![alt](hero.png)` both resolve to `<workspace>/.hd/<id>/hero.png`. A bare name (no `/`, no leading `.`) always means "the managed folder." To point at a file that lives somewhere else on disk, give it a **path** instead — that switches to the in-place namespace (see below). A bare name never reaches a subfolder: `img/hero.png` is read as an in-place path relative to the doc, **not** as `.hd/<id>/img/hero.png`.
 2. **A doc with media must have its `id` set in frontmatter.** If you are authoring a new doc and also creating its images, generate a 22-char base62 id yourself (don't rely on auto-generation — you need the value *now* to know where to put the files).
 3. **Create `<workspace>/.hd/<id>/` before placing files.** Then write images into it with whatever filenames you reference from the body.
 4. **Inline SVG is fine** — `<svg>...</svg>` lives inside the body, not in a file. The asset-folder rule applies only to `<img>` references.
@@ -34,6 +44,40 @@ Example workflow when adding a new doc with images:
 4. Write the .hd file with `id: <that-same-id>` in frontmatter
 5. Reference the image as <img src="hero.png" alt="...">
 ```
+
+### Referencing media in place (unmanaged)
+
+Sometimes the media **already exists on disk**, managed outside hd — most often when an agent writes an `.hd` report that summarizes generated output (screenshots, renders, charts) already sitting in a directory in the repo. You want to reference those files **where they stand**, versioned alongside the code, without copying or moving them into `.hd/<id>/`.
+
+To do that, reference the file with a **relative path** instead of a bare name. Any `src` containing a path separator or a leading `.` is resolved **relative to the `.hd` document's own folder**, not the asset folder:
+
+```
+repo/
+├── reports/
+│   └── run-42.hd            ← the doc
+└── generated/
+    └── run-42/
+        ├── chart-01.png
+        └── chart-02.png
+```
+
+```markdown
+<!-- from reports/run-42.hd, pointing at the sibling generated/ tree -->
+![Latency over time](../generated/run-42/chart-01.png)
+
+<!-- a sized in-place image is still an HTML island -->
+<img src="../generated/run-42/chart-02.png" alt="Throughput" style="max-width: 640px">
+```
+
+Rules and limits for in-place references:
+
+- **The path is relative to the doc**, exactly like a link in Markdown: `./x.png` is a sibling of the `.hd` file, `../a/x.png` is up one level. Both the `![alt](…)` and `<img src="…">` spellings work, and sizing/figures behave identically to managed images.
+- **No copy happens.** The editor loads the file from where it lives; nothing is written into `.hd/<id>/`. The document does **not** need an `id` for in-place media to render (though it still needs one for any *managed* image and is recommended regardless).
+- **The file must be inside the workspace.** Resolution goes through the editor's local-resource sandbox, which is scoped to the workspace folder(s). A path that escapes the workspace (or an absolute filesystem path like `/Users/…` or `D:\…`) will not load — keep the media in the repo and reference it relatively.
+- **Publishing still copies.** When `/hd:sync` builds an external site, an in-place file's bytes must land in the published output, so the converter copies it there and rewrites the link. In-place referencing keeps your **source repo** clean (one copy, versioned with the code) — it does not mean zero copies at the published destination.
+- **The paste/asset flow is unchanged.** Pasting an image into the editor still writes it to `.hd/<id>/` and inserts a bare name. In-place references are something you author by hand (or an agent writes) — they are never produced by paste.
+
+Use **managed** (bare name) when hd should own the file — pasted media, screenshots you're capturing into the doc. Use **in-place** (relative path) when the file is a build/generation artifact that already has a home in the repo.
 
 ### Generating an id
 

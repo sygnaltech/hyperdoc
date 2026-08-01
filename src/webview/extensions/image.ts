@@ -40,6 +40,13 @@ export const HdImage = Image.extend({
       loading: {
         default: null,
         parseHTML: (el) => el.getAttribute('loading') || null
+      },
+      // Transient: the original authored path of an in-place image (`./x.png`),
+      // stashed on the way in so it can be restored verbatim on the way out.
+      // Never reaches disk — the save-side rewrite strips it.
+      dataHdSrc: {
+        default: null,
+        parseHTML: (el) => el.getAttribute('data-hd-src') || null
       }
     };
   },
@@ -55,6 +62,7 @@ export const HdImage = Image.extend({
     if (a.width) attrs.width = a.width;
     if (a.height) attrs.height = a.height;
     if (a.loading) attrs.loading = a.loading;
+    if (a.dataHdSrc != null) attrs['data-hd-src'] = a.dataHdSrc;
 
     const style = joinStyle(a.style, align ? imageAlignStyle(align) : null);
     if (style) attrs.style = style;

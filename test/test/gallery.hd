@@ -1,0 +1,21 @@
+---
+id: 2ncHHpUE7BdqFC1G1h9Oho
+title: "Image Gallery"
+version: 2
+date: 2026-08-01
+---
+
+# Image Gallery
+
+Two generated renders, shown as thumbnails.
+
+<figure style="max-width: 240px">
+  <img src="./image_krea2_turbo_t2i_int8.png" alt="Krea2 Turbo text-to-image render (int8)" style="max-width: 240px">
+  <figcaption>Krea2 Turbo — text-to-image (int8)</figcaption>
+</figure>
+
+<figure style="max-width: 240px">
+  <img src="./image_qwen_edit_2509_multiref.png" alt="Qwen Edit 2509 multi-reference render" style="max-width: 240px">
+  <figcaption>Qwen Edit 2509 — multi-reference</figcaption>
+</figure>
+

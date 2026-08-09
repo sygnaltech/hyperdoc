@@ -83,14 +83,14 @@ Use **managed** (bare name) when hd should own the file — pasted media, screen
 
 An HD id is 22 characters of base62 (alphabet `0-9a-zA-Z`) encoding 128 bits of entropy. **Do not hand-author one.** The editor's algorithm lives in `src/identity/base62.ts`; the same algorithm is exposed as a script and as a portable shell one-liner.
 
-**If the hd plugin is checked out** (most common — the `plugin/hd/` directory exists somewhere reachable):
+**Preferred — the bundled script** (works from any cwd; `${CLAUDE_PLUGIN_ROOT}` is set whenever this skill runs as part of the installed hd plugin, and resolves to the plugin's own directory regardless of where you're working):
 
 ```bash
-node plugin/hd/scripts/new-id.mjs        # one id
-node plugin/hd/scripts/new-id.mjs 5      # five ids, one per line
+node "${CLAUDE_PLUGIN_ROOT}/scripts/new-id.mjs"        # one id
+node "${CLAUDE_PLUGIN_ROOT}/scripts/new-id.mjs" 5      # five ids, one per line
 ```
 
-**Fallback when the plugin isn't local** (any environment with Node):
+**Fallback when `${CLAUDE_PLUGIN_ROOT}` isn't set** (running outside the plugin, any environment with Node):
 
 ```bash
 node -e "const c=require('crypto');const A='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';let b=0n;for(const x of c.randomBytes(16))b=(b<<8n)|BigInt(x);let s='';while(b>0n){s=A[Number(b%62n)]+s;b=b/62n;}while(s.length<22)s=A[0]+s;console.log(s)"
@@ -106,7 +106,7 @@ What you must *never* do:
 
 ### Legacy mirrored layout (read-only fallback)
 
-An earlier version of HD nested asset folders under the document's path, producing `.hd/docs/architecture/<id>/...`. The editor still resolves images from that location as a fallback if the flat path doesn't exist, but new content should always be placed at `.hd/<id>/`. Workspaces still on the legacy layout can be migrated with `node plugin/hd/scripts/migrate-assets-flat.mjs <workspace>` (dry-run by default; pass `--apply` to perform moves) or via the `HD: Migrate Workspace Assets to Flat Layout` command in VS Code.
+An earlier version of HD nested asset folders under the document's path, producing `.hd/docs/architecture/<id>/...`. The editor still resolves images from that location as a fallback if the flat path doesn't exist, but new content should always be placed at `.hd/<id>/`. Workspaces still on the legacy layout can be migrated with `node "${CLAUDE_PLUGIN_ROOT}/scripts/migrate-assets-flat.mjs" <workspace>` (dry-run by default; pass `--apply` to perform moves) or via the `HD: Migrate Workspace Assets to Flat Layout` command in VS Code.
 
 ## 2. Sizing and constraining images
 

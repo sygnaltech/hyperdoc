@@ -336,6 +336,13 @@ function createView(initialText: string): void {
     doc: initialText,
     extensions: [
       history(),
+      // Bold / italic, matching the toolbar buttons. Returning true marks the
+      // key handled so CodeMirror calls preventDefault; the leak guard below
+      // then keeps it from reaching VS Code (where Ctrl+B toggles the sidebar).
+      keymap.of([
+        { key: 'Mod-b', run: () => (wrapSelection('**', '**'), true) },
+        { key: 'Mod-i', run: () => (wrapSelection('*', '*'), true) }
+      ]),
       keymap.of([...defaultKeymap, ...historyKeymap]),
       EditorView.lineWrapping,
       drawSelection(),
@@ -357,6 +364,17 @@ function createView(initialText: string): void {
     ]
   });
   view = new EditorView({ state, parent: editorEl });
+
+  // Keep the editor's own shortcuts inside the editor. VS Code's webview host
+  // replays every keydown that reaches the webview `window` as a workbench
+  // keybinding, so a key CodeMirror already acted on (Ctrl+B, Ctrl+I, Ctrl+Z,
+  // …) would ALSO fire its global binding — e.g. Ctrl+B toggling the sidebar.
+  // Once the editor has consumed a key (defaultPrevented), stop it before it
+  // leaves the editor. Keys the editor ignores (Ctrl+S, …) still reach VS Code.
+  editorEl.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented) e.stopPropagation();
+  });
+
   setupTableUI(view, editorEl);
 }
 

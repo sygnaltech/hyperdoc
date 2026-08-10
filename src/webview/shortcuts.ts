@@ -33,6 +33,22 @@ export function setupShortcuts(editor: Editor): void {
       void pastePlainFromClipboard(editor);
     }
   });
+
+  // Keep the editor's own shortcuts inside the editor. VS Code's webview host
+  // replays every keydown that reaches the webview `window` as a workbench
+  // keybinding — so a key ProseMirror already acted on (Ctrl+B bold, Ctrl+I
+  // italic, Ctrl+Z undo, our shortcuts above, …) would ALSO fire its global
+  // binding, e.g. Ctrl+B toggling the sidebar. preventDefault() alone doesn't
+  // stop that; the event still bubbles. Once the editor has consumed a key
+  // (defaultPrevented), stop it before it leaves the editable. Keys the editor
+  // ignores (Ctrl+S save, Ctrl+P, …) are untouched and still reach VS Code.
+  //
+  // Registered last, so it runs after ProseMirror's own keydown handler (same
+  // node, later registration → later in the bubble) and thus sees the final
+  // defaultPrevented state.
+  editor.view.dom.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented) e.stopPropagation();
+  });
 }
 
 async function pastePlainFromClipboard(editor: Editor): Promise<void> {

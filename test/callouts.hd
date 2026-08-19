@@ -1,0 +1,39 @@
+---
+title: Callout Test
+id: 2EQore6jR8UE28MNkYXBgD
+version: 2
+---
+
+# Callout test bed
+
+Ordinary paragraph before the callouts.
+
+> [!NOTE]
+> Baseline for this runbook: commit `55a6abb`. The repo still has **no release tags**.
+
+> [!TIP]
+> Lowercase and mixed-case markers are accepted on load and normalized to uppercase on save.
+
+> [!IMPORTANT]
+> Key information the reader must not miss.
+
+> [!WARNING]
+> This release assumes prod is already at `0.1.43`'s schema.
+
+> [!CAUTION]
+> **Migration 0014** must be applied before the Worker is deployed.
+>
+> A second paragraph inside the same callout.
+
+> [!TIP]
+> A callout with a list:
+>
+> -   first item
+> -   second item
+
+> Plain blockquote — no marker, no callout styling.
+
+> [!HINT]
+> Not one of the five types, so this stays an ordinary blockquote with literal marker text.
+
+> [!NOTE] Marker on the same line as text is a plain blockquote too, matching GitHub.

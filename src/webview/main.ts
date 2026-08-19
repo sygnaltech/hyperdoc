@@ -23,6 +23,7 @@ import { Highlight } from './extensions/highlight';
 import { HdTaskList, HdTaskItem } from './extensions/task';
 import { RadioGroup, RadioItem } from './extensions/radio';
 import { ControlGrouping } from './extensions/control-grouping';
+import { HdBlockquote } from './extensions/callout';
 
 const vscode = getVsCodeApi();
 const bridge = new Bridge(vscode);
@@ -58,8 +59,11 @@ function createEditor(initialBody: string) {
     autofocus: isBlank ? 'end' : false,
     extensions: [
       StarterKit.configure({
-        heading: { levels: [1, 2, 3, 4, 5, 6] }
+        heading: { levels: [1, 2, 3, 4, 5, 6] },
+        // Replaced by HdBlockquote, which adds GitHub-style alert callouts.
+        blockquote: false
       }),
+      HdBlockquote,
       Underline,
       Subscript,
       Superscript,

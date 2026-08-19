@@ -16,6 +16,12 @@ import { tags as t } from '@lezer/highlight';
 import { tableExtension } from './table-view';
 import { setupTableUI } from './table-ui';
 import { blankTable, serializeTable } from './table-model';
+import {
+  CALLOUT_MARKER_LINE_RE,
+  calloutTitleHtml,
+  normalizeCalloutType,
+  type CalloutType
+} from '../format/callouts';
 
 declare function acquireVsCodeApi(): { postMessage(msg: unknown): void };
 const vscode = acquireVsCodeApi();
@@ -171,30 +177,22 @@ const imagePreview = ViewPlugin.fromClass(
 // IMPORTANT / WARNING / CAUTION). Rendered as a coloured box with a titled
 // header; the `[!TYPE]` marker becomes a title unless the caret is on it. The
 // `>` prefixes stay in the source — this is a view-layer decoration only.
+//
+// The WYSIWYG editor renders the same five types from the same vocabulary (see
+// ../format/callouts.ts), so a callout looks the same in both views.
 // ---------------------------------------------------------------------------
 
-const ALERT_META: Record<string, { label: string; icon: string }> = {
-  note: { label: 'Note', icon: 'ⓘ' },
-  tip: { label: 'Tip', icon: '💡' },
-  important: { label: 'Important', icon: '❗' },
-  warning: { label: 'Warning', icon: '⚠' },
-  caution: { label: 'Caution', icon: '🛑' }
-};
-
-const ALERT_TITLE_RE = /^\s*>\s?\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*$/i;
-
 class AlertTitleWidget extends WidgetType {
-  constructor(readonly type: string) {
+  constructor(readonly type: CalloutType) {
     super();
   }
   eq(other: AlertTitleWidget): boolean {
     return other.type === this.type;
   }
   toDOM(): HTMLElement {
-    const meta = ALERT_META[this.type] ?? { label: this.type, icon: '' };
     const span = document.createElement('span');
     span.className = `cm-gh-alert-title cm-gh-alert-title-${this.type}`;
-    span.textContent = `${meta.icon} ${meta.label}`;
+    span.innerHTML = calloutTitleHtml(this.type);
     return span;
   }
   ignoreEvent(): boolean {
@@ -215,11 +213,11 @@ function buildAlertDecorations(view: EditorView): DecorationSet {
       enter: (node) => {
         if (node.name !== 'Blockquote' || seen.has(node.from)) return;
         const firstLine = view.state.doc.lineAt(node.from);
-        const m = ALERT_TITLE_RE.exec(firstLine.text);
-        if (!m) return;
+        const m = CALLOUT_MARKER_LINE_RE.exec(firstLine.text);
+        const type = m ? normalizeCalloutType(m[1]) : null;
+        if (!type) return;
         seen.add(node.from);
 
-        const type = m[1].toLowerCase();
         const total = view.state.doc.lines;
         for (let n = firstLine.number; n <= total; n++) {
           const line = view.state.doc.line(n);

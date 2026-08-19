@@ -37,6 +37,34 @@ The toolbar exposes the same actions as visible buttons — the shortcuts are an
 
 Headings (H1–H3 buttons; H4–H6 via Markdown shortcuts), bold, italic, underline, highlight, inline code, code block, link, bullet list, ordered list, blockquote, horizontal rule, insert table. At the right-hand end sits an **ⓘ Document info** button that opens the diagnostics panel described below.
 
+## Callouts
+
+A callout is a blockquote with a **type** — the GitHub-style alert syntax, stored on disk exactly as it reads:
+
+```markdown
+> [!NOTE]
+> Baseline for this runbook: commit 55a6abb.
+```
+
+Five types are recognised, case-insensitively: `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, and `CAUTION`. Any other marker stays literal text in an ordinary blockquote, exactly as Markdown would leave it.
+
+### Creating one
+
+Type the marker followed by a space — `[!note]` — at the start of a paragraph, and that paragraph becomes a callout. Inside an existing blockquote, type it at the start of the first line. Typing `>` first is optional, so either route works.
+
+### Reading and editing
+
+The callout has two states, and the caret is the switch between them:
+
+-   **Reading** — a coloured box headed by the GitHub alert icon for that type and its name as a small tag, both in the accent colour. The marker is not part of the text, so ordinary typing and deleting can't break it into `[!NOT`.
+
+-   **Editing** — put the caret anywhere inside the callout and the name expands into the literal `[!NOTE]` marker in an editable field. The icon stays put and the box keeps its colour: only the word is swapped, so expanding the marker changes what you can edit, never what the block looks like.
+
+
+Change the type by editing the marker itself — the box recolours as you type. Clicking anywhere on the header row takes you straight into it. **Enter**, or clicking away, commits and returns the caret to the body; **Esc** cancels. Clearing the field removes the type, leaving the plain blockquote that was always underneath, and an unrecognised type snaps back rather than silently becoming a different one.
+
+The Markdown source view styles the same callouts in place, and both editors read the same five types, so a document looks the same whichever way it is opened.
+
 ## Tables
 
 HD tables support the full HTML capability set — `colspan`, `rowspan`, multi-paragraph cells, inline styles, header rows and columns. The editor provides three ways to manipulate them.

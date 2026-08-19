@@ -1,5 +1,6 @@
 import TurndownService from 'turndown';
 import { markdownToHtml, markdownInlineToHtml } from './mdToHd';
+import { addCalloutTurndownRule, calloutMarkdown, calloutTypeOf } from './callouts';
 
 /**
  * hd2 conversion layer — how the Markdown-primary body (version 2, the default
@@ -40,6 +41,9 @@ function baseTurndown(extra: Partial<TurndownService.Options> = {}): TurndownSer
   });
 
   td.keep(HTML_ISLAND_TAGS as unknown as TurndownService.Filter);
+
+  // A typed blockquote goes back to disk as its `> [!NOTE]` marker line.
+  addCalloutTurndownRule(td);
 
   // Strikethrough is lossless in GFM — upgrade it from the hd1 raw-HTML default.
   td.addRule('strikethrough', {
@@ -89,12 +93,19 @@ const cellTurndown = baseTurndown();
 // line between two real paragraphs is still the normal Markdown separator; only
 // *extra* empty paragraphs become islands.)
 const docTurndown = baseTurndown({
-  blankReplacement: (_content, node) =>
-    (node as unknown as HtmlEl).nodeName === 'P'
+  blankReplacement: (_content, node) => {
+    // Turndown treats an empty node as blank and drops it before any rule gets
+    // a look. A callout the user has only just created has no body yet — it
+    // still has to reach the file, or it would vanish from under the caret on
+    // the very first autosave.
+    const callout = calloutTypeOf(node);
+    if (callout) return calloutMarkdown(callout, '');
+    return (node as unknown as HtmlEl).nodeName === 'P'
       ? '\n\n<p></p>\n\n'
       : (node as unknown as { isBlock?: boolean }).isBlock
         ? '\n\n'
-        : ''
+        : '';
+  }
 });
 docTurndown.addRule('table', {
   filter: (node) => node.nodeName === 'TABLE',

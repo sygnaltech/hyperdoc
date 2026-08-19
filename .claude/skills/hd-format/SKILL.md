@@ -99,7 +99,7 @@ The marker sits alone on the first line; the body follows on `>`-prefixed lines:
 > `.hd2` flavor. They are not available in plain `.hd` documents.
 ```
 
-Callout styling is applied in the Markdown-source view; in the WYSIWYG editor the same content shows as a normal blockquote. Either way it round-trips losslessly as a blockquote, so it is always safe to author.
+Both editors style callouts: the Markdown-source view colours the blockquote in place, and the WYSIWYG editor renders it as a titled box whose `[!TYPE]` marker expands for editing when the caret is inside it. Either way it round-trips losslessly as a blockquote, so it is always safe to author.
 
 ### Write as an HTML island
 

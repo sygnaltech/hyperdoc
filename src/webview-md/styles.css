@@ -94,7 +94,26 @@ body {
 .cm-gh-alert-caution { --cm-gh-alert-color: #f85149; }
 
 .cm-gh-alert-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  vertical-align: text-bottom;
+}
+
+/* Monochrome Octicon, drawn in the alert's accent colour via currentColor. */
+.cm-gh-alert-title .hd-callout-icon {
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
+  fill: currentColor;
+}
+
+/* Matches the WYSIWYG editor's tag treatment, so the two views read alike. */
+.cm-gh-alert-title .hd-callout-label {
+  font-size: 0.8em;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .cm-gh-alert-title-note { color: #4493f8; }
 .cm-gh-alert-title-tip { color: #3fb950; }

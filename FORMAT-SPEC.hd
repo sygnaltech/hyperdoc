@@ -33,6 +33,7 @@ For each allowed element, this document records whether the element round-trips 
 | `code` (inline) | Lossless | Backticks. |
 | `pre` + `code` | Lossless | Fenced code block. `class="language-…"` is preserved as the info string. |
 | `blockquote` | Lossless | Lines prefixed with `>`. |
+| `blockquote[data-callout]` | Lossless | A GitHub-style alert: `> [!NOTE]` (also `TIP`, `IMPORTANT`, `WARNING`, `CAUTION`) alone on the first line. An unrecognized type stays an ordinary blockquote. |
 | `ul`, `ol`, `li` | Lossless | Bulleted/numbered lists. `ol`'s `start` attribute is supported in GFM. |
 | `dl`, `dt`, `dd` | Raw HTML | No standard Markdown for definition lists. |
 | `a` | Lossless | `[text](href)`. `target` and `rel` are dropped. |

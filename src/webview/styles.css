@@ -105,6 +105,98 @@ body {
   padding: 0.25em 1em;
 }
 
+/* GitHub-style alert callouts (`> [!NOTE]`) — a blockquote with a type. One
+   colour variable per type drives the border, the tint, and the header, so the
+   box reads the same in the WYSIWYG editor as in the Markdown source view. */
+.ProseMirror blockquote[data-callout] {
+  border-left-color: var(--hd-callout-color);
+  background: color-mix(in srgb, var(--hd-callout-color) 8%, transparent);
+  padding: 0.6em 1em;
+}
+
+.ProseMirror blockquote[data-callout="note"] { --hd-callout-color: #4493f8; }
+.ProseMirror blockquote[data-callout="tip"] { --hd-callout-color: #3fb950; }
+.ProseMirror blockquote[data-callout="important"] { --hd-callout-color: #ab7df8; }
+.ProseMirror blockquote[data-callout="warning"] { --hd-callout-color: #d29922; }
+.ProseMirror blockquote[data-callout="caution"] { --hd-callout-color: #f85149; }
+
+.hd-callout-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  line-height: 1.3;
+  color: var(--hd-callout-color);
+  margin-bottom: 0.4em;
+  user-select: none;
+}
+
+.hd-callout-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  cursor: pointer;
+}
+
+/* Monochrome Octicon, drawn in the callout's accent colour via currentColor. */
+.hd-callout-icon {
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
+  fill: currentColor;
+}
+
+/* A category tag, not a heading. The accent colour and the icon already
+   announce the type, so the word is set small and quiet enough to introduce
+   the prose instead of competing with it. */
+.hd-callout-label {
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hd-callout-title:hover .hd-callout-label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The `[!NOTE]` markup stays out of the way until the callout is being edited,
+   so it can never be half-deleted by ordinary typing. */
+.hd-callout-marker {
+  display: none;
+  flex: none;
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.85em;
+  font-weight: 600;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.hd-callout-marker:hover {
+  border-color: color-mix(in srgb, var(--hd-callout-color) 40%, transparent);
+}
+
+.hd-callout-marker:focus {
+  outline: none;
+  border-color: var(--hd-callout-color);
+  background: var(--vscode-input-background, transparent);
+}
+
+.ProseMirror blockquote.hd-callout-editing .hd-callout-label {
+  display: none;
+}
+
+.ProseMirror blockquote.hd-callout-editing .hd-callout-marker {
+  display: inline-block;
+}
+
+/* The body's own blocks keep their spacing from each other, not from the box. */
+.hd-callout-body > :first-child { margin-top: 0; }
+.hd-callout-body > :last-child { margin-bottom: 0; }
+
 .ProseMirror table {
   border-collapse: collapse;
   margin: 1em 0;

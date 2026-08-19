@@ -17,6 +17,13 @@ Ordinary paragraph before the callouts.
 > [!IMPORTANT]
 > Key information the reader must not miss.
 
+sdafsdaf.
+
+
+
+
+sadfsdaf
+
 > [!WARNING]
 > This release assumes prod is already at `0.1.43`'s schema.
 
@@ -29,11 +36,12 @@ Ordinary paragraph before the callouts.
 > A callout with a list:
 >
 > -   first item
+>
 > -   second item
+>
 
 > Plain blockquote — no marker, no callout styling.
 
-> [!HINT]
-> Not one of the five types, so this stays an ordinary blockquote with literal marker text.
+> \[!HINT\] Not one of the five types, so this stays an ordinary blockquote with literal marker text.
 
-> [!NOTE] Marker on the same line as text is a plain blockquote too, matching GitHub.
+> \[!NOTE\] Marker on the same line as text is a plain blockquote too, matching GitHub.

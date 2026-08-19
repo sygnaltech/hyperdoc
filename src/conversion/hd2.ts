@@ -1,6 +1,7 @@
 import TurndownService from 'turndown';
 import { markdownToHtml, markdownInlineToHtml } from './mdToHd';
 import { addCalloutTurndownRule, calloutMarkdown, calloutTypeOf } from './callouts';
+import { expandBlankRuns, restoreBlankRuns } from './blank-lines';
 
 /**
  * hd2 conversion layer — how the Markdown-primary body (version 2, the default
@@ -87,11 +88,12 @@ const cellTurndown = baseTurndown();
 
 // Full-document converter, with table handling layered on top.
 //
-// An empty paragraph is intentional vertical space the user added, but Markdown
-// can't represent an empty line — turndown would drop it. We keep it as a tiny
-// `<p></p>` HTML island so blank lines survive the round-trip. (A single blank
-// line between two real paragraphs is still the normal Markdown separator; only
-// *extra* empty paragraphs become islands.)
+// An empty paragraph is intentional vertical space — the author's, whether they
+// typed it here or wrote it in the file. Turndown would drop it, so it is
+// emitted as a `<p></p>` marker that restoreBlankRuns (see ./blank-lines.ts)
+// turns back into the blank line it came from, leaving clean Markdown on disk.
+// Only an empty paragraph at the very start or end of the document keeps the
+// marker, since the trim below would swallow a blank line there.
 const docTurndown = baseTurndown({
   blankReplacement: (_content, node) => {
     // Turndown treats an empty node as blank and drops it before any rule gets
@@ -147,7 +149,7 @@ docTurndown.addRule('namedRadioGroup', {
 });
 
 export function hd2BodyToEditorHtml(markdownBody: string): string {
-  const html = markdownToHtml(segmentControls(markdownBody));
+  const html = markdownToHtml(segmentControls(expandBlankRuns(markdownBody)));
   // marked emits `<code>…\n</code></pre>` for every fenced block. That trailing
   // newline shows as a phantom blank line at the bottom of the code block in the
   // editor; strip it so what you see matches the source (the save side strips it
@@ -244,7 +246,7 @@ function renderControlBlock(kind: ControlKind, items: ControlItem[]): string {
 }
 
 export function editorHtmlToHd2Body(html: string): string {
-  const md = docTurndown.turndown(html).trim();
+  const md = restoreBlankRuns(docTurndown.turndown(html)).trim();
   return md.length ? md + '\n' : '';
 }
 

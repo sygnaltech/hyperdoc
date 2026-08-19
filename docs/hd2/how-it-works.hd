@@ -59,7 +59,9 @@ When a block-level element becomes an HTML island — for example a `<section>` 
 
 ### 3\. Blank lines are preserved as empty-paragraph islands
 
-Markdown has no way to represent a deliberately empty line — a single blank line is just the separator between two paragraphs, and any extra blank lines are normally discarded. Because that whitespace is often intentional (spacing, or room to keep typing), HD2 preserves each empty paragraph as a tiny `<p></p>` HTML island. So the vertical spacing you add in the editor — including by clicking in the empty area below the content to place the cursor there — survives a save and reload unchanged. Normal paragraph separation stays clean Markdown; only *extra* empty lines become islands.
+Markdown has no way to represent a deliberately empty line — a single blank line is just the separator between two paragraphs, and any extra blank lines are normally discarded by the parser. Because that whitespace is usually intentional (spacing, or room to keep typing), HD2 restores it: on load, every blank line beyond the separator becomes an empty paragraph you can see and put the cursor in, and on save each one is written back out as the blank line it came from. Vertical spacing therefore survives a round-trip **exactly**, whether you typed it in the editor — including by clicking in the empty area below the content — or wrote it by hand in the file, and the file keeps plain Markdown blank lines with no marker added.
+
+Two places are deliberately left alone, because a blank line there is syntax rather than spacing: inside a fenced code block, where it is part of the code, and between two items of the same list, where it is what makes the list loose. An empty paragraph at the very start or end of a document is the one case still stored as a `<p></p>` island, since a blank line there would be trimmed away.
 
 ## Frontmatter and versioning
 

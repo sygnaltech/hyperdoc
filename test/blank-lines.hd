@@ -1,0 +1,43 @@
+---
+title: Blank Line Test
+id: 7yoIVhk8aVvrWoPjVGuYiX
+version: 2
+---
+
+# Blank line test bed
+
+One blank line above (normal separator).
+
+
+Two blank lines above this paragraph.
+
+
+
+Three blank lines above this one.
+
+
+## Heading with two blanks above
+
+
+> [!NOTE]
+> Two blank lines above this callout, two below.
+
+
+Paragraph after the callout.
+
+
+```js
+// Blank lines inside this fence are CODE and must survive exactly:
+const a = 1;
+
+
+const b = 2;
+```
+
+
+-   loose list item one
+
+-   loose list item two
+
+
+Text after the list.

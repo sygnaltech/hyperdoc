@@ -9,7 +9,42 @@ The `.hd` format is **Markdown-primary** documentation: the body is GitHub-Flavo
 
 > **Two on-disk versions exist.** Version **2** (the current default, described here) stores the body as Markdown + HTML islands. Version **1** is the older body-only-HTML format. The `version:` frontmatter field — not the file extension — says which one a file is. A file is treated as legacy v1 **only when it explicitly declares `version: 1`**; anything else (including a file with no `version:` field) opens as v2. See [Reading and migrating version 1](#reading-and-migrating-version-1) before editing an older file. The `.hd2` extension is a deprecated alias for a version-2 `.hd` file; it still opens but should not be used for new content.
 
-> **Creating a new `.hd`? Use the script, never hand-write the frontmatter.** Run `node "${CLAUDE_PLUGIN_ROOT}/scripts/new-doc.mjs" <path.hd> [--title "…"]`. It stamps `version: 2`, the title, the date, **and an `id`** for you. Two reasons this matters: it's the one reliable way to guarantee the `version` field is present (a hand-authored doc that omits it is the usual cause of a "why is this version 1?" surprise), and it stamps the `id` up front so the doc doesn't get **silently rewritten the first time it's opened** — the editor mints a missing `id` on open and saves the file, which reflows the frontmatter and makes the just-created file reappear in your work tree. Pass `--no-id` only for a throwaway you'll never open in the editor.
+> **Creating a new `.hd`? Use the script, never hand-write the frontmatter.** Run `node "<skill-dir>/scripts/new-doc.mjs" <path.hd> [--title "…"]` — see [Running the bundled scripts](#running-the-bundled-scripts) for what `<skill-dir>` is. It stamps `version: 2`, the title, the date, **and an `id`** for you. Two reasons this matters: it's the one reliable way to guarantee the `version` field is present (a hand-authored doc that omits it is the usual cause of a "why is this version 1?" surprise), and it stamps the `id` up front so the doc doesn't get **silently rewritten the first time it's opened** — the editor mints a missing `id` on open and saves the file, which reflows the frontmatter and makes the just-created file reappear in your work tree. Pass `--no-id` only for a throwaway you'll never open in the editor.
+
+## Running the bundled scripts
+
+This skill ships four Node scripts in its own `scripts/` folder. **Resolve them against this skill's own directory** — `<skill-dir>` below is the absolute path given on the `Base directory for this skill:` line of this skill's launch message. Quote the whole path, since it usually contains spaces:
+
+```bash
+node "<skill-dir>/scripts/new-doc.mjs" <path.hd> [--title "…"]      # create a new .hd
+node "<skill-dir>/scripts/new-id.mjs" [n]                           # mint 22-char base62 id(s)
+node "<skill-dir>/scripts/stamp-legacy-versions.mjs" [dir] --write   # stamp un-versioned HTML files
+node "<skill-dir>/scripts/migrate-assets-flat.mjs" <workspace>       # legacy → flat asset layout
+```
+
+Two paths that look correct and are not:
+
+- **`${CLAUDE_PLUGIN_ROOT}/scripts/…`** — that variable is set only when this skill runs as part of the *installed* `hd` plugin. The skill is just as often wired in as a symlink under `~/.claude/skills/`, where it is **empty**, so the command silently degrades to `node "/scripts/new-doc.mjs"` and the script appears to be missing. Don't use it.
+- **`plugin/hd/scripts/…`** — a path relative to the plugin repo. Your cwd is the user's docs project, not this repo.
+
+**If a script genuinely won't run, use the documented fallback rather than improvising one.** Both fallbacks below are exact; an invented id or hand-guessed frontmatter is precisely the failure this skill exists to prevent.
+
+### Fallback — creating a doc without `new-doc.mjs`
+
+Write the frontmatter by hand in this exact shape, minting the `id` with the one-liner in [reference/media.md](reference/media.md#generating-an-id) — never type an id yourself:
+
+```
+---
+id: <22 chars of base62, from new-id.mjs or the one-liner>
+title: "Getting Started"
+version: 2
+date: 2026-06-12
+---
+
+# Getting Started
+```
+
+`version: 2` and a valid `id` are the two fields that matter. A missing `version` is the usual cause of a "why is this version 1?" surprise; a missing or malformed `id` is regenerated on first open, orphaning any `.hd/<id>/` asset folder you created against the old value.
 
 ## File structure
 
@@ -142,13 +177,13 @@ Images, image sizing/constraints, and figures have their own detailed rules. **L
 - **Set a meaningful `alt`** on every content image (`alt=""` only if decorative). **Align** images with `display:block` + auto `margin` and figures with `text-align` on the `<figure>`.
 - **Use `<figure>` + `<figcaption>`** (an HTML island) for captioned images and screenshot grids: exactly one `<img>` plus an optional caption.
 
-reference/media.md covers all of the above in full, plus **id generation** (use `node "${CLAUDE_PLUGIN_ROOT}/scripts/new-id.mjs"` — never hand-author an id), the legacy asset layout, and the device-screenshot-report pattern. The asset convention is **identical across versions 1 and 2** — nothing about media folders changed.
+reference/media.md covers all of the above in full, plus **id generation** (use `node "<skill-dir>/scripts/new-id.mjs"` — never hand-author an id), the legacy asset layout, and the device-screenshot-report pattern. The asset convention is **identical across versions 1 and 2** — nothing about media folders changed.
 
 ## Reading and migrating version 1
 
 A file with an explicit `version: 1` stores the body as **body-only HTML** rather than Markdown. It still opens in the editor unchanged.
 
-- **v1 is opt-in, not the fallback.** The editor treats a file as legacy HTML **only** when it declares `version: 1`. A file with no `version:` field opens as v2/Markdown. So a genuine legacy HTML file that was never stamped must carry `version: 1` to keep rendering as HTML — `node "${CLAUDE_PLUGIN_ROOT}/scripts/stamp-legacy-versions.mjs" [dir] --write` finds un-versioned HTML-bodied files and stamps them for you (dry-run without `--write`).
+- **v1 is opt-in, not the fallback.** The editor treats a file as legacy HTML **only** when it declares `version: 1`. A file with no `version:` field opens as v2/Markdown. So a genuine legacy HTML file that was never stamped must carry `version: 1` to keep rendering as HTML — `node "<skill-dir>/scripts/stamp-legacy-versions.mjs" [dir] --write` finds un-versioned HTML-bodied files and stamps them for you (dry-run without `--write`).
 - **The editor migrates on first edit.** Opening a v1 file leaves it byte-for-byte identical; the first save from the editor re-serializes the body to v2 Markdown and stamps `version: 2`. Opening without editing never rewrites it.
 - **When hand-editing a v1 file**, either (a) keep the explicit `version: 1` and leave the body as HTML, or (b) convert the whole body to Markdown + islands and set `version: 2`. Do not keep `version: 1` on a body you've rewritten as Markdown — it will still be read as HTML.
 - **The `.hd2` extension** is a deprecated alias: a `.hd2` file is just a version-2 `.hd`. It still opens, but author new content as `.hd` with `version: 2`.

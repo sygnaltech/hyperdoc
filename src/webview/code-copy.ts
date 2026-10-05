@@ -8,6 +8,154 @@ const CHECK_ICON =
   '<path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>' +
   '</svg>';
 
+/**
+ * One logical line of a code block and the vertical band it actually occupies.
+ * `top`/`bottom` are relative to the top of the code box, not the viewport, so a
+ * measurement stays valid while the document scrolls.
+ */
+interface LineBox {
+  text: string;
+  top: number;
+  bottom: number;
+}
+
+/**
+ * Measures where each logical line of `codeEl` is really drawn.
+ *
+ * Code blocks wrap (ProseMirror sets `white-space: pre-wrap` on `pre`), so one
+ * logical line can occupy several visual rows. Dividing the block's height by
+ * the number of logical lines therefore yields a figure that matches nothing on
+ * screen, and every line after the first wrapped one is reported in the wrong
+ * place. Instead, ask the browser — the thing doing the wrapping — how many rows
+ * each line takes, then lay the lines out on the block's uniform row grid.
+ */
+export function measureLines(codeEl: HTMLElement, codeTop: number): LineBox[] {
+  // Walk the text nodes once, recording where each starts in the joined text, so
+  // a character offset can be mapped back to a (node, offset) pair. Taking the
+  // text from the nodes themselves — rather than from innerText — guarantees the
+  // offsets and the content can never disagree.
+  const nodes: Text[] = [];
+  const starts: number[] = [];
+  let joined = '';
+  const walker = document.createTreeWalker(codeEl, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    starts.push(joined.length);
+    nodes.push(n as Text);
+    joined += (n as Text).data;
+  }
+  if (!nodes.length) return [];
+
+  const locate = (offset: number): [Text, number] => {
+    let lo = 0;
+    let hi = nodes.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (starts[mid] <= offset) lo = mid;
+      else hi = mid - 1;
+    }
+    return [nodes[lo], Math.min(offset - starts[lo], nodes[lo].data.length)];
+  };
+
+  // Pass 1 — collect the raw text rects for each logical line. A rect is one run
+  // of text on one visual row, so a line split across several highlight spans
+  // contributes several rects per row; the rows are recovered in pass 2.
+  // A block ending in a newline would otherwise yield a phantom trailing line.
+  const text = joined.endsWith('\n') ? joined.slice(0, -1) : joined;
+  const range = document.createRange();
+  const raw: { text: string; rects: { top: number; height: number }[] }[] = [];
+
+  for (let pos = 0; pos <= text.length; ) {
+    let end = text.indexOf('\n', pos);
+    if (end < 0) end = text.length;
+
+    const [startNode, startOffset] = locate(pos);
+    const [endNode, endOffset] = locate(end);
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+
+    const rects: { top: number; height: number }[] = [];
+    for (const r of Array.from(range.getClientRects())) {
+      if (r.height > 0) rects.push({ top: r.top, height: r.height });
+    }
+
+    raw.push({ text: text.slice(pos, end).replace(/\r$/, ''), rects });
+    pos = end + 1;
+  }
+  if (!raw.length) return [];
+
+  // The ink height of a row — the rect the browser draws around the glyphs. This
+  // is SHORTER than the line box, because it excludes the leading.
+  const allHeights = raw.flatMap((r) => r.rects.map((x) => x.height)).sort((a, b) => a - b);
+  const inkH = allHeights.length ? allHeights[allHeights.length >> 1] : 0;
+
+  // How many visual rows each line occupies: the number of distinct rect tops,
+  // clustered so that a bold or differently-sized span on the same row doesn't
+  // read as a row of its own.
+  const tol = Math.max(1, inkH * 0.6);
+  const rowTops = raw.map((r) => {
+    const tops: number[] = [];
+    for (const x of r.rects) {
+      if (!tops.some((t) => Math.abs(t - x.top) < tol)) tops.push(x.top);
+    }
+    return tops.sort((a, b) => a - b);
+  });
+  const rowCounts = rowTops.map((t) => Math.max(1, t.length));
+
+  // Rows are evenly spaced within a code block — one font, one line-height — so
+  // derive that spacing from the gaps between consecutive distinct row tops.
+  const distinct = Array.from(new Set(rowTops.flat())).sort((a, b) => a - b);
+  const gaps: number[] = [];
+  for (let i = 1; i < distinct.length; i++) {
+    const g = distinct[i] - distinct[i - 1];
+    if (g > tol) gaps.push(g);
+  }
+  gaps.sort((a, b) => a - b);
+  let pitch = gaps.length ? gaps[gaps.length >> 1] : 0;
+  if (!(pitch > 0)) {
+    // Single-row block: nothing to derive a pitch from, so ask the style system.
+    const cssLh = parseFloat(getComputedStyle(codeEl).lineHeight);
+    pitch = Number.isFinite(cssLh) && cssLh > 0 ? cssLh : inkH;
+  }
+  if (!(pitch > 0)) return [];
+
+  // Anchor the row grid on the first line that actually produced rects. A blank
+  // line's own rect cannot be trusted — a collapsed range reports the caret at
+  // the end of the preceding row, half a leading too high — but its position is
+  // implied by the rows before it, so it never needs to be measured.
+  let origin = NaN;
+  for (let i = 0, row = 0; i < raw.length; row += rowCounts[i], i++) {
+    if (rowTops[i].length) {
+      origin = rowTops[i][0] - row * pitch;
+      break;
+    }
+  }
+  if (Number.isNaN(origin)) origin = codeTop;
+
+  // Pass 2 — lay the bands out on that grid. Expanding by half the leading makes
+  // consecutive bands tile exactly, so the highlight has no seams and a wrapped
+  // line's band covers every row it occupies.
+  const halfLead = Math.max(0, (pitch - inkH) / 2);
+  const boxes: LineBox[] = [];
+  for (let i = 0, row = 0; i < raw.length; row += rowCounts[i], i++) {
+    const top = origin + row * pitch - halfLead;
+    boxes.push({
+      text: raw[i].text,
+      top: top - codeTop,
+      bottom: top + rowCounts[i] * pitch - codeTop,
+    });
+  }
+
+  return boxes;
+}
+
+/** Index of the line whose band contains `yRel` (measured from the code box top). */
+export function lineIndexAt(boxes: LineBox[], yRel: number): number {
+  for (let i = 0; i < boxes.length; i++) {
+    if (yRel < boxes[i].bottom) return i;
+  }
+  return boxes.length - 1;
+}
+
 export function setupCodeCopy(container: HTMLElement): CodeCopyHandlers {
   const button = document.createElement('button');
   button.type = 'button';
@@ -67,40 +215,48 @@ export function setupCodeCopy(container: HTMLElement): CodeCopyHandlers {
     button.style.left = `${preRect.right - containerRect.left - button.offsetWidth - 6}px`;
   };
 
-  // Splits a <pre>'s code into lines and measures the rendered line height.
-  const readLines = (pre: HTMLPreElement) => {
+  // Per-line geometry for the block under the pointer. Measuring every line
+  // means a Range per line, which is too much to redo on each mousemove, so the
+  // result is cached until something that could change wrapping changes.
+  let geomCache: { pre: HTMLPreElement; sig: string; boxes: LineBox[] } | null = null;
+
+  const lineGeometry = (pre: HTMLPreElement) => {
     const codeEl = (pre.querySelector('code') as HTMLElement | null) ?? pre;
-    const text = codeEl.innerText.replace(/\r\n/g, '\n').replace(/\n$/, '');
-    const lines = text.split('\n');
     const codeRect = codeEl.getBoundingClientRect();
-    // Measure from the actual rendered code box so it matches whatever line
-    // height the theme applies (avoids relying on a possibly-"normal" value).
-    const lineHeight = lines.length > 0 ? codeRect.height / lines.length : codeRect.height;
-    return { codeEl, lines, lineHeight, codeRect };
+    // Text length and rendered size cover every way the layout can shift: an
+    // edit, a resize, a font load. Scroll position is deliberately absent — it
+    // moves codeRect.top but not the boxes, which are relative to it.
+    const sig = `${codeEl.textContent?.length ?? 0}|${Math.round(codeRect.width)}|${Math.round(codeRect.height)}`;
+    if (geomCache && geomCache.pre === pre && geomCache.sig === sig) {
+      return { boxes: geomCache.boxes, codeRect };
+    }
+    const boxes = measureLines(codeEl, codeRect.top);
+    geomCache = { pre, sig, boxes };
+    return { boxes, codeRect };
   };
 
-  // Highlights the line under (clientX, clientY) within `pre`.
+  // Highlights the line under clientY within `pre`.
   const positionLine = (pre: HTMLPreElement, clientY: number) => {
-    const { lines, lineHeight, codeRect } = readLines(pre);
-    if (!lines.length || lineHeight <= 0) {
+    const { boxes, codeRect } = lineGeometry(pre);
+    if (!boxes.length) {
       hideLine();
       return;
     }
-    let idx = Math.floor((clientY - codeRect.top) / lineHeight);
-    if (idx < 0) idx = 0;
-    if (idx > lines.length - 1) idx = lines.length - 1;
+    const idx = lineIndexAt(boxes, clientY - codeRect.top);
+    const box = boxes[idx];
 
     lineIndex = idx;
-    lineText = lines[idx];
+    lineText = box.text;
 
     const preRect = pre.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
     lineHi.classList.remove('copied', 'failed');
     lineHi.style.display = 'block';
-    lineHi.style.top = `${codeRect.top - containerRect.top + idx * lineHeight}px`;
+    lineHi.style.top = `${codeRect.top - containerRect.top + box.top}px`;
     lineHi.style.left = `${preRect.left - containerRect.left}px`;
     lineHi.style.width = `${preRect.width}px`;
-    lineHi.style.height = `${lineHeight}px`;
+    // A wrapped line occupies several rows, so the band is as tall as all of them.
+    lineHi.style.height = `${box.bottom - box.top}px`;
   };
 
   // Central hover evaluation shared by mousemove and Ctrl key up/down.

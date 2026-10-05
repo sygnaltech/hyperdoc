@@ -1,0 +1,62 @@
+---
+id: 2Ucjj9sEJkbmrFIWVFXM8u
+title: "Code block line-picking"
+version: 2
+date: 2026-10-05
+---
+
+# Code block line-picking
+
+Hold **Ctrl** (or **Cmd**) and move the pointer over the blocks below. The
+highlight must bracket exactly one logical line, and clicking must copy that
+same line.
+
+Code blocks wrap, so a long line occupies several visual rows. Its highlight
+should be one tall band covering all of them — not a one-row band, and not a
+band offset from the line it claims to be on.
+
+## Wrapped lines among short ones
+
+Lines 3 and 6 wrap. Check that lines 7–9 are still picked correctly: an error in
+the earlier wrapped lines shows up as drift further down the block.
+
+```js
+const a = 1;
+const b = 2;
+const config = { retries: 5, timeout: 30000, backoff: 'exponential', onError: (e) => console.warn('request failed, retrying', e), headers: { accept: 'application/json' } };
+const c = 3;
+
+function describe(thing) {
+  return `${thing.name} has ${thing.parts.length} parts, weighs ${thing.massKg}kg, and was last serviced on ${thing.servicedAt.toISOString()}`;
+}
+
+const d = 4;
+const e = 5;
+```
+
+## Blank lines
+
+A blank line is pickable too, and its band is one row tall like any other.
+
+```py
+first = 1
+
+second = 2
+
+
+third = 3
+```
+
+## Every line wraps
+
+```text
+alpha bravo charlie delta echo foxtrot golf hotel india juliett kilo lima mike november oscar papa
+quebec romeo sierra tango uniform victor whiskey xray yankee zulu one two three four five six seven
+eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty
+```
+
+## Single line, no wrap
+
+```sh
+echo hello
+```

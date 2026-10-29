@@ -39,7 +39,7 @@ All fields are optional. The editor will inject `id` and `version` automatically
 | Field | Type | Notes |
 | --- | --- | --- |
 | `id` | base62 string (22 chars) | Per-document identifier. Stable across renames and moves; asset folders are keyed by it. Do not edit by hand — clear it to force regeneration. |
-| `version` | integer | HD format version the document is written against. Current: **1**. A missing version means "the latest version." |
+| `version` | integer | HD format version the document is written against. Current: **2**. A missing version means "the latest version." |
 | `title` | string | Human-readable title. |
 | `date` | ISO 8601 date or datetime | Document date. |
 | `author` | string | Author identifier (email or handle). |

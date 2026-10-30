@@ -37,6 +37,6 @@ HD is a body-only HTML documentation format authored in a dedicated VS Code WYSI
     
 -   **Per-document base62 identity.** The editor injects a stable `id:` on first open. Asset folders are keyed by that id, so renames and moves don't break references.
     
--   **Format version field.** The current version is `1`. Documents without a `version:` field are interpreted as the latest version.
+-   **Format version field.** `format-version:` records which version of the HD *file format* a document is stored in. The current version is `2`. Documents without the field are interpreted as the latest version. It is not a document revision number and is never incremented.
     
 -   **Markdown round-trip via clipboard.** Paste Markdown into the editor and it converts; "Copy as Markdown" emits Markdown for round-trippable elements and raw HTML for everything else.

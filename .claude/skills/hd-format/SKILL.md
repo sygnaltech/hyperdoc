@@ -7,9 +7,15 @@ description: Read, write, and edit .hd documentation files — Markdown-primary 
 
 The `.hd` format is **Markdown-primary** documentation: the body is GitHub-Flavored Markdown, dropping down to **raw-HTML islands** only for the things Markdown can't express losslessly. Use this skill whenever you're reading, writing, or editing files with the `.hd` extension, or producing content that will be saved as `.hd`.
 
-> **Two on-disk versions exist.** Version **2** (the current default, described here) stores the body as Markdown + HTML islands. Version **1** is the older body-only-HTML format. The `version:` frontmatter field — not the file extension — says which one a file is. A file is treated as legacy v1 **only when it explicitly declares `version: 1`**; anything else (including a file with no `version:` field) opens as v2. See [Reading and migrating version 1](#reading-and-migrating-version-1) before editing an older file. The `.hd2` extension is a deprecated alias for a version-2 `.hd` file; it still opens but should not be used for new content.
+> **`format-version` is the FILE FORMAT's version, not the document's. NEVER increment it.** It is not a revision number, a changelog, a draft counter, or anything you are expected to maintain. `format-version: 2` means "this file is written in HD format 2", exactly as it will still mean after you edit the document a hundred times. Editing a document's *content* does not change the format it is stored in, so **the correct value is always `2` and you must leave it at `2`** — writing `3` (or `2.1`, or bumping it "to be current") declares a format that does not exist and breaks the file. Only the HD format itself changing — a thing the editor does, not you — would ever move this number. **Do not edit, bump, or "update" this field. Ever.**
+>
+> If you want to record a document revision, add your own separate field (`revision`, `doc-version`, …). Never repurpose this one.
 
-> **Creating a new `.hd`? Use the script, never hand-write the frontmatter.** Run `node "<skill-dir>/scripts/new-doc.mjs" <path.hd> [--title "…"]` — see [Running the bundled scripts](#running-the-bundled-scripts) for what `<skill-dir>` is. It stamps `version: 2`, the title, the date, **and an `id`** for you. Two reasons this matters: it's the one reliable way to guarantee the `version` field is present (a hand-authored doc that omits it is the usual cause of a "why is this version 1?" surprise), and it stamps the `id` up front so the doc doesn't get **silently rewritten the first time it's opened** — the editor mints a missing `id` on open and saves the file, which reflows the frontmatter and makes the just-created file reappear in your work tree. Pass `--no-id` only for a throwaway you'll never open in the editor.
+> **Two on-disk versions exist.** Version **2** (the current default, described here) stores the body as Markdown + HTML islands. Version **1** is the older body-only-HTML format. The `format-version:` frontmatter field — not the file extension — says which one a file is. A file is treated as legacy v1 **only when it explicitly declares format version `1`**; anything else (including a file with no version field at all) opens as v2. See [Reading and migrating version 1](#reading-and-migrating-version-1) before editing an older file. The `.hd2` extension is a deprecated alias for a version-2 `.hd` file; it still opens but should not be used for new content.
+
+> **The field was renamed from `version` to `format-version`.** The old name was read as a document revision counter and incremented, which silently declared files to be a format that doesn't exist. `format-version` is now canonical and is the only name you should ever write. A plain `version:` is still *read* as a fallback so old documents keep opening, but it is **deprecated**: the editor deletes it and writes `format-version` the next time the document is edited. If you are hand-editing a file that still has `version:`, rename it to `format-version:` and keep the value — don't leave both.
+
+> **Creating a new `.hd`? Use the script, never hand-write the frontmatter.** Run `node "<skill-dir>/scripts/new-doc.mjs" <path.hd> [--title "…"]` — see [Running the bundled scripts](#running-the-bundled-scripts) for what `<skill-dir>` is. It stamps `format-version: 2`, the title, the date, **and an `id`** for you. Two reasons this matters: it's the one reliable way to guarantee the `format-version` field is present and correctly spelled (a hand-authored doc that omits it is the usual cause of a "why is this version 1?" surprise), and it stamps the `id` up front so the doc doesn't get **silently rewritten the first time it's opened** — the editor mints a missing `id` on open and saves the file, which reflows the frontmatter and makes the just-created file reappear in your work tree. Pass `--no-id` only for a throwaway you'll never open in the editor.
 
 ## Running the bundled scripts
 
@@ -37,14 +43,14 @@ Write the frontmatter by hand in this exact shape, minting the `id` with the one
 ---
 id: <22 chars of base62, from new-id.mjs or the one-liner>
 title: "Getting Started"
-version: 2
+format-version: 2
 date: 2026-06-12
 ---
 
 # Getting Started
 ```
 
-`version: 2` and a valid `id` are the two fields that matter. A missing `version` is the usual cause of a "why is this version 1?" surprise; a missing or malformed `id` is regenerated on first open, orphaning any `.hd/<id>/` asset folder you created against the old value.
+`format-version: 2` and a valid `id` are the two fields that matter. Write `format-version: 2` literally — that is the value for every document you will ever author, and it is never incremented. A missing version field is the usual cause of a "why is this version 1?" surprise; a missing or malformed `id` is regenerated on first open, orphaning any `.hd/<id>/` asset folder you created against the old value.
 
 ## File structure
 
@@ -57,7 +63,7 @@ Example:
 ```
 ---
 title: Getting Started
-version: 2
+format-version: 2
 date: 2026-06-12
 ---
 
@@ -71,12 +77,12 @@ Welcome. This is **Markdown**, with an HTML island only where needed:
 </figure>
 ```
 
-> **Always write `version: 2`** in the frontmatter of a document you author or convert (the `new-doc.mjs` script does this for you). Only an explicit `version: 1` is read as legacy HTML, so a missing field now defaults to v2 — but write `version: 2` anyway, both for clarity and so the doc survives tools that key off the field.
+> **Always write `format-version: 2`** in the frontmatter of a document you author or convert (the `new-doc.mjs` script does this for you). Only an explicit format version of `1` is read as legacy HTML, so a missing field now defaults to v2 — but write `format-version: 2` anyway, both for clarity and so the doc survives tools that key off the field. **Write it once and never touch it again.**
 
 ## Recommended frontmatter fields
 
 - `id` — 22-character base62 identifier. **Include it on every doc** (the `new-doc.mjs` script does this by default). The editor auto-generates one on first open if it's absent — but that first open then rewrites the file (reflowing the frontmatter and dirtying your work tree), so stamping it at creation avoids the surprise. It is also **required** before placing media: images resolve to `.hd/<id>/` and there's nothing to key the folder on without it — see [Media](#media). Stable across renames/moves. Never change an existing id; clearing the value (leaving the key) forces the editor to regenerate.
-- `version` — HD format version. **Current version: `2`** (Markdown-primary). Always set it to `2` on new or converted docs. `1` marks a legacy body-only-HTML file.
+- `format-version` — the version of the **HD file format** this document is stored in. **The only correct value is `2`.** It describes the format, not the document, so it does **not** change when you edit the content. **Never increment it, never "bump" it, never set it to `3`.** `1` marks a legacy body-only-HTML file and is set only by the migration script. (Renamed from `version`, which agents kept mistaking for a revision counter; a plain `version:` is still read as a fallback but is deprecated and is deleted on the next edit.)
 - `title`
 - `date`
 - `author`
@@ -181,17 +187,18 @@ reference/media.md covers all of the above in full, plus **id generation** (use 
 
 ## Reading and migrating version 1
 
-A file with an explicit `version: 1` stores the body as **body-only HTML** rather than Markdown. It still opens in the editor unchanged.
+A file with an explicit format version of `1` stores the body as **body-only HTML** rather than Markdown. It still opens in the editor unchanged.
 
-- **v1 is opt-in, not the fallback.** The editor treats a file as legacy HTML **only** when it declares `version: 1`. A file with no `version:` field opens as v2/Markdown. So a genuine legacy HTML file that was never stamped must carry `version: 1` to keep rendering as HTML — `node "<skill-dir>/scripts/stamp-legacy-versions.mjs" [dir] --write` finds un-versioned HTML-bodied files and stamps them for you (dry-run without `--write`).
-- **The editor migrates on first edit.** Opening a v1 file leaves it byte-for-byte identical; the first save from the editor re-serializes the body to v2 Markdown and stamps `version: 2`. Opening without editing never rewrites it.
-- **When hand-editing a v1 file**, either (a) keep the explicit `version: 1` and leave the body as HTML, or (b) convert the whole body to Markdown + islands and set `version: 2`. Do not keep `version: 1` on a body you've rewritten as Markdown — it will still be read as HTML.
-- **The `.hd2` extension** is a deprecated alias: a `.hd2` file is just a version-2 `.hd`. It still opens, but author new content as `.hd` with `version: 2`.
+- **How the version is read.** `format-version` is checked first and wins outright. A pre-rename `version` is consulted **only** as a fallback, for documents written before the rename. If a file somehow carries both, `format-version` is authoritative and the stale `version` is ignored.
+- **v1 is opt-in, not the fallback.** The editor treats a file as legacy HTML **only** when it declares format version `1`. A file with no version field opens as v2/Markdown. So a genuine legacy HTML file that was never stamped must carry `format-version: 1` to keep rendering as HTML — `node "<skill-dir>/scripts/stamp-legacy-versions.mjs" [dir] --write` finds un-versioned HTML-bodied files and stamps them for you (dry-run without `--write`).
+- **The editor migrates and self-corrects on first edit.** Opening a file never rewrites its version fields; the first *save* from the editor re-serializes a v1 body to v2 Markdown, writes `format-version: 2`, and **deletes any leftover `version` key**. So an inconsistent document fixes itself as soon as someone edits it — you don't need to go hunting.
+- **When hand-editing a v1 file**, either (a) keep the explicit format version `1` and leave the body as HTML, or (b) convert the whole body to Markdown + islands and set `format-version: 2`. Do not leave a version of `1` on a body you've rewritten as Markdown — it will still be read as HTML.
+- **The `.hd2` extension** is a deprecated alias: a `.hd2` file is just a version-2 `.hd`. It still opens, but author new content as `.hd` with `format-version: 2`.
 
 ## Authoring guidance
 
 - Write the body as GFM Markdown; reach for an HTML island only when the [boundary](#markdown-vs-html-islands) requires it.
-- Frontmatter is bare YAML — never wrap it in `<!-- ... -->`. Always include `version: 2`.
+- Frontmatter is bare YAML — never wrap it in `<!-- ... -->`. Always include `format-version: 2`, and never change that value.
 - Prefer Markdown constructs over equivalent HTML (`## Heading`, not `<h2>`); prefer semantic wrappers (`section`, `figure`) over generic `div` when an island is unavoidable.
 - Tables are a primary motivator for the format — use GFM tables for simple cases, and an HTML-island table when you need `colspan`/`rowspan` or multi-paragraph cells.
 

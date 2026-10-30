@@ -12,7 +12,7 @@ Template for a new source format. Copy this to `sources/<format>.md` and fill in
 
 ## Frontmatter
 - How does the source carry `title` / `description` / other metadata, and how does it map to HD frontmatter?
-- (Engine always adds `version: 2` and a generated `id`.)
+- (Engine always adds `format-version: 2` and a generated `id`.)
 
 ## Text artifacts
 - Any source-specific escaping or noise to clean up. Keep output as literal Markdown text, not HTML entities.

@@ -10,7 +10,7 @@ Convert an existing documentation source into a tree of `.hd` files. This skill 
 **This skill depends on the `hd-format` skill.** That skill is the single source of truth for the *target*: the Markdown-primary body rules, the Markdown-vs-HTML-island boundary, allowed elements/attributes, frontmatter fields, the `id` generator, and — critically — the asset convention. Do not restate or contradict those rules here; defer to them. **Read `hd-format`'s SKILL.md (and its `reference/media.md`) before starting a migration.**
 
 > [!IMPORTANT]
-> HD is **Markdown-primary (format version 2)**. A migrated page is GFM Markdown, dropping to raw-HTML islands only for what Markdown can't express (figures, complex tables, sectioning wrappers, etc.). Do **not** emit body-only HTML — that is the legacy v1 format. Every page gets `version: 2`.
+> HD is **Markdown-primary (format version 2)**. A migrated page is GFM Markdown, dropping to raw-HTML islands only for what Markdown can't express (figures, complex tables, sectioning wrappers, etc.). Do **not** emit body-only HTML — that is the legacy v1 format. Every page gets `format-version: 2` (the HD *file format* version — a fixed value, never incremented).
 
 ## The two hard rules that make migrations break
 
@@ -36,7 +36,7 @@ Most of a migration is mechanical source-Markdown → HD-Markdown. The two thing
 ### 3. Convert each page
 For every source page:
 1. **Generate an id** using hd-format's id generator — see its **"Generating an id"** section (a 22-char base62 id; never hand-author one). One fresh id per page; never reuse.
-2. **Frontmatter** → emit `id`, `version: 2`, `title`, and `description` if the source had one. Bare YAML fenced with `---`, never wrapped in an HTML comment. Strip status emoji/artifacts from the title.
+2. **Frontmatter** → emit `id`, `format-version: 2`, `title`, and `description` if the source had one. Bare YAML fenced with `---`, never wrapped in an HTML comment. Strip status emoji/artifacts from the title.
 3. **Body** → convert source markup to **GFM Markdown**, using a raw-HTML island only where the hd-format boundary requires one. Keep Markdown as Markdown — headings, emphasis, lists, blockquotes, and fenced code all stay in Markdown; do **not** rewrite them into `<h1>`/`<p>`/`<ul>` HTML. Source-specific constructs (admonitions, embeds, shortcodes, tables-with-HTML) are mapped per `sources/<format>.md`.
 4. **Assets** → for each image/media the page references:
    - Copy the source file into `<root>/.hd/<id>/` under a bare filename.
@@ -52,7 +52,7 @@ For every source page:
 
 ### 6. Verify
 - Source page count == target `.hd` count.
-- Every page has `version: 2` and an `id` in frontmatter.
+- Every page has `format-version: 2` and an `id` in frontmatter.
 - Every **managed** image reference is a bare filename that exists at `.hd/<id>/<name>` for that page's id (in-place relative references, if any were deliberately kept, resolve to a file that exists).
 - Body is Markdown-primary — no wholesale `<h1>`/`<p>`/`<ul>` HTML where Markdown would do; islands only where the boundary requires them.
 - No forbidden HD elements (`script`/`style`/`iframe`/`video`/`audio`/form controls/`html`/`head`/`body`).

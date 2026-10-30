@@ -3,22 +3,23 @@
  * Safety net for the "version 2 is the default" flip.
  *
  * The editor now treats a .hd/.hd2 file as legacy v1 ONLY when it explicitly
- * declares `version: 1`. Any file WITHOUT a version field opens as current
+ * declares format version 1. Any file WITHOUT a version field opens as current
  * v2/Markdown. That is correct for new docs, but a genuinely-legacy body-only
  * HTML file that was never stamped would now render through the Markdown path.
  *
  * This script finds un-versioned files whose body looks like body-only HTML and
- * stamps them with an explicit `version: 1` so they keep rendering as legacy
- * HTML. Un-versioned files that look like Markdown are left alone (the new
- * default already makes them v2). Files that already declare any version are
- * skipped untouched.
+ * stamps them with an explicit `format-version: 1` so they keep rendering as
+ * legacy HTML. Un-versioned files that look like Markdown are left alone (the
+ * new default already makes them v2). Files that already declare a version
+ * under EITHER key — the canonical `format-version` or the pre-rename
+ * `version` — are skipped untouched.
  *
  *   node stamp-legacy-versions.mjs [dir]           # dry run (default: cwd)
  *   node stamp-legacy-versions.mjs [dir] --write   # apply the changes
  *
- * The insertion is minimal: a single `version: 1` line is added to existing
- * frontmatter (or a frontmatter block is prepended) — the rest of the file is
- * left byte-for-byte unchanged.
+ * The insertion is minimal: a single `format-version: 1` line is added to
+ * existing frontmatter (or a frontmatter block is prepended) — the rest of the
+ * file is left byte-for-byte unchanged.
  */
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs'
 import { join, extname } from 'node:path'
@@ -53,14 +54,14 @@ function looksLikeHtml(body) {
   return /^<[a-zA-Z][\w-]*(\s|>|\/)/.test(firstLine)
 }
 
-/** Insert a `version: 1` line minimally, preserving the rest of the file. */
+/** Insert a `format-version: 1` line minimally, preserving the rest of the file. */
 function stampV1(raw) {
   if (/^---\r?\n/.test(raw)) {
     // Existing frontmatter block — inject right after the opening fence.
-    return raw.replace(/^---(\r?\n)/, `---$1version: 1$1`)
+    return raw.replace(/^---(\r?\n)/, `---$1format-version: 1$1`)
   }
   // No frontmatter — prepend a minimal block.
-  return `---\nversion: 1\n---\n\n${raw}`
+  return `---\nformat-version: 1\n---\n\n${raw}`
 }
 
 const files = collect(root)
@@ -77,7 +78,11 @@ for (const file of files) {
     console.warn(`! skip (unparseable frontmatter): ${file}`)
     continue
   }
-  if (parsed.data && parsed.data.version != null) {
+  // A version declared under either key counts as stated — don't second-guess it.
+  const declared = parsed.data
+    ? (parsed.data['format-version'] ?? parsed.data.version)
+    : undefined
+  if (declared != null) {
     skippedVersioned++
     continue
   }
@@ -86,7 +91,7 @@ for (const file of files) {
     continue
   }
   stamped++
-  console.log(`${write ? 'stamp' : 'would stamp'} version: 1  →  ${file}`)
+  console.log(`${write ? 'stamp' : 'would stamp'} format-version: 1  →  ${file}`)
   if (write) writeFileSync(file, stampV1(raw), 'utf8')
 }
 

@@ -24,7 +24,7 @@ The WYSIWYG editor is built on TipTap, whose internal document model is HTML. Th
   file on disk (Markdown + HTML islands)
 ```
 
-On **load**, the Markdown body is converted to HTML and handed to the editor. On **save**, the editor's HTML is converted back to Markdown, emitting a raw-HTML island for any element Markdown can't represent losslessly. Whether the load conversion runs is decided by the document's `version`, not its file extension: a legacy version-1 body is already HTML and is read verbatim, while a version-2 body is Markdown and is converted. **Every save writes version 2**, so a v1 document is migrated to Markdown the first time it is edited.
+On **load**, the Markdown body is converted to HTML and handed to the editor. On **save**, the editor's HTML is converted back to Markdown, emitting a raw-HTML island for any element Markdown can't represent losslessly. Whether the load conversion runs is decided by the document's `format-version`, not its file extension: a legacy version-1 body is already HTML and is read verbatim, while a version-2 body is Markdown and is converted. **Every save writes version 2**, so a v1 document is migrated to Markdown the first time it is edited.
 
 The consequence worth remembering: **the editor and the paste pipeline are flavor-agnostic.** They only ever see HTML. All HD2-specific behavior is the load/save conversion, and nothing else.
 
@@ -65,8 +65,10 @@ Two places are deliberately left alone, because a blank line there is syntax rat
 
 ## Frontmatter and versioning
 
-Both versions use the identical frontmatter structure. The only value that differs is `version`: a v2 document declares `version: 2`, a legacy document `version: 1`. That field — not the file extension — is the source of truth for how the body is stored. A new document is created as v2, and every save writes `version: 2`, so a legacy file is stamped and migrated the first time it is edited. A `.hd` whose body is non-empty and carries no version is read as legacy v1 HTML, so a hand-authored Markdown body must declare `version: 2` explicitly.
+Both versions use the identical frontmatter structure. The only value that differs is `format-version`: a v2 document declares `format-version: 2`, a legacy document `format-version: 1`. That field — not the file extension — is the source of truth for how the body is stored. A new document is created as v2, and every save writes `format-version: 2`, so a legacy file is stamped and migrated the first time it is edited. A document carrying no version field at all is read as current v2.
+
+The field describes the **file format**, not the document, so it is written once and never incremented. It was originally spelled `version`, which agents and authors alike read as a document revision counter and bumped — declaring a format that does not exist. Resolution order is now fixed: `format-version` is read first and wins; a plain `version` is consulted only as a fallback for pre-rename documents. Every save writes `format-version` and **deletes** any leftover `version`, so a document with both fields repairs itself on first edit.
 
 ## Assets are shared, deliberately
 
-Version 2 does not introduce a new asset mechanism. It reuses the existing `.hd/<id>/` folders keyed by the document `id`. Because both versions resolve assets the same way, a document migrates from v1 to v2 without moving, renaming, or re-referencing a single asset — and a legacy `.hd2` file is identical on disk to a `.hd` carrying `version: 2`.
+Version 2 does not introduce a new asset mechanism. It reuses the existing `.hd/<id>/` folders keyed by the document `id`. Because both versions resolve assets the same way, a document migrates from v1 to v2 without moving, renaming, or re-referencing a single asset — and a legacy `.hd2` file is identical on disk to a `.hd` carrying `format-version: 2`.

@@ -16,7 +16,7 @@ This document is the human-readable specification of a valid `.hd` file. The age
     
 2.  **One blank line** after the frontmatter is a convention for readability, not a requirement.
     
-3.  **Body-only HTML content** follows. The file must not contain `<html>`, `<head>`, or `<body>` tags.
+3.  **The body** follows. In format version 2 it is GFM Markdown with raw-HTML islands; in legacy version 1 it is body-only HTML. Either way the file must not contain `<html>`, `<head>`, or `<body>` tags.
     
 
 Minimal example:
@@ -24,27 +24,51 @@ Minimal example:
 ```
 ---
 title: Getting Started
-id: 7gXk2L9pM4nQ8vR1cT3bDe
-version: 1
+id: <22 chars of base62>
+format-version: 2
 ---
 
-<h1>Getting Started</h1>
-<p>Welcome.</p>
+# Getting Started
+
+Welcome.
 ```
 
 ## Frontmatter fields
 
-All fields are optional. The editor will inject `id` and `version` automatically on first open if they are absent.
+All fields are optional. The editor will inject `id` and `format-version` automatically on first open if they are absent.
 
 | Field | Type | Notes |
 | --- | --- | --- |
 | `id` | base62 string (22 chars) | Per-document identifier. Stable across renames and moves; asset folders are keyed by it. Do not edit by hand — clear it to force regeneration. |
-| `version` | integer | HD format version the document is written against. Current: **2**. A missing version means "the latest version." |
+| `format-version` | integer | Version of the **HD file format** the document is stored in. Current: **2**. A missing value means "the latest version." **Not a document revision number — never increment it.** See [The `format-version` field](#the-format-version-field). |
 | `title` | string | Human-readable title. |
 | `date` | ISO 8601 date or datetime | Document date. |
 | `author` | string | Author identifier (email or handle). |
 | `description` | string | One-line description. |
 | `tags` | list of strings | Tags / categories. |
+| `purpose` | string | Optional free-text statement of what the document is for. |
+
+### The `format-version` field
+
+> [!IMPORTANT]
+> `format-version` records **which version of the HD file format the document is stored in**. It is not a revision counter, a draft number, or a changelog. It describes the *container*, not the *content* — so editing a document does not change it.
+>
+> **The only correct value for authored content is `2`, and it must never be incremented.** Writing `3`, or bumping it "to keep it current", declares a format that does not exist and breaks the file. The number moves only when the HD format itself changes, which is a change to the editor, not to any document.
+
+**Renamed from `version`.** The field was originally called `version`. That name was routinely misread as the document's own revision number and incremented, silently reclassifying valid v2 files. `format-version` cannot be misread that way, which is the entire reason for the rename.
+
+Both names are **read**, with a fixed precedence:
+
+1. `format-version` — canonical. If present, it wins outright.
+2. `version` — deprecated fallback, for documents written before the rename. Consulted only when `format-version` is absent.
+
+If a document carries both, `format-version` is authoritative and the stale `version` is ignored — never merged, never treated as a conflict.
+
+Only `format-version` is **written**. The editor auto-corrects on the first edit of any document: it writes `format-version: 2` and **removes the legacy `version` key entirely**, so an inconsistent document repairs itself as soon as it is edited. Opening a document never rewrites its version fields.
+
+A document is treated as legacy version 1 **only when it explicitly declares format version `1`** under either key. Anything else — including a document with no version field at all — is read as current version 2.
+
+To record a document's own revision, add a separate field of your own (`revision`, `doc-version`, …). Do not repurpose `format-version`.
 
 ## Supported elements
 

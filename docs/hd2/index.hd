@@ -12,7 +12,7 @@ version: 2
 
 **HD version 2** stores document content as **Markdown first, HTML only where Markdown can't express the intent**. It is **now the default**: new documents are created as v2, and every save writes v2 — regardless of file extension. The older body-only-HTML format is version 1, still readable and migrated to v2 the first time you edit it. (The `.hd2` extension was the original home of this format and still opens; it is now a deprecated alias for a v2 `.hd` file.)
 
-**Status: default format.** Version 2 has replaced version 1 as the format new content is created and saved in. A legacy v1 (`.hd`, HTML) file opens unchanged and is migrated to v2 on its first edit — the `version:` frontmatter field, not the file extension, records which version a file is. There is no separate `.hd2` format to consolidate anymore; it is simply an alternate extension for the same v2 content.
+**Status: default format.** Version 2 has replaced version 1 as the format new content is created and saved in. A legacy v1 (`.hd`, HTML) file opens unchanged and is migrated to v2 on its first edit — the `format-version:` frontmatter field, not the file extension, records which version a file is. There is no separate `.hd2` format to consolidate anymore; it is simply an alternate extension for the same v2 content.
 
 ## The one-sentence difference
 
@@ -22,7 +22,7 @@ Version 1 stores **body-only HTML** on disk; version 2 stores **Markdown with ra
 
 -   **The editor.** The same VS Code WYSIWYG editor opens both. Typing, tables, paste, image handling, and the toolbar are unchanged.
     
--   **Frontmatter.** The same bare `---` YAML fence, the same fields (`id`, `title`, `date`, `version`, …).
+-   **Frontmatter.** The same bare `---` YAML fence, the same fields (`id`, `title`, `date`, `format-version`, …).
     
 -   **Document identity.** The same 22-character base62 `id`, injected on first open.
     
@@ -35,7 +35,7 @@ Version 1 stores **body-only HTML** on disk; version 2 stores **Markdown with ra
 
 -   **On-disk representation.** Prose, headings, lists, simple tables, and other Markdown-expressible content are stored as Markdown. Everything Markdown can't represent is stored as a verbatim HTML island.
     
--   **Frontmatter version.** v2 files carry `version: 2`; legacy v1 files carry `version: 1`. The field is the source of truth for how the body is stored.
+-   **Frontmatter version.** v2 files carry `format-version: 2`; legacy v1 files carry `format-version: 1`. The field is the source of truth for how the body is stored. (It was called `version` before the rename; that spelling is still read as a fallback and is cleaned up on the next edit.)
     
 -   **Cleaner diffs, more familiar source.** The raw file reads like Markdown and produces smaller, line-oriented git diffs for prose edits.
     

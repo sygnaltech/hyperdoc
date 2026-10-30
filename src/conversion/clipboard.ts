@@ -22,7 +22,8 @@ export function registerClipboardCommands(): vscode.Disposable[] {
 
       const { meta, body } = parseDocument(active.getText());
       // v2 bodies are already Markdown; legacy v1 bodies are HTML and need
-      // converting. The version field is the source of truth, not the extension.
+      // converting. The `format-version` frontmatter field is the source of
+      // truth (falling back to the pre-rename `version`), not the extension.
       const version = effectiveVersion(meta, extForPath(active.fileName), body);
       const md = version >= 2 ? body : htmlToMarkdown(body);
       await vscode.env.clipboard.writeText(md);

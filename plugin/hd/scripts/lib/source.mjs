@@ -2,7 +2,10 @@ import { readFile, readdir } from 'node:fs/promises'
 import { join, extname, basename } from 'node:path'
 import matter from 'gray-matter'
 
-const HD_FRONTMATTER_DROP = new Set(['id', 'version'])
+// HD-internal plumbing that must never reach the destination's frontmatter.
+// `format-version` is the canonical key; `version` is its pre-rename spelling,
+// still dropped so an un-migrated source doesn't leak it downstream.
+const HD_FRONTMATTER_DROP = new Set(['id', 'version', 'format-version'])
 
 export async function readHdSources(sourceDir) {
   const entries = await readdir(sourceDir)

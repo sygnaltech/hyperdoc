@@ -29,7 +29,7 @@ npm run package; code --install-extension "hyperdoc-$((Get-Content package.json 
 
 ## Create your first .hd file
 
-Create any file with a `.hd` extension in a workspace. VS Code launches the HD WYSIWYG editor as the default editor for that file. On first open, the editor injects an `id` and a `version` into the frontmatter — you don't need to set them by hand.
+Create any file with a `.hd` extension in a workspace. VS Code launches the HD WYSIWYG editor as the default editor for that file. On first open, the editor injects an `id` and a `format-version` into the frontmatter — you don't need to set them by hand.
 
 If you want to seed your own frontmatter, start the file with a bare YAML fence:
 

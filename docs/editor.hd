@@ -148,10 +148,14 @@ Every `.hd` file gets a 22-character base62 `id` in its frontmatter on first ope
 
 ## Format version
 
-Documents carry a `version` field in their frontmatter. The current version is `2` (Markdown-primary), and it is the source of truth for how the body is stored — not the file extension. New documents are created as v2, and every save writes `version: 2`, so a legacy v1 (body-only HTML) document is migrated to v2 the first time you edit it. Opening a v1 document without editing it leaves it untouched. A non-empty `.hd` with no version is read as legacy v1 HTML.
+Documents carry a `format-version` field in their frontmatter. The current version is `2` (Markdown-primary), and it is the source of truth for how the body is stored — not the file extension. New documents are created as v2, and every save writes `format-version: 2`, so a legacy v1 (body-only HTML) document is migrated to v2 the first time you edit it. Opening a v1 document without editing it leaves it untouched. A document with no version field at all is read as current v2.
+
+The field names the **file format**, not the document. It does not change when you edit the content, and it is never incremented — `2` is the correct value for every document you author.
+
+The field was originally called `version`, which was persistently misread as a document revision counter and incremented. `format-version` is now canonical; a plain `version:` is still read as a fallback so older documents keep opening, but the editor replaces it with `format-version` and deletes it the first time the document is edited. If a document somehow carries both, `format-version` wins and the stale `version` is ignored.
 
 ## Sync with disk
 
-When the editor injects an `id` or `version` on open, it **saves that change straight to disk** rather than leaving it as an unsaved edit. This keeps the file and the editor in sync and avoids a confusing "unsaved changes" state you never created. It also means that if an agent or other tool rewrites the `.hd` file on disk while it's open and you have no pending edits, the editor reloads to match — a document left dirty by the injection would otherwise block that automatic reload.
+When the editor injects an `id` or `format-version` on open, it **saves that change straight to disk** rather than leaving it as an unsaved edit. This keeps the file and the editor in sync and avoids a confusing "unsaved changes" state you never created. It also means that if an agent or other tool rewrites the `.hd` file on disk while it's open and you have no pending edits, the editor reloads to match — a document left dirty by the injection would otherwise block that automatic reload.
 
-The injection is a **minimal, surgical edit**: the new `id`/`version` line is inserted textually and every other frontmatter field is left byte-for-byte untouched. It does not re-serialize the YAML, so bare dates, flow-style lists (`[a, b]`), and long folded strings are preserved exactly as you wrote them — the only change in the resulting diff is the line that was added.
+The injection is a **minimal, surgical edit**: the new `id`/`format-version` line is inserted textually and every other frontmatter field is left byte-for-byte untouched. It does not re-serialize the YAML, so bare dates, flow-style lists (`[a, b]`), and long folded strings are preserved exactly as you wrote them — the only change in the resulting diff is the line that was added.

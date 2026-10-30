@@ -78,7 +78,8 @@ section below.
 
 As of HD format **version 2** (the current default), a `.hd` body is
 **Markdown-primary** (GFM with raw-HTML islands), not body-only HTML. Version
-**1** files store body-only HTML. The `version:` frontmatter field says which.
+**1** files store body-only HTML. The `format-version:` frontmatter field says
+which (the pre-rename `version:` is still read as a fallback).
 
 > **Known limitation.** The `nextra4` converter below was written for v1 (HTML)
 > bodies: it rewrites links/assets by matching HTML `href=`/`src=` attributes and
@@ -95,8 +96,8 @@ As of HD format **version 2** (the current default), a `.hd` body is
 **What it does (deterministic):**
 
 1. Read every `.hd` in the config's source dir; parse YAML frontmatter; drop
-   HD-only fields (`id`, `version`); keep `title`, `description`, `date`,
-   `author`, `tags`.
+   HD-only fields (`id`, `format-version`, and the legacy `version`); keep
+   `title`, `description`, `date`, `author`, `tags`.
 2. Rewrite the body (written for v1 HTML bodies — see the limitation above):
    - `href="foo.hd"` → `href="/foo"` (or `/<routePrefix>/foo` when set).
    - `href="foo.hd#anchor"` → `href="/foo#anchor"` (prefix applied if set).

@@ -115,16 +115,26 @@ function build(info: DocInfo | null, error: string | null, bridge: Bridge): HTML
       ? `2 · Markdown-primary`
       : `1 · body-only HTML (legacy)`;
   const extNote = info.ext === 'hd2' ? '.hd2 (deprecated alias)' : '.hd';
-  el.appendChild(
-    section('Format', [
-      row('Version', versionLabel),
-      row('Extension', extNote),
-      row('Id', info.id ?? '— none —')
-    ])
-  );
+  const formatRows = [
+    row('Format version', versionLabel),
+    row('Extension', extNote),
+    row('Id', info.id ?? '— none —')
+  ];
+  // A leftover pre-rename `version:` key is the thing that confuses agents into
+  // treating the format version as a revision counter, so call it out here
+  // rather than letting it blend into the generic frontmatter list. It is
+  // removed automatically the next time the document is edited.
+  if (Object.prototype.hasOwnProperty.call(info.meta, 'version')) {
+    formatRows.push(
+      row('Legacy `version`', `${formatMetaValue(info.meta.version)} — removed on next edit`)
+    );
+  }
+  el.appendChild(section('Format', formatRows));
 
-  // Frontmatter (everything except id/version, already shown above)
-  const fmKeys = Object.keys(info.meta).filter((k) => k !== 'id' && k !== 'version');
+  // Frontmatter (everything except id and the version fields, shown above)
+  const fmKeys = Object.keys(info.meta).filter(
+    (k) => k !== 'id' && k !== 'version' && k !== 'format-version'
+  );
   if (fmKeys.length) {
     el.appendChild(section('Frontmatter', fmKeys.map((k) => row(k, formatMetaValue(info.meta[k])))));
   }

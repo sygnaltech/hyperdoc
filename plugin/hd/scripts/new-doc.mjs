@@ -2,8 +2,13 @@
 /**
  * Scaffold a new .hd document in the CURRENT (version 2 / Markdown-primary)
  * format. This is the ONLY correct way to create a new .hd file: it guarantees
- * `version: 2` in the frontmatter so the doc can never be misread as legacy v1.
- * Never hand-author the frontmatter — always go through this script.
+ * `format-version: 2` in the frontmatter so the doc can never be misread as
+ * legacy v1. Never hand-author the frontmatter — always go through this script.
+ *
+ * `format-version` names the HD FILE FORMAT, not the document's revision. It is
+ * written once, here, and never incremented. (It was called `version` before;
+ * that name was read as a revision counter and bumped, which is exactly why it
+ * is now spelled `format-version`.)
  *
  *   node new-doc.mjs <path.hd> [--title "Title"] [--no-id] [--force]
  *
@@ -86,7 +91,7 @@ const date = new Date().toISOString().slice(0, 10)
 const fm = ['---']
 if (wantId) fm.push(`id: ${generateId()}`)
 fm.push(`title: ${JSON.stringify(docTitle)}`)
-fm.push('version: 2')
+fm.push('format-version: 2')
 fm.push(`date: ${date}`)
 fm.push('---')
 

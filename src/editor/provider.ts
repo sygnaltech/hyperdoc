@@ -3,7 +3,13 @@ import * as path from 'path';
 import { parseDocument } from '../format/parser';
 import { serializeDocument } from '../format/serializer';
 import { stampFrontmatterKeys } from '../format/frontmatter';
-import { effectiveVersion, HD_V2 } from '../format/version';
+import {
+  effectiveVersion,
+  declaredFormatVersion,
+  normalizeFormatVersion,
+  FORMAT_VERSION_KEY,
+  HD_V2
+} from '../format/version';
 import { extForUri } from '../format/flavor';
 import { hd2BodyToEditorHtml, editorHtmlToHd2Body } from '../conversion/hd2';
 import { generateId, IdIndex } from '../identity';
@@ -85,8 +91,10 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       const currentId = typeof m.id === 'string' ? m.id : undefined;
       const reconciled = await this.idIndex.reconcile(document.uri, currentId);
 
-      // How the body is stored on disk right now. The `version:` field is the
-      // source of truth; extension/body are only fallbacks for docs without one.
+      // How the body is stored on disk right now. The frontmatter is the source
+      // of truth: `format-version` is read first and wins, with the pre-rename
+      // `version` key consulted only as a fallback (see declaredFormatVersion).
+      // The extension is never consulted.
       const version = effectiveVersion(m, ext, body);
 
       let needsPersist = false;
@@ -103,13 +111,15 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
       // only by id, so renaming or moving the doc does not require touching
       // the file system.
 
-      // Only stamp the version when we're already writing the file for another
-      // reason (an id regeneration). Opening a legacy v1 document must not
-      // rewrite it just to record a version — migration to v2 happens on the
+      // Only stamp the format version when we're already writing the file for
+      // another reason (an id regeneration), and only when the document states
+      // NO version at all under either key. Opening a document must not rewrite
+      // it just to record or rename a version field — both the v1 → v2 body
+      // migration and the `version` → `format-version` cleanup happen on the
       // first real edit (see the save handler below).
-      if ((m.version === undefined || m.version === null) && needsPersist) {
-        m.version = version;
-        stamp.version = version;
+      if (declaredFormatVersion(m) === undefined && needsPersist) {
+        m[FORMAT_VERSION_KEY] = version;
+        stamp[FORMAT_VERSION_KEY] = version;
       }
 
       if (needsPersist) {
@@ -181,11 +191,17 @@ export class HdEditorProvider implements vscode.CustomTextEditorProvider {
         case 'change': {
           // Every edit is saved in the current format — version 2 (Markdown-
           // primary). The webview always emits HTML; serialize it to Markdown
-          // with HTML islands before it hits disk, and stamp version 2. A legacy
-          // v1 (HTML) document is migrated to v2 here, on its first save —
-          // nothing rewrites it until the user actually edits.
+          // with HTML islands before it hits disk, and stamp the format version.
+          // A legacy v1 (HTML) document is migrated to v2 here, on its first
+          // save — nothing rewrites it until the user actually edits.
+          //
+          // This is also where version-field inconsistencies are corrected:
+          // normalizeFormatVersion guarantees exactly one canonical
+          // `format-version: 2` and DELETES any pre-rename `version` key, so an
+          // edited document can never carry two competing version fields (or a
+          // `version` an agent might read as a revision number and increment).
           const diskBody = editorHtmlToHd2Body(msg.body);
-          const meta = { ...msg.meta, version: HD_V2 };
+          const meta = normalizeFormatVersion(msg.meta, HD_V2);
           writeGuard = true;
           try {
             await this.persist(document, meta, diskBody);

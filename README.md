@@ -127,7 +127,7 @@ npm run package; code --install-extension "hyperdoc-$((Get-Content package.json 
 
 ## Getting started
 
-Create any file with a `.hd` extension in a workspace. VS Code opens it in the Hyperdoc WYSIWYG editor by default. On first open, the editor injects an `id` and `version` into the frontmatter automatically — you don't set them by hand.
+Create any file with a `.hd` extension in a workspace. VS Code opens it in the Hyperdoc WYSIWYG editor by default. On first open, the editor injects an `id` and `format-version` into the frontmatter automatically — you don't set them by hand.
 
 To seed your own frontmatter, start the file with a bare YAML fence:
 
@@ -164,7 +164,7 @@ Markdown (`.md`) files also open in the HD editor by default. To use VS Code's b
 
 ## The `.hd` format
 
-- **Body stored as Markdown (format v2).** The `version` field in frontmatter — not the file extension — is the source of truth for how the body is stored. New documents are v2; legacy v1 (body-only HTML) documents are migrated to v2 the first time you edit them.
+- **Body stored as Markdown (format v2).** The `format-version` field in frontmatter — not the file extension — is the source of truth for how the body is stored. New documents are v2; legacy v1 (body-only HTML) documents are migrated to v2 the first time you edit them. The field names the *file format* and is never incremented; the pre-rename `version` spelling is still read as a fallback and is removed on the next edit.
 - **Curated HTML subset for the rest.** Underline, highlight, complex tables, definition lists, figures, inline SVG, and other constructs Markdown lacks are stored as a bounded, sanitized set of HTML elements.
 - **Frontmatter is optional YAML** behind a bare `---` fence.
 - **Every document carries a stable `id`** used to key its asset folder at `.hd/<id>/`.

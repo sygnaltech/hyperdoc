@@ -47,7 +47,7 @@ function scalarize(value: string | number): string {
 /**
  * Append new top-level scalar keys to an existing frontmatter block by textual
  * insertion — WITHOUT re-serializing the keys already present. Used for
- * editor-initiated stamps (`id`, `version`) so that opening a doc to mint a
+ * editor-initiated stamps (`id`, `format-version`) so that opening a doc to mint a
  * missing id doesn't also churn unrelated fields: a full `yaml.dump` round-trip
  * normalizes bare dates to ISO timestamps, expands flow lists (`[a, b]`) to
  * block lists, and folds long strings — none of which the user changed.

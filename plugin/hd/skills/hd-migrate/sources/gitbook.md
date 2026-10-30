@@ -13,7 +13,7 @@ How to convert a GitBook space (Markdown + `.gitbook/` scaffolding) into HD. Rea
 ## Frontmatter
 - `title:` — from the first `# H1`, with trailing status emoji/markers (✅ ⏸️ 🟢 🧪 📗 📘 🔵) and `&#x20;` artifacts removed. Quote if it contains a colon.
 - `description:` — copy verbatim only if the source frontmatter had one.
-- Always add `version: 2` and the generated `id:` (see engine step 3.1).
+- Always add `format-version: 2` and the generated `id:` (see engine step 3.1).
 
 ## Text artifacts (GitBook-specific noise)
 - `&#x20;` — a GitBook trailing-space artifact. **Delete it** and collapse the resulting trailing whitespace.

@@ -3,7 +3,7 @@ title: How HD2 Works
 date: '2026-07-13T00:00:00.000Z'
 description: The Markdown-primary model behind HD2 — the conversion boundary, the load/save round-trip, and its caveats.
 id: 5t4sT2Ov13bUIQLmiJCphw
-version: 2
+format-version: 2
 ---
 
 # How HD2 Works

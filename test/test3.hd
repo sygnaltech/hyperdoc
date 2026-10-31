@@ -4,7 +4,7 @@ format: hd-doc v1
 date: 2026-06-12T00:00:00.000Z
 purpose: Verify a Claude-class agent correctly recognizes an .hd file dropped in with no other instructions.
 id: 4TnPMArPPU1TdXNMG1Otbx
-version: 1
+format-version: 1
 ---
 
 <h1>Claude Recognition Test</h1>

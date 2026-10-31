@@ -3,7 +3,7 @@ title: Editor Features
 date: '2026-06-13T00:00:00.000Z'
 description: The HD WYSIWYG editor's toolbar, table manipulation, paste behavior, and clipboard interop.
 id: 1LnQlEBfma2D4bx1wJidgK
-version: 2
+format-version: 2
 ---
 
 # Editor Features

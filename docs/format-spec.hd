@@ -3,7 +3,7 @@ title: HD Format Specification
 date: '2026-06-13T00:00:00.000Z'
 description: Human-readable specification of a valid .hd file — structure, frontmatter, allowed elements, and allowed attributes.
 id: 21P8M6RFRrBZuSDYnWbQW8
-version: 2
+format-version: 2
 ---
 
 # HD Format Specification

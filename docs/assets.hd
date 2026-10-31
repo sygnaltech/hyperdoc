@@ -3,7 +3,7 @@ title: Assets
 date: '2026-06-13T00:00:00.000Z'
 description: How images and binary assets are stored, referenced, and tracked through renames and moves.
 id: 2njQMsf8fvOHHwDFytmV73
-version: 2
+format-version: 2
 ---
 
 # Assets

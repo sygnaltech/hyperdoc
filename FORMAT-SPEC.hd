@@ -4,7 +4,7 @@ format: hd-doc v1
 date: '2026-06-12T00:00:00.000Z'
 description: Authoritative reference for each supported element/attribute and its Markdown round-trip behavior.
 id: 3JtsnslgeZiWFjYXJuyueV
-version: 2
+format-version: 2
 ---
 
 # HD Format Element Specification

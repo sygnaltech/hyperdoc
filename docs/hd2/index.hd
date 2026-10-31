@@ -5,7 +5,7 @@ description: >-
   Overview of the Markdown-primary HD format (version 2), now the default — what it is, why it exists, and how it
   relates to legacy version 1.
 id: 7CyJ0AFZ7aLdE1IOjkJM0R
-version: 2
+format-version: 2
 ---
 
 # HD Format v2 (Markdown-primary)

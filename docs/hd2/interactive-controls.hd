@@ -5,7 +5,7 @@ description: >-
   How HD2 supports clickable checkboxes and radio buttons — the markdown syntax, the saved state, and the agent-review
   workflow.
 id: 18DqiVPldk0H1ozQmuoaL3
-version: 2
+format-version: 2
 ---
 
 # Interactive Controls (Checkboxes & Radios)

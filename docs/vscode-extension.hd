@@ -5,7 +5,7 @@ description: >-
   The HD VS Code extension — what it is, why HD authoring lives inside VS Code, and how the WYSIWYG editor integrates
   with the surrounding workspace.
 id: 5Y835fJoRCTFs6J0hNh4Ls
-version: 2
+format-version: 2
 ---
 
 # VS Code Extension

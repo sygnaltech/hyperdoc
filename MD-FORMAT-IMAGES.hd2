@@ -1,6 +1,6 @@
 ---
 title: Markdown Image Handling & Configuration
-version: 2
+format-version: 2
 id: 3biXHPVmPzqimCzD7CoNZy
 date: 2026-07-17
 description: How pasted images are stored for plain .md files, the folder conventions in the wild, the template-token model, and a simple in-editor helper for choosing the convention per project or system-wide.

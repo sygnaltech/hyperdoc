@@ -3,7 +3,7 @@ title: HD2 Capabilities
 date: '2026-07-13T00:00:00.000Z'
 description: Element-by-element map of what HD2 stores as Markdown versus what it stores as a raw HTML island.
 id: 4qQx4Ek3nRugjcrie1UgRQ
-version: 2
+format-version: 2
 ---
 
 # HD2 Capabilities

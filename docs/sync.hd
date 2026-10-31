@@ -5,7 +5,7 @@ description: >-
   How to publish .hd documentation to external platforms like Nextra, Docusaurus, and GitBook using the hd Claude plugin
   and the /hd:sync slash command.
 id: 4HLiE33aIsNkruAxLekiDd
-version: 2
+format-version: 2
 ---
 
 # Sync to External Platforms

@@ -3,7 +3,7 @@ title: Format Comparison
 date: '2026-06-13T00:00:00.000Z'
 description: Capability-by-capability comparison of HD against Markdown, HTML, and Nextra docs.
 id: 2YQ2Q6rfoVUYU6L2K9lPzv
-version: 2
+format-version: 2
 ---
 
 # Format Comparison

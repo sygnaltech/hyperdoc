@@ -1,6 +1,6 @@
 ---
 title: WYSIWYG Editing for Plain Markdown — Feature Audit
-version: 2
+format-version: 2
 id: 1bGwT5GpUeDyLuz7RnUHME
 date: 2026-07-17
 description: Feature-by-feature audit of bringing the HD WYSIWYG editing experience to plain .md files, and where the two must diverge.

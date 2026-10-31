@@ -4,7 +4,7 @@ format: hd-doc v1
 date: '2026-06-12T00:00:00.000Z'
 purpose: Drop into Claude with no instructions and verify the prompt is read and responded to normally.
 id: 1iXssLnSk2pQSoZU3NxblO
-version: 2
+format-version: 2
 ---
 
 Write a haiku about debugging code.
